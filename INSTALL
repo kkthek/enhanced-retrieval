@@ -1,0 +1,40 @@
+== Enhanced Retrieval Extension ==
+
+=== Requirements ===
+* MediaWiki 1.27.x 
+* SMW 2.4.x
+* Apache SOLR server v4.4 
+	find a preconfigured SOLR with the DataWiki configuration at
+	http://downloads.diqa-pm.com/free/power-search/1.9.0/
+
+	
+=== Installation Instructions ===
+
+* Add to your LocalSettings.php:
+  $smwgEnabledDeferredUpdate = false;
+  
+* Add this ONLY IF you DID NOT use composer to install  
+	require_once("extensions/EnhancedRetrieval/includes/EnhancedRetrieval.php");
+
+* Then run:
+	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/setup.php
+
+* Adapt configuration to SOLR Server
+	If the SOLR server does not run on port 8983, please configure it in 
+		{wiki-path}/extensions/EnhancedRetrieval/includes/FacetedSearch/solrproxy.php
+		{wiki-path}/extensions/EnhancedRetrieval/includes/FacetedSearch/FS_Settings.php
+
+* Start the SOLR server with the DataWiki configuration by executing the start
+	script in the wiki-solr folder of the preconfigured SOLR server.
+
+* Create the initial index:
+	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/updateSOLR.php
+	
+	OR via composer:
+	
+	cd php {wiki-path}/extensions/EnhancedRetrieval
+	composer run-script update
+
+That's it.
+
+
