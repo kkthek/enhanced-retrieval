@@ -39,6 +39,7 @@ define('US_EXACTMATCH', 2);
 
 require_once 'FacetedSearch/FS_GlobalFunctions.php';
 
+global $wgExtensionCredits;
 $wgExtensionCredits['other'][] = array(
         'name' => 'Enhanced Retrieval extension',
         'version' => US_SEARCH_EXTENSION_VERSION,
