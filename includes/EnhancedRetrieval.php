@@ -44,8 +44,9 @@ $wgExtensionCredits['other'][] = array(
         'name' => 'Enhanced Retrieval extension',
         'version' => US_SEARCH_EXTENSION_VERSION,
         'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].", 
-        'url' => 'http://www.semantic-mediawiki.org/wiki/Help:SMW_extensions#Enhanced_Retrieval',
-        'description' => 'Provides access to a Lucene backend.',
+        'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
+        'description' => 'Enhanced retrieval provides a faceted search for Mediawiki and SMW. 
+It requires a SOLR server as backend.',
 );
 
 global $wgExtensionFunctions;
