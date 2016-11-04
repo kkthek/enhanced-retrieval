@@ -43,6 +43,7 @@ global $wgExtensionCredits;
 $wgExtensionCredits['other'][] = array(
         'name' => 'Enhanced Retrieval extension',
         'version' => US_SEARCH_EXTENSION_VERSION,
+		'license-name' => 'GPL-2.0+',
         'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].", 
         'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
         'description' => 'Enhanced retrieval provides a faceted search for Mediawiki and SMW. 
