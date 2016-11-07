@@ -51,6 +51,7 @@
 	"scripts": {
 		"setup": "php maintenance/setup.php",
 		"update": "php maintenance/updateSOLR.php -v",
-		"post-install-cmd": "echo 'In order for EnhancedRetrieval to work a SOLR server needs to be insalled. Checkout https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval for details'"
+		"post-install-cmd": "echo 'Install: In order for EnhancedRetrieval to work a SOLR server needs to be insalled. Checkout https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval for details'",
+		"post-update-cmd": "echo 'Update: In order for EnhancedRetrieval to work a SOLR server needs to be insalled. Checkout https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval for details'"
 	}
 }
