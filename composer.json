@@ -51,9 +51,7 @@
 	"scripts": {
 		"setup": "php maintenance/setup.php",
 		"update": "php maintenance/updateSOLR.php -v",
-		"post-install-cmd": "php maintenance/composerMessage.php",
-		"post-update-cmd": "php maintenance/composerMessage.php",
-		"logg2": "php maintenance/composerMessage.php",
-		"logg1": "echo 'Install: In order for EnhancedRetrieval to work a SOLR server needs to be insalled. Checkout https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval for details'"
+		"post-package-install": "php maintenance/composerMessage.php",
+		"post-package-update": "php maintenance/composerMessage.php"
 	}
 }
