@@ -50,8 +50,6 @@
 	},
 	"scripts": {
 		"setup": "php maintenance/setup.php",
-		"update": "php maintenance/updateSOLR.php -v",
-		"post-package-install": "php maintenance/composerMessage.php",
-		"post-package-update": "php maintenance/composerMessage.php"
+		"update": "php maintenance/updateSOLR.php -v"
 	}
 }
