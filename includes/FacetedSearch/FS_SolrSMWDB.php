@@ -312,7 +312,7 @@ SQL;
 				$hex .= $str{$i};
 			} else {
 				// encode all others
-				$hex .= "_".dechex(ord($str{$i}));
+				$hex .= "_0x".dechex(ord($str{$i}));
 			}
 			$i++;
 		} while ($i < strlen($str));
@@ -523,60 +523,63 @@ SQL;
 	    $prop = str_replace(' ', '_', $property->getLabel());
 	    $prop = self::encodeTitle($prop);
 	    $type = $dataItem->getDIType();
-	    
+
 	    // The values of all attributes are stored according to their type.
-	    $typeSuffix = 't';
-	    $isNumeric = false;
 	    if ($type == SMWDataItem::TYPE_TIME) {
-	        
-	        
+	        $typeSuffix = 'dt';
+
 	        $year = $dataItem->getYear();
 	        $month = $dataItem->getMonth();
 	        $day = $dataItem->getDay();
-	        
+
 	        $hour = $dataItem->getHour();
 	        $min = $dataItem->getMinute();
 	        $sec = $dataItem->getSecond();
-	        
-	        $valueXSD = "{$year}-{$month}-{$day}T{$hour}:{$min}:{$sec}Z";
-	        
-	        // Given format of a date: 1995/12/31T23:59:59
+
+	        $month = strlen($month) === 1 ? "0$month" : $month;
+	        $day = strlen($day) === 1 ? "0$day" : $day;
+	        $hour = strlen($hour) === 1 ? "0$hour" : $hour;
+	        $min = strlen($min) === 1 ? "0$min" : $min;
+	        $sec = strlen($sec) === 1 ? "0$sec" : $sec;
+
 	        // Required format: 1995-12-31T23:59:59Z
-	        $typeSuffix = 'dt';
+	        $valueXSD = "{$year}-{$month}-{$day}T{$hour}:{$min}:{$sec}Z";
+
 	        // Store a date/time also as long e.g. 19951231235959
 	        // This is needed for querying statistics for dates
-	        // Normalize month and day e.g. 1995-1-1 => 1995-01-01
-	        $ymd = explode('-', "{$year}-{$month}-{$day}");
-	        $m = (strlen($ymd[1]) == 1) ? '0'.$ymd[1] : $ymd[1];
-	        $d = (strlen($ymd[2]) == 1) ? '0'.$ymd[2] : $ymd[2];
-	        $dateTime = $ymd[0] . $m . $d . str_replace(':', '', "{$hour}:{$min}:{$sec}");
+	        $year = strlen($year) === 1 ? "0$year" : $year;
+	        $year = strlen($year) === 2 ? "0$year" : $year;
+	        $year = strlen($year) === 3 ? "0$year" : $year;
+	        $dateTime = "{$year}{$month}{$day}{$hour}{$min}{$sec}";
+
 	        $propDate = 'smwh_' . $prop . '_datevalue_l';
 	        if (!array_key_exists($propDate, $doc)) {
 	            $doc[$propDate] = array();
 	        }
 	        $doc[$propDate][] = $dateTime;
+
 	    } else if ($type == SMWDataItem::TYPE_NUMBER) {
 	        $typeSuffix = 'd';
-	        $isNumeric = true;
-	    } else if ($type == SMWDataItem::TYPE_BOOLEAN) {
-	        $typeSuffix = 'b';
-	    } else {
-	        $typeSuffix = 't';
-	    }
-	    
-	    $propXSD = "smwh_{$prop}_xsdvalue_$typeSuffix";
-	    if (!array_key_exists($propXSD, $doc)) {
-	        $doc[$propXSD] = array();
-	    }
-	    $doc[$propXSD][] = $valueXSD;
-	    
-	    if ($isNumeric) {
+
 	        $propNum = "smwh_{$prop}_numvalue_d";
 	        if (!array_key_exists($propNum, $doc)) {
 	            $doc[$propNum] = array();
 	        }
 	        $doc[$propNum][] = $valueXSD;
+
+	    } else if ($type == SMWDataItem::TYPE_BOOLEAN) {
+	        $typeSuffix = 'b';
+
+	    } else {
+	        $typeSuffix = 't';
 	    }
+
+	    $propXSD = "smwh_{$prop}_xsdvalue_$typeSuffix";
+	    if (!array_key_exists($propXSD, $doc)) {
+	        $doc[$propXSD] = array();
+	    }
+	    $doc[$propXSD][] = $valueXSD;
+
 	    return $propXSD;
 	}
 	

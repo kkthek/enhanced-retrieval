@@ -90,7 +90,7 @@ FacetedSearch.classes.ClusterWidget = AjaxSolr.AbstractWidget.extend({
 		
 		// Create strings for the ranges with instance counts
 		// e.g. 42 - 52 (5)
-		var regex = new RegExp(this.statisticsFieldName+':\\[(\\d*) TO (\\d*)\\]'); 
+		var regex = new RegExp(this.statisticsFieldName+':\\[(\-?\\d*.?\\d*) TO (\-?\\d*.?\\d*)\\]'); 
 		var ranges = data.facet_counts.facet_queries;
 		var minValue = null;
 		var maxValue = null;
@@ -143,9 +143,13 @@ FacetedSearch.classes.ClusterWidget = AjaxSolr.AbstractWidget.extend({
 			}
 		}
 				
+		// get total num of facet matches for this property
+		var smwh_attributes = data.facet_counts.facet_fields.smwh_attributes;
+		var totalHitCount = smwh_attributes[self.facetName];
+		
 		// Show the cluster title
 		target.prepend(AjaxSolr.theme('cluster', minValue, maxValue, 
-								   data.response.numFound, 
+								   totalHitCount, 
 								   this.clickRemoveRangeHandler(this.statisticsFieldName),
 								   true, rangeRestricted));
 		
