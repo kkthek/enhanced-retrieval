@@ -78,10 +78,11 @@ function fsfSetupFacetedSearch() {
     $wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
     $wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
     
-    global $fsgExtraPropertiesToRequest, $wgOut;
+    global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $wgOut;
     $script = "";
     $script .= "\nvar XFS = XFS || {};";
     $script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
+    $script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
     $wgOut->addScript(
     		'<script type="text/javascript">'.$script.'</script>'
     );

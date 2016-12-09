@@ -65,6 +65,9 @@ FacetedSearch.classes.NumericFacetClusterer = function (facetName, plainName) {
 	 * 		The maximal number value of the value range.
 	 */
 	that.makeClusters = function makeClusters(min, max) {
+		if (XFS.numericPropertyClusters[facetName]) {
+			return that.makeCustomClusters(min, max);
+		}
 		var diff = max - min;
 		var values = [];
 		var currVal = min;
@@ -80,7 +83,29 @@ FacetedSearch.classes.NumericFacetClusterer = function (facetName, plainName) {
 		}
 		values.splice(values.length-1,1);
 		return values;
-	}
+	};
+	
+	that.makeCustomClusters = function(min, max) {
+		var clusters = XFS.numericPropertyClusters[facetName];
+		var values = [];
+		if (clusters['min']) {
+			values.push([clusters['min'], clusters['min']]);
+		}
+		if (clusters['lowerBound'] && clusters['upperBound'] && clusters['interval']) {
+			var currVal = clusters['lowerBound'];
+			var numClusters = (clusters['upperBound'] - clusters['lowerBound']) / clusters['interval'];
+			
+			for (var i = 0; i < numClusters; ++i) {
+				values.push([ Math.round(currVal), Math.round(currVal + clusters['interval']) - 1 ]);
+				currVal += clusters['interval'];
+			}
+			
+		}
+		if (clusters['max']) {
+			values.push([clusters['max'], clusters['max']]);
+		}
+		return values;
+	};
 		
 	construct(facetName, plainName);
 	return that;

@@ -198,3 +198,16 @@ $fsgExtraPropertiesToRequest = [];
 global $fsgShowSortOrder, $fsgShowCategories;
 $fsgShowSortOrder = true;
 $fsgShowCategories = true;
+
+####
+#
+# Numeric property clusters
+# 
+# Example:
+# $fsgNumericPropertyClusters['smwh_BaujahrMin_xsdvalue_d'] = 
+# 			[ 'min' => -9999, 'max' => 9999, 'lowerBound' => 1700, 
+#				'upperBound' => 2030, 'interval' => 10 ];
+# means that the given property get a minimum cluster value of -9999, a maximum of 9999
+# and 33 x 10year-clusters from 1700 - 2030. min and max is optional.
+#
+$fsgNumericPropertyClusters = [];
