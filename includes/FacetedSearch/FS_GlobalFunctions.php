@@ -58,6 +58,7 @@ function fsfSetupFacetedSearch() {
 	$wgAutoloadClasses['FSIncrementalUpdater'] = $dir . 'FS_IncrementalUpdater.php';
 	$wgAutoloadClasses['IFSIndexer'] = $dir . 'IFS_Indexer.php';
 	$wgAutoloadClasses['FSFacetedSearchSpecial'] = $dir . '../../specials/FS_FacetedSearchSpecial.php';
+	$wgAutoloadClasses['UpdateSolrJob'] = $dir . 'UpdateSolrJob.php';
 	
 	// Exceptions
 	$wgAutoloadClasses['ERException'] = $dir . '../../exceptions/ER_Exception.php';

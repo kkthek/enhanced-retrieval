@@ -1,0 +1,37 @@
+<?php
+/**
+ * Asynchronous updates for SOLR
+ * 
+ * @author Kai
+ *
+ */
+class UpdateSolrJob extends Job {
+
+	/**
+	 * @param Title $title
+	 * @param array $params job parameters (timestamp)
+	 */
+	function __construct( $title, $params ) {
+		parent::__construct( 'UpdateSolrJob', $title, $params );
+	}
+
+	/**
+	 * implementation of the actual job
+	 *
+	 * {@inheritDoc}
+	 * @see Job::run()
+	 */
+	public function run() {
+		
+		$title = $this->params['title'];
+		$wp = new WikiPage(Title::newFromText($title));
+
+		$indexer = FSIndexerFactory::create();
+		$indexer->updateIndexForArticle($wp);
+		
+		if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
+			echo "Updated (SOLR): $title";
+		}
+		
+	}
+}

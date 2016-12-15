@@ -50,6 +50,9 @@ $wgExtensionCredits['other'][] = array(
 It requires a SOLR server as backend.',
 );
 
+global $wgJobClasses;
+$wgJobClasses['UpdateSolrJob'] = 'UpdateSolrJob';
+
 global $wgExtensionFunctions;
 $wgExtensionFunctions[] = 'wfUSSetupExtension';
 

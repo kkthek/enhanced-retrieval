@@ -42,14 +42,23 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  */
 class FSSolrSMWDB extends FSSolrIndexer {
 
-	//--- Private fields ---
+	// --- Constants ---
 
+	/**
+	 * Maximal number of synchronous updates during a request
+	 * @var int
+	 */
+	const MAX_SYNC_UPDATES = 20;
 
-	//--- getter/setter ---
-
-	//--- Public methods ---
+ 	//--- Private fields ---
 
 	private static $RECURSIVE = true;
+
+	/**
+	 * Dependant articles which must be updated too
+	 * @var array
+	 */
+	private $dependant = [];
 	
 	/**
 	 * Creates a new FSSolrSMWDB indexer object.
@@ -76,7 +85,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 */
 	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL) {
 		$doc = array();
-
+		$this->dependant = [];
+		
 		$db = wfGetDB( DB_SLAVE );
 
 		$article = Article::newFromID($wikiPage->getId());
@@ -131,6 +141,23 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		
 		// Let the super class update the index
 		$this->updateIndex($doc, $options);
+		
+		// update dependant articles
+		if (count($this->dependant) > self::MAX_SYNC_UPDATES) {
+				// if more than MAX_SYNC_UPDATES updates are required, create jobs for it
+				foreach($this->dependant as $ttu) {
+						$params = [];
+						$params['title'] = $ttu->getPrefixedText();
+						$title = Title::makeTitle(NS_SPECIAL, 'Search');
+						$job = new UpdateSolrJob($title, $params);
+						JobQueueGroup::singleton()->push( $job );
+					}
+				} else {
+				// if less than MAX_SYNC_UPDATES, do it synchronously
+				foreach($this->dependant as $ttu) {
+						$this->updateIndexForArticle(new WikiPage($ttu));
+				}
+		}
 	}
 	/**
 	 * Updates the index for a moved article.
@@ -501,9 +528,10 @@ SQL;
 				$subjects = $store->getPropertySubjects($inProperty, $subject);
 				
 				foreach($subjects as $subj) {
-					$this->updateIndexForArticle(new WikiPage($subj->getTitle()));
+					$this->dependant[] = $subj->getTitle();
 				}
 			}
+			$this->dependant = array_unique($this->dependant);
 			self::$RECURSIVE = true;
 		}
 	}
