@@ -35,7 +35,10 @@ require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
 global $smwgEnableUpdateJobs, $wgServer, $wgTitle;
 $wgTitle = Title::newFromText( 'SMW_refreshData.php' );
 $smwgEnableUpdateJobs = false; // do not fork additional update jobs while running this script
-$fsRunsOnCommandLine = true;
+
+// when indexing everything, dependent pages do not need special treatment
+global $fsUpdateOnlyCurrentArticle;
+$fsUpdateOnlyCurrentArticle = true;
 
 if ( isset( $options['server'] ) ) {
 	$wgServer = $options['server'];

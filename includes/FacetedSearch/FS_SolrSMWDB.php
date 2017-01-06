@@ -48,11 +48,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * Maximal number of synchronous updates during a request
 	 * @var int
 	 */
-	const MAX_SYNC_UPDATES = 20;
+	const MAX_SYNC_UPDATES = 10;
 
  	//--- Private fields ---
-
-	private static $RECURSIVE = true;
 
 	/**
 	 * Dependant articles which must be updated too
@@ -142,22 +140,29 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		// Let the super class update the index
 		$this->updateIndex($doc, $options);
 		
-		// update dependant articles
-		if (count($this->dependant) > self::MAX_SYNC_UPDATES) {
-				// if more than MAX_SYNC_UPDATES updates are required, create jobs for it
-				foreach($this->dependant as $ttu) {
-						$params = [];
-						$params['title'] = $ttu->getPrefixedText();
-						$title = Title::makeTitle(NS_SPECIAL, 'Search');
-						$job = new UpdateSolrJob($title, $params);
-						JobQueueGroup::singleton()->push( $job );
-					}
-				} else {
-				// if less than MAX_SYNC_UPDATES, do it synchronously
-				foreach($this->dependant as $ttu) {
-						$this->updateIndexForArticle(new WikiPage($ttu));
-				}
-		}
+	    if($this->updateOnlyCurrentArticle()) {
+			return;
+		} 
+		
+    	// update dependant articles
+    	if (count($this->dependant) > self::MAX_SYNC_UPDATES) {
+    			// if more than MAX_SYNC_UPDATES updates are required, create jobs for it
+    			foreach($this->dependant as $ttu) {
+    				$params = [];
+    				$params['title'] = $ttu->getPrefixedText();
+    				$title = Title::makeTitle(NS_SPECIAL, 'Search');
+    				$job = new UpdateSolrJob($title, $params);
+    				JobQueueGroup::singleton()->push( $job );
+    			}
+    	} else {
+    			// if less than MAX_SYNC_UPDATES, do it synchronously
+    			global $fsUpdateOnlyCurrentArticle;
+    			$fsUpdateOnlyCurrentArticle = true;
+    			foreach($this->dependant as $ttu) {
+    				$this->updateIndexForArticle(new WikiPage($ttu));
+    			}
+    	}
+		
 	}
 	/**
 	 * Updates the index for a moved article.
@@ -505,8 +510,7 @@ SQL;
 	    return $prop;		 
 	}
 	
-	private function addTitleAndUpdateDependent($subject, $dataItem, & $obj) {
-		
+ 	private function addTitleAndUpdateDependent($subject, $dataItem, & $obj) {
 		global $fsgTitleProperty;
 		$titleProperty = SMWDIProperty::newFromUserLabel($fsgTitleProperty);
 		$store = ApplicationFactory::getInstance()->getStore();
@@ -514,26 +518,23 @@ SQL;
 		if (count($titleValue) > 0) {
 			$titleValue = reset($titleValue);
 			$obj .= '|'.$titleValue->getString();
-		
+
 		}
-		global $fsRunsOnCommandLine;
-		if (isset($fsRunsOnCommandLine) && $fsRunsOnCommandLine === true) {
+		
+		if($this->updateOnlyCurrentArticle()) {
 			return;
 		}
-		if (self::$RECURSIVE) {
-			$inProperties = $store->getInProperties($subject);
-			
-			self::$RECURSIVE = false;
-			foreach($inProperties as $inProperty) {
-				$subjects = $store->getPropertySubjects($inProperty, $subject);
-				
-				foreach($subjects as $subj) {
-					$this->dependant[] = $subj->getTitle();
-				}
+		
+		$inProperties = $store->getInProperties($subject);
+		foreach($inProperties as $inProperty) {
+			$subjects = $store->getPropertySubjects($inProperty, $subject);
+
+			foreach($subjects as $subj) {
+				$this->dependant[] = $subj->getTitle();
 			}
-			$this->dependant = array_unique($this->dependant);
-			self::$RECURSIVE = true;
 		}
+			
+		$this->dependant = array_unique($this->dependant);
 	}
 	
 	/**
@@ -611,5 +612,16 @@ SQL;
 	    return $propXSD;
 	}
 	
+	/**
+	 * @return boolean true iff the global variable $fsUpdateOnlyCurrentArticle is set to true
+	 */
+	private function updateOnlyCurrentArticle() {
+		global $fsUpdateOnlyCurrentArticle;
+		if (isset($fsUpdateOnlyCurrentArticle) && $fsUpdateOnlyCurrentArticle === true) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 

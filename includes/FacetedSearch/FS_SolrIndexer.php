@@ -207,7 +207,7 @@ public function updateIndex(array $document, array $options) {
 	 */
 	public function extractDocument($title) {
 		
-		global $fsRunsOnCommandLine;
+		
 		
 		// get file and extension
 		$file = RepoGroup::singleton()->getLocalRepo()->newFile($title);
@@ -235,7 +235,7 @@ public function updateIndex(array $document, array $options) {
 
 		// send document to Tika and extract text
 		if ($filepath == '') {
-			if (isset($fsRunsOnCommandLine) && $fsRunsOnCommandLine === true) {
+			if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
 		    	echo sprintf("\n - WARNING: Empty file path for '%s'. Can not index document properly.\n", $title->getPrefixedText());
 			}
 		    return;
@@ -249,7 +249,7 @@ public function updateIndex(array $document, array $options) {
 		$xml =    simplexml_load_string($result);
 		$text = $xml->str;
 		// strip tags and line feeds
-		$text = str_replace(array("\n","\t"), " ", strip_tags($text));
+		$text = str_replace(array("\n","\t"), " ", strip_tags(str_replace('<', ' <', $text)));
 		
 		
 		return $text;

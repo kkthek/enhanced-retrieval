@@ -22,10 +22,13 @@ class UpdateSolrJob extends Job {
 	 * @see Job::run()
 	 */
 	public function run() {
-		
 		$title = $this->params['title'];
 		$wp = new WikiPage(Title::newFromText($title));
-
+		
+        // when indexing with jobs, dependent pages do not need special treatment, because jobs already represent the dependent pages
+   		global $fsUpdateOnlyCurrentArticle;
+		$fsUpdateOnlyCurrentArticle = true;
+		
 		$indexer = FSIndexerFactory::create();
 		$indexer->updateIndexForArticle($wp);
 		
