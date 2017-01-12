@@ -1,6 +1,20 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
 
+VERSION 1.9.2
+
+	- Configurable numeric clusters(cf. FS_Settings.php for an example)
+		$fsgNumericPropertyClusters
+		
+	- Bug on SOLR update could cause infinite loops in some cases	
+	- Complex update operations when using $fsgTitleProperty are moved into MW-jobs
+	- Bug on displaying clusters of negative values and floating points values
+ 	- Bug on displaying aggregated hitcount in cluster titles
+ 	- Bug when indexing datetime values if they contain time data, not only date data.
+
+VERSION 1.9.1
+	- Version hint on Special:Version fixed
+
 VERSION 1.9.0
 	- Add several JS extension points: registerAdditionalActions, registerAdditionalFacets, getPageTitle, translateName
 	  Add PHP extension points: extendedFilters, extendedFacets
@@ -14,80 +28,4 @@ VERSION 1.9.0
 
 	- Composer support
 	
-VERSION 1.8.0
-	Compatibility with SMW 1.8.0
-	Removed all obsolete code not related to Facetted search
-
-VERSION 1.7
-  FEATURES:
-  	Added support for the HaloACL extension
-  	
-  BUGFIXES:
-	16483 - English is not the fallback language in the UI
-	
-VERSION 1.6
-  FEATURES:
-    14756 - A configurable faceted search
-  BUGFIXES:
-	15201 - Create index failed single quotes are not escaped
-	15322 - Missing language spec in SOLR configuration
-	15323 - Parse error in SOLR request for empty search term
-	15299 - XSS Injection
-	15237 - Slash in property name breaks FacetedSearch
-	15236 - Slash in title seems to break Faceted Search
-	
-VERSION 1.5.6
-
-  FEATURES:
-  Expert mode: Added an expert mode for entering search terms with logical 
-  	operations. This mode is used for search terms within braces.
-  	Example: (chicag* OR "New York")
-
-  CHANGES:
-
-  BUGFIXES:
-  15074 - link to create article must be red
-  15030 - SOLR doesn't use 'OR' in multi word search phrases
-  14664 - Last drilldown facet should not be a link
-  14663 - Change label "has properties: (show)"  
-  14662 - Don't show ranges if only one number is left for drilldown
-  14661 - Text for date drilldown unclear
-  12265 - Sorting search results by date, relevance etc.  
-  13941 - Combine the special pages for fulltext search and faceted browsing
-  14666 - Expand selected facets to support drilldown process
-  14660 - Always show currently selected facet in "Selected Facets" area
-  14668 - Move search field to main area
-  14667 - Rename "Remove all filters"
-  14603 - Faceted Search: Text properties clutter interface
-  14594 - Faceted Search: Use hand icon for interactive elements
-
-VERSION 1.4.1
-
-
-  FEATURES:
-  * Faceted Search: Browse the semantic data by categories and properties
-
-  CHANGES:
-
-  BUGFIXES:
-  13633 - Function split() is deprecated
-  13577 - Unified search statistics shows always 20 Hits (results on one page) not the real number
-  
-
-VERSION XXXX
-
-
-  FEATURES:
-
-
-
-  CHANGES:
-
-
-
-  BUGFIXES:
-  	Bugfix 12380 -  Rename Unified Search to Enhanced retrieval in SVN
-		http://smwplus.net/smwbugs/show_bug.cgi?id=12380
-  
-
-
+Older versions are not supported anymore.

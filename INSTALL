@@ -7,6 +7,7 @@
 	find a preconfigured SOLR with the DataWiki configuration at
 	http://downloads.diqa-pm.com/free/power-search/1.9.0/
 
+	We recommend using Tomcat as an application server for SOLR. Installation instructions are contained.
 	
 === Installation Instructions ===
 
@@ -20,15 +21,14 @@
 	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/setup.php
 
 * Adapt configuration to SOLR Server
-	If the SOLR server does not run on port 8983, please configure it in 
+	If the SOLR server does not run on port 8080 (default port of Tomcat), please configure it in 
 		{wiki-path}/extensions/EnhancedRetrieval/includes/FacetedSearch/solrproxy.php
 		{wiki-path}/extensions/EnhancedRetrieval/includes/FacetedSearch/FS_Settings.php
 
-* Start the SOLR server with the DataWiki configuration by executing the start
-	script in the wiki-solr folder of the preconfigured SOLR server.
+* Start the SOLR server 
 
 * Create the initial index:
-	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/updateSOLR.php
+	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/updateSOLR.php -v
 	
 	OR via composer:
 	
