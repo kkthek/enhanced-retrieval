@@ -1,4 +1,5 @@
 <?php
+use DIQA\FacetedSearch\Storage\FSStorageSQL;
 /*
  * Copyright (C) Vulcan Inc., DIQA Projektmanagement GmbH
  *
@@ -35,7 +36,7 @@ if (array_key_exists('SERVER_NAME', $_SERVER) && $_SERVER['SERVER_NAME'] != NULL
 $mediaWikiLocation = dirname(__FILE__) . '/../../..';
 require_once "$mediaWikiLocation/maintenance/commandLine.inc";
 
-require_once "$mediaWikiLocation/extensions/EnhancedRetrieval/includes/FacetedSearch/storage/FS_StorageSQL.php";
+require_once "$mediaWikiLocation/extensions/EnhancedRetrieval/src/FacetedSearch/storage/FS_StorageSQL.php";
 
 $delete = array_key_exists('delete', $options);
 $help = array_key_exists('h', $options);

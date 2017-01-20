@@ -1,5 +1,8 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+VERSION 1.9.3
+
+	- Refactoring extension structure. Basically using composer autoload.
 
 VERSION 1.9.2
 

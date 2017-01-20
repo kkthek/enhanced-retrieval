@@ -42,8 +42,11 @@
 	},
 	"autoload": {
 		"files" : [
-			"includes/EnhancedRetrieval.php"
-		]
+			"EnhancedRetrieval.php"
+		],
+		"psr-4": {
+			"DIQA\\": "src/"
+		}
 	},
 	"config": {
 		"process-timeout": 0

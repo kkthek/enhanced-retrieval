@@ -1,5 +1,6 @@
 <?php
 
+use DIQA\FacetedSearch\FSIndexerFactory;
 /*
  * Copyright (C) DIQA-Projektmanagement GmbH 2013
  *
