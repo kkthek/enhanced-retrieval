@@ -204,8 +204,7 @@ public function updateIndex(array $document, array $options) {
 	 *
 	 * @param Title $title
 	 * 		Title object of document (must be of type NS_FILE)
-	 * @return string
-	 * 		extracted text of document
+	 * @return [ text => extracted text of document, xml => full XML-response of Tika ]
 	 */
 	public function extractDocument($title) {
 		
@@ -254,7 +253,7 @@ public function updateIndex(array $document, array $options) {
 		$text = str_replace(array("\n","\t"), " ", strip_tags(str_replace('<', ' <', $text)));
 		
 		
-		return $text;
+		return [ 'xml' => $xml, 'text' => $text ];
 		
 	}
 	

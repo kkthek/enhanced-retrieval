@@ -146,7 +146,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
 		// extract document if a file was uploaded
 		if ($pns == NS_FILE) {
-			$doc['smwh_full_text'] .= " " . $this->extractDocument($t);
+			$docData = $this->extractDocument($t);
+			$doc['smwh_full_text'] .= " " . $docData['text'];
 		}
 		
 		// Let the super class update the index
