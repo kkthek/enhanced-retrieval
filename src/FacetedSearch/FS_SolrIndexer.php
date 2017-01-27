@@ -18,6 +18,7 @@ namespace DIQA\FacetedSearch;
  * with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  */
+use Title;
 
 /**
  * @file
@@ -202,17 +203,22 @@ public function updateIndex(array $document, array $options) {
 	 *  - PPT/X (Microsoft Powerpoint)
 	 *  - XLS/X (Microsoft Excel)
 	 *
-	 * @param Title $title
+	 * @param mixed $title Title or filepath
 	 * 		Title object of document (must be of type NS_FILE)
+	 * 		or a filepath in the filesystem
 	 * @return [ text => extracted text of document, xml => full XML-response of Tika ]
 	 */
 	public function extractDocument($title) {
 		
-		
+		if ($title instanceof Title) {
+			$file = \RepoGroup::singleton()->getLocalRepo()->newFile($title);
+			$filepath = $file->getLocalRefPath();
+			
+		} else {
+			$filepath = $title;
+		}
 		
 		// get file and extension
-		$file = \RepoGroup::singleton()->getLocalRepo()->newFile($title);
-		$filepath = $file->getLocalRefPath();
 		$ext = pathinfo($filepath, PATHINFO_EXTENSION);
 	
 		// choose content type
