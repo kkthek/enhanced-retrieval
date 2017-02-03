@@ -277,7 +277,12 @@
 	 * 		HTML representation of the semantic data
 	 */
 	AjaxSolr.theme.prototype.article = function (doc, data, highlight, showDataHandler) {
-		var output = '<div class="xfsResult"><a class="xfsResultTitle" href="' + getLink(doc.smwh_namespace_id, doc.smwh_title) + '">';
+		
+		var link = getLink(doc.smwh_namespace_id, doc.smwh_title);
+		if (doc.smwh_diqa_import_fullpath_xsdvalue_t) {
+			link = doc.smwh_diqa_import_fullpath_xsdvalue_t;
+		}
+		var output = '<div class="xfsResult"><a class="xfsResultTitle" href="' + link + '">';
     if (window.XFS.getPageTitle) {
        var titleObj = window.XFS.getPageTitle(doc);
        output += noUnderscore(titleObj.title) + '</a> -- ' + titleObj.appendix;

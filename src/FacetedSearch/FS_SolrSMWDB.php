@@ -143,6 +143,10 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			$smwID = $doc['smwh_smw_id'];
 			$this->retrievePropertyValues($db, $pns, $pt, $doc);
 		}
+		
+		if ($t->getNamespace() == NS_FILE) {
+			$this->retrieveFileSystemPath($db, $pns, $pt, $doc);
+		}
 
 		// extract document if a file was uploaded
 		if ($pns == NS_FILE) {
@@ -405,6 +409,24 @@ SQL;
 
 		return $found;
 
+	}
+	
+	/**
+	 * Retrieves full URL of the file resource attached to this title.
+	 * 
+	 * @param Database $db
+	 * @param int $namespace namespace-id
+	 * @param string $title dbkey
+	 * @param array $doc (out)
+	 */
+	private function retrieveFileSystemPath($db, $namespace, $title, array &$doc) {
+		$title = Title::newFromText($title, $namespace);
+		$file = \RepoGroup::singleton()->getLocalRepo()->newFile($title);
+		$filepath = $file->getFullUrl();
+		
+		$propXSD = "smwh_diqa_import_fullpath_xsdvalue_t";
+		$doc[$propXSD] = $filepath;
+		$doc['smwh_attributes'][] = $propXSD;
 	}
 
 	/**

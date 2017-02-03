@@ -59,6 +59,20 @@ $dir = dirname(__FILE__).'/';
 $wgExtensionFunctions[] = 'wfUSSetupExtension';
 $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Languages/FS_Messages.php'; // register messages (requires MW=>1.11)
 
+global $wgHooks;
+$wgHooks['ParserFirstCallInit'][] = 'wfERParserSetup';
+function wfERParserSetup() {
+	global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $wgOut;
+	$script = "";
+	$script .= "\nvar XFS = XFS || {};";
+	$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
+	$script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
+	$wgOut->addScript(
+			'<script type="text/javascript">'.$script.'</script>'
+	);
+}
+
+require_once 'src/FacetedSearch/FS_DefaultSettings.php';
 /**
  * Initializes PermissionACL extension
  *
@@ -66,7 +80,43 @@ $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Language
  */
 function wfUSSetupExtension() {
 	
-	require_once 'src/FacetedSearch/FS_Settings.php';
+	###
+	# This array configures the indexer that is used for faceted search. It has the
+	# following key-value pairs:
+	# indexer: Type of the indexer. Currently only 'SOLR' is supported.
+	# source:  The source for indexing semantic data. Currently only the database
+	#          of SMW is supported: 'SMWDB'
+	# proxyHost: Protocol and name or IP address of the proxy to the indexer server 
+	#          as seen from the client e.g. 'http://www.mywiki.com' or $wgServer
+	# proxyPort: The port number of the indexer server e.g. 8983 as seen from the 
+	#          client. 
+	#          If the solrproxy is used this can be omitted.
+	# proxyServlet: Servlet of the indexer proxy as seen from the client. If the 
+	#          solrproxy is used it should be
+	#          "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php"
+	#          If the indexer is addressed directly it should be '/solr/select' (for SOLR)
+	# indexerHost: Name or IP address of the indexer server as seen from the wiki server
+	#          e.g. 'localhost'
+	#          If the solrproxy is used and the indexer host (SOLR) is different from 
+	#          'localhost', i.e. SOLR is running on another machine than the wiki server, 
+	#          the variable $SOLRhost must be set in solrproxy.php.
+	# indexerPort: The port number of the indexer server e.g. 8983 as seen from the 
+	#          wiki server.
+	#          If the solrproxy is used and the port of the indexer host (SOLR) is 
+	#          different from 8983, the variable $SOLRport must be set in solrproxy.php.
+	##
+	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
+	if (!isset($fsgFacetedSearchConfig)) {
+		$fsgFacetedSearchConfig = array(
+		    'indexer' => 'SOLR',
+		    'source'  => 'SMWDB',
+		    'proxyHost'    => $wgServer,
+		//	'proxyPort'    => 8983,		
+			'proxyServlet' => "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php",
+			'indexerHost' => 'localhost', // must be equal to $SOLRhost in solrproxy.php
+			'indexerPort' => 8080         // must be equal to $SOLRport in solrproxy.php
+		);
+	}
 	
 	global $IP, $wgScriptPath;
 	global $fsgScriptPath, $fsgIP;

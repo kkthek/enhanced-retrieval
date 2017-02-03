@@ -55,18 +55,11 @@ class FSGlobalFunctions {
 		
 		///// Register specials pages
 		global $wgSpecialPages, $wgSpecialPageGroups;
-		$wgSpecialPages['FacetedSearch']      = array('FSFacetedSearchSpecial');
+		$wgSpecialPages['FacetedSearch']      = array('DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
 		$wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
 		$wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
 		
-		global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $wgOut;
-		$script = "";
-		$script .= "\nvar XFS = XFS || {};";
-		$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
-		$script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
-		$wgOut->addScript(
-				'<script type="text/javascript">'.$script.'</script>'
-		);
+		
 		
 		self::initResourceLoaderModules();
 	}

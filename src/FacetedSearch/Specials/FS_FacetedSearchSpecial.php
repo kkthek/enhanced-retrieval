@@ -148,7 +148,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 			if(!is_null( $t ) ){
 
 				# If there's an exact or very near match, jump right there.
-				$t = SearchEngine::getNearMatch( $search );
+				$t = \SearchEngine::getNearMatch( $search );
 				if( !is_null( $t ) ) {
 					$wgOut->redirect( $t->getFullURL() );
 					return;
