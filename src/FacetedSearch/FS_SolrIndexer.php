@@ -250,7 +250,7 @@ public function updateIndex(array $document, array $options) {
 		$result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);
 		
 		if ($rc != 200) {
-			return ""; // could not extract
+			return [ 'xml' => NULL, 'text' => 'Keine Extraktion möglich' ]; // could not extract
 		}
 		
 		$xml =    simplexml_load_string($result);
