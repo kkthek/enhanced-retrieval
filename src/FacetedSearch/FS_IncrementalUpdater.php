@@ -3,6 +3,9 @@ namespace DIQA\FacetedSearch;
 
 use WikiPage;
 use Title;
+use SMWStore;
+use Revision;
+use SMW\SemanticData;
 
 
 /*
@@ -72,6 +75,27 @@ class FSIncrementalUpdater  {
 	public static function onArticleSaveComplete(WikiPage &$wikiPage, $user, $text) {
 		$indexer = FSIndexerFactory::create();
 		$indexer->updateIndexForArticle($wikiPage, $user, $text);
+		return true;
+	}
+	
+	/**
+	 * Called when semantic data is refreshed.
+	 * Note: This hook is only used on command-line!
+	 * 
+	 * @param SMWStore $store
+	 * @param SemanticData $semanticData
+	 * @return void|boolean
+	 */
+	public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
+		$wikiTitle = $semanticData->getSubject()->getTitle();
+		$Revision = Revision::newFromTitle ( $wikiTitle );
+		if (is_null($Revision)) {
+			return;
+		}
+		
+		$WikiPageContent = $Revision->getContent ( Revision::RAW )->serialize ();
+		$indexer = FSIndexerFactory::create();
+		$indexer->updateIndexForArticle(new \WikiPage($wikiTitle), null, $WikiPageContent);
 		return true;
 	}
 	

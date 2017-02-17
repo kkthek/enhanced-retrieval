@@ -47,6 +47,9 @@ class FSGlobalFunctions {
 		// Register hooks
 		if ($fsgEnableIncrementalIndexer) {
 			$wgHooks['ArticleSaveComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleSaveComplete';
+			if (PHP_SAPI === 'cli') {
+				$wgHooks['SMWStore::updateDataAfter'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter';
+			}
 			$wgHooks['UploadComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete';
 			$wgHooks['AfterImportPage'][]     = 'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage';
 			$wgHooks['TitleMoveComplete'][]   = 'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete';
