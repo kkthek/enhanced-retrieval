@@ -93,7 +93,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 *		Optional content of the article. If NULL, the content of $article is
 	 *		retrieved in this method.
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL) {
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL) {
 		$doc = array();
 		$this->dependant = [];
 		
@@ -106,13 +106,10 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		$pid = $t->getArticleID();
 		$pns = $t->getNamespace();
 		$pt  = $t->getDBkey();
-
-		//if ($text === NULL) {
-		//$text = $article->getContent();
+		
 		$parserOptions = new ParserOptions();
 		$parserOut = $wikiPage->getParserOutput($parserOptions);
 		$text = Sanitizer::stripAllTags($parserOut->getText());
-		//}
 
 		$doc['id'] = $pid;
 		$doc['smwh_namespace_id'] = $pns;
@@ -153,6 +150,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			$docData = $this->extractDocument($t);
 			$doc['smwh_full_text'] .= " " . $docData['text'];
 		}
+		
+		\Hooks::run('fs_saveArticle', array( &$rawText, &$doc ));
 		
 		// Let the super class update the index
 		$this->updateIndex($doc, $options);
