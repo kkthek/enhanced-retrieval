@@ -551,7 +551,9 @@ SQL;
 		$titleValue = $store->getPropertyValues($dataItem, $titleProperty);
 		if (count($titleValue) > 0) {
 			$titleValue = reset($titleValue);
-			$obj .= '|'.$titleValue->getString();
+			if ($titleValue instanceof \SMWDIString) {
+				$obj .= '|'.$titleValue->getString();
+			}
 
 		}
 		
