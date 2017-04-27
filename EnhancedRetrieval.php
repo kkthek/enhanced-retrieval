@@ -62,9 +62,13 @@ $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Language
 global $wgHooks;
 $wgHooks['ParserFirstCallInit'][] = 'wfERParserSetup';
 function wfERParserSetup() {
-	global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $wgOut;
+	global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgTitleProperty, $wgOut;
+	if ($fsgTitleProperty != '') {
+		$fsgExtraPropertiesToRequest[] = 'smwh_' . $fsgTitleProperty . '_xsdvalue_t';
+	}
 	$script = "";
 	$script .= "\nvar XFS = XFS || {};";
+	$script .= "\nXFS.titleProperty = '".$fsgTitleProperty."';";
 	$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
 	$script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
 	$wgOut->addScript(

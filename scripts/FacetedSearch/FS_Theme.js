@@ -283,12 +283,16 @@
 			link = doc.smwh_diqa_import_fullpath_xsdvalue_t;
 		}
 		var output = '<div class="xfsResult"><a class="xfsResultTitle" href="' + link + '">';
-    if (window.XFS.getPageTitle) {
-       var titleObj = window.XFS.getPageTitle(doc);
-       output += noUnderscore(titleObj.title) + '</a> -- ' + titleObj.appendix;
-    } else {
-		   output += noUnderscore(doc.smwh_title) + '</a>';
-    }
+		
+		// get page title
+	    if (window.XFS.getPageTitle) {
+	       var titleObj = window.XFS.getPageTitle(doc);
+	       output += noUnderscore(titleObj.title) + '</a> -- ' + titleObj.appendix;
+	    } else if(XFS.titleProperty != '' && doc['smwh_'+XFS.titleProperty+"_xsdvalue_t"]) { 
+	    	  output += noUnderscore(doc['smwh_'+XFS.titleProperty+"_xsdvalue_t"][0]) + '</a>';
+	    } else {
+			  output += noUnderscore(doc.smwh_title) + '</a>';
+	    }
 		output += getIconForNSID(doc.smwh_namespace_id);
 		// output += '<p id="links_' + doc.id + '" class="links"></p>';
 		output += '<div class="xfsHighlightSearch">' + highlight + '</div>';
