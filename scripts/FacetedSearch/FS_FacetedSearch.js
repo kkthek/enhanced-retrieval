@@ -203,6 +203,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		createSolrManager();
 		createWidgets();
 		addEventHandlers();
+		initializeGUIElements();
 		
 		initNamespaces();
 		
@@ -390,6 +391,35 @@ FacetedSearch.classes.FacetedSearch = function () {
 		$('#query').keyup(that.onSearchKeyup);
 		$('#search_order').change(that.onSearchOrderChanged);
 		$('#search_button').click(that.onSearchButtonClicked);
+		
+	}
+	
+	/**
+	 * Initialize GUI elements after initial load.
+	 * 
+	 */
+	function initializeGUIElements() {
+		// initalize sort order GUI element
+		var sort = mAjaxSolrManager.store.values('sort');
+		if (!sort || sort.length == 0 || sort[0].length == 0) {
+			return;
+		}
+		var val='score';
+		switch(sort[0][0]) {
+			case 'smwh__MDAT_xsdvalue_dt desc':
+				val = 'newest';
+				break;
+			case 'smwh__MDAT_xsdvalue_dt asc':
+				val = 'oldest';
+				break;
+			case 'smwh_title_s asc':
+				val = 'ascending';
+				break;
+			case 'smwh_title_s desc':
+				val = 'descending';
+				break;
+		}
+		$("#search_order option[value="+val+"]").prop('selected', true);
 	}
 	
 	/**
