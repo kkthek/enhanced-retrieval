@@ -62,6 +62,16 @@ class FSGlobalFunctions {
 		$wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
 		$wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
 		
+		// Register configuration used in Javascript
+		global $wgOut, $fsgShownFacets, $fsgFacetsWithOR, $fsgCategoriesToShowInTitle;
+		$script = "";
+		$script .= "\nvar XFS = XFS || {};";
+		$script .= "\nXFS.SHOWNFACETS = ".json_encode($fsgShownFacets).";";
+		$script .= "\nXFS.OREDFACETS = ".json_encode($fsgFacetsWithOR).";";
+		$script .= "\nXFS.CATEGORIES_TO_SHOW_IN_TITLE = ".json_encode($fsgCategoriesToShowInTitle).";";
+		$wgOut->addScript(
+				'<script type="text/javascript">'.$script.'</script>'
+		);
 		
 		
 		self::initResourceLoaderModules();
@@ -116,6 +126,8 @@ class FSGlobalFunctions {
 						"scripts/FacetedSearch/FS_DateFacetClusterer.js",
 						"scripts/FacetedSearch/FS_ClusterWidget.js",
 						"scripts/FacetedSearch/FS_FacetClustererFactory.js",
+						
+						
 				),
 				'styles' => array(
 				'/skin/faceted_search.css',
@@ -125,6 +137,24 @@ class FSGlobalFunctions {
 				'ext.facetedSearch.ajaxSolr',
 				)
 	
+		);
+		
+		$wgResourceModules['ext.facetedSearch.enhancements'] = $moduleTemplate + array(
+				'localBasePath' => __DIR__,
+				
+				'scripts' => array(
+						'scripts/FacetedSearch/Enhancements/fs_categoryFilter.js',
+						'scripts/FacetedSearch/Enhancements/fs_propertySelector.js',
+						'scripts/FacetedSearch/Enhancements/fs_facetValueDialog.js',
+						'scripts/FacetedSearch/Enhancements/fs_enhancements.js'
+				),
+				'styles' => array('skin/dialogs.css'),
+				'dependencies' => array(
+						'ext.facetedSearch.special',
+						'ext.diqa.util',
+						'jquery.ui.autocomplete',
+						'ext.bootstrap.styles',
+				'ext.bootstrap.scripts' )
 		);
 		self::addJSLanguageScripts();
 	

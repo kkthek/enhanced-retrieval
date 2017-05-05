@@ -46,7 +46,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 {{fs_ext_Top}}
 <div id="wrapper"> 
 			<div>
-		<div id="field_namespaces" class="xfsNamespaces">
+		<div id="field_namespaces" class="xfsNamespaces" style="{{fs_show_namespaces}}">
 		</div>
 		<div class="search" id="fs_search_fields">
 			<input type="text" id="query" name="query" value="{{searchTerm}}" />
@@ -167,9 +167,10 @@ class FSFacetedSearchSpecial extends SpecialPage {
 		$html = self::SPECIAL_PAGE_HTML;
 		$html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
 		
-		global $fsgShowSortOrder, $fsgShowCategories;
+		global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces;
 		$html = str_replace('{{fs_show_sortorder}}', $fsgShowSortOrder === true ? '' : 'display:none;', $html);
 		$html = str_replace('{{fs_show_categories}}', $fsgShowCategories === true ? '' : 'display:none;', $html);
+		$html = str_replace('{{fs_show_namespaces}}', $fsgShowNamespaces === true ? '' : 'display:none;', $html);
 		
 		$extendedFacets = '';
 		Hooks::run('fs_extendedFacets', array( & $extendedFacets));
@@ -183,6 +184,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 		
 		$wgOut->addHTML($this->replaceLanguageStrings($html));
 		$wgOut->addModules('ext.facetedSearch.special');
+		$wgOut->addModules('ext.facetedSearch.enhancements');
     }
     
     /**

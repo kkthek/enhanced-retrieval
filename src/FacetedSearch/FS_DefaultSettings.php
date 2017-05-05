@@ -123,9 +123,10 @@ $fsgExtraPropertiesToRequest = [];
 #
 # Show/hide UI parts
 #
-global $fsgShowSortOrder, $fsgShowCategories;
+global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces;
 $fsgShowSortOrder = true;
 $fsgShowCategories = true;
+$fsgShowNamespaces = true;
 
 ####
 #
@@ -140,3 +141,10 @@ $fsgShowCategories = true;
 #
 global $fsgNumericPropertyClusters;
 $fsgNumericPropertyClusters = [];
+
+####
+#
+# User configurable category drop-down
+#
+global $fsgCategoryFilter;
+$fsgCategoryFilter = [];

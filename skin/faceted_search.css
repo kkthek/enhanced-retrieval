@@ -183,3 +183,7 @@ a.xfsFMore, a.xfsFLess {
 .xfsCurrentSearchLink {
 	clear: both;
 }
+
+a.xfsAddFacetOperation {
+	cursor: pointer;
+}
