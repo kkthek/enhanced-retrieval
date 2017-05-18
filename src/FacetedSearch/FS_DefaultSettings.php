@@ -148,3 +148,18 @@ $fsgNumericPropertyClusters = [];
 #
 global $fsgCategoryFilter;
 $fsgCategoryFilter = [];
+
+####
+#
+# Annotations already shown in snippet
+#
+# Maps category names to a list of property names.
+# Articles from these categories show the values 
+# of the given properties in the snippets (if values exist)
+#
+# Example:
+#	$fsgAnnotationsInSnippet['Dokument' => [ 'Abteilung', 'Dokumentart' ] ];
+#
+#
+global $fsgAnnotationsInSnippet;
+$fsgAnnotationsInSnippet = [];

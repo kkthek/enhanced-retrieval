@@ -187,3 +187,42 @@ a.xfsFMore, a.xfsFLess {
 a.xfsAddFacetOperation {
 	cursor: pointer;
 }
+
+div.xfs_additional_property_table {
+	border: 1px solid;
+    float: left;
+   
+    margin-top: 5px;
+	margin-bottom: 5px;
+    width: 100%;
+	
+}
+
+div.xfs_additional_property_table_row,div.xfs_additional_property_table_row_first {
+	padding: 5px;
+	float:left;
+	
+}
+
+table.xfs_additional_property_table td {
+	padding: 5px;
+}
+
+table.xfs_additional_property_table td span.xfs_additional_property_value {
+	font-size: 13px;
+    font-style: italic;
+    margin-left: 5px;
+}
+
+@media (min-width: 200px) and  (max-width: 768px) {
+
+    div#xfsPropertyFacetContainer { display: none; }
+	
+}
+
+@media (min-width: 769px) and (max-width: 1920px) {
+
+	div#xfsPropertyFacetContainer { display: block; }
+	div.xfs_additional_property_table_row_first { width: 70%; }
+	div.xfs_additional_property_table_row { width: 30%; }
+}

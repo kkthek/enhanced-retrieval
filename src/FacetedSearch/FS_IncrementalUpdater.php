@@ -64,19 +64,6 @@ class FSIncrementalUpdater  {
 	//--- getter/setter ---
 	
 	//--- Public methods ---
-
-	/**
-	 * This function is called after saving an article is completed.
-	 * It starts an update of the index for the given article.
-	 * 
-	 * @param Article $article
-	 * 		The saved article.
-	 */
-	public static function onArticleSaveComplete(WikiPage &$wikiPage, $user, $text) {
-		$indexer = FSIndexerFactory::create();
-		$indexer->updateIndexForArticle($wikiPage, $user, $text);
-		return true;
-	}
 	
 	/**
 	 * Called when semantic data is refreshed.
@@ -87,6 +74,7 @@ class FSIncrementalUpdater  {
 	 * @return void|boolean
 	 */
 	public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
+		
 		$wikiTitle = $semanticData->getSubject()->getTitle();
 		$Revision = Revision::newFromTitle ( $wikiTitle );
 		if (is_null($Revision)) {

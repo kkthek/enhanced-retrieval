@@ -54,7 +54,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	var ATTRIBUTE_FIELD = 'smwh_attributes';
 
 	// Name of the SOLR field that stores the modification date of an article
-	var MODIFICATION_DATE_FIELD = 'smwh__MDAT_xsdvalue_dt';
+	var MODIFICATION_DATE_FIELD = 'smwh__MDAT_datevalue_l';
 
 	// Name of the SOLR field that stores the title of an article with type
 	// 'wiki'
@@ -73,7 +73,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 						
 	// Names of all fields that are returned in a query for documents
 	var QUERY_FIELD_LIST = [MODIFICATION_DATE_FIELD,
-							'smwh_categories', 
+							'smwh_categories',
+							'smwh_directcategories',
 							ATTRIBUTE_FIELD, 
 							RELATION_FIELD,
 							DOCUMENT_ID,

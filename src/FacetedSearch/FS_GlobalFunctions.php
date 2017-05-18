@@ -1,6 +1,7 @@
 <?php
 namespace DIQA\FacetedSearch;
 
+use SMW\StoreFactory;
 /*
  * Copyright (C) Vulcan Inc., DIQA Projektmanagement GmbH
  *
@@ -46,10 +47,8 @@ class FSGlobalFunctions {
 		
 		// Register hooks
 		if ($fsgEnableIncrementalIndexer) {
-			$wgHooks['ArticleSaveComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleSaveComplete';
-			if (PHP_SAPI === 'cli') {
-				$wgHooks['SMWStore::updateDataAfter'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter';
-			}
+		
+			$wgHooks['SMW::SQLStore::AfterDataUpdateComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter';
 			$wgHooks['UploadComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete';
 			$wgHooks['AfterImportPage'][]     = 'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage';
 			$wgHooks['TitleMoveComplete'][]   = 'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete';
@@ -159,6 +158,68 @@ class FSGlobalFunctions {
 		self::addJSLanguageScripts();
 	
 	}
+	
+	/**
+	 * Called before parser is initialized
+	 */
+	public static function initializeBeforeParserInit() {
+		global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgTitleProperty, $fsgAnnotationsInSnippet, $wgOut;
+		
+		$fsgTitlePropertyField = '';
+		if ($fsgTitleProperty != '') {
+			$fsgTitlePropertyField = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgTitleProperty));
+			$fsgExtraPropertiesToRequest[] = $fsgTitlePropertyField;
+		}
+		
+		$script = "";
+		$script .= "\nvar XFS = XFS || {};";
+		$script .= "\nXFS.titleProperty = '".$fsgTitleProperty."';";
+		$script .= "\nXFS.titlePropertyField = '".$fsgTitlePropertyField."';";
+		$script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
+		self::addAnnotationSnippets($script);
+		$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
+		
+		$wgOut->addScript(
+				'<script type="text/javascript">'.$script.'</script>'
+		);
+	}
+	
+	/**
+	 * Serializes metadata about properties for displaying them later in snippets.
+	 * 
+	 *  1. adds every property in $fsgExtraPropertiesToRequest
+	 *  2. retrieves metadata like DisplayTitle
+	 *  
+	 * @param string $script (out)
+	 */
+	private static function addAnnotationSnippets(& $script) {
+		global $fsgAnnotationsInSnippet, $fsgExtraPropertiesToRequest;
+		
+		$result = [];
+		$store = StoreFactory::getStore ();
+		foreach($fsgAnnotationsInSnippet as $category => $properties) {
+			
+			foreach($properties as $property) {
+				$smwProperty = \SMWDIProperty::newFromUserLabel($property);
+				$solrFieldName = FSSolrSMWDB::encodeSOLRFieldName($smwProperty);
+				
+				if (!in_array($solrFieldName, $fsgExtraPropertiesToRequest)) {
+					$fsgExtraPropertiesToRequest[] = $solrFieldName;
+				}
+				
+				global $fsgTitleProperty;
+				$value = $store->getPropertyValues( $smwProperty->getDiWikiPage(),
+						\SMWDIProperty::newFromUserLabel ( $fsgTitleProperty ) );
+				$value = reset($value);
+				$displayTitle = $value !== false ? $value->getString() : '';
+				
+				$result[$solrFieldName] = ['label' => $displayTitle, 'category' => $category ];
+			}
+		}
+		
+		$script .= "\nXFS.annotationsInSnippet = ".json_encode($result).";";
+	}
+	
 	
 	
 	/**

@@ -61,30 +61,11 @@ $wgExtensionFunctions[] = 'wfUSSetupExtension';
 $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Languages/FS_Messages.php'; // register messages (requires MW=>1.11)
 
 global $wgHooks;
-$wgHooks['ParserFirstCallInit'][] = 'wfERParserSetup';
+$wgHooks['ParserFirstCallInit'][] = 'DIQA\FacetedSearch\FSGlobalFunctions::initializeBeforeParserInit';
 $wgHooks['fs_extendedFilters'][] = 'DIQA\FacetedSearch\FacetedCategoryFilter::addFilter';
 
 global $wgAPIModules;
 $wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Dialogs\DialogAjaxAPI';
-
-function wfERParserSetup() {
-	global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgTitleProperty, $wgOut;
-	
-	$fsgTitlePropertyField = '';
-	if ($fsgTitleProperty != '') {
-		$fsgTitlePropertyField = sprintf("smwh_%s_xsdvalue_t", FSSolrSMWDB::encodeTitle($fsgTitleProperty));
-		$fsgExtraPropertiesToRequest[] = $fsgTitlePropertyField;
-	}
-	$script = "";
-	$script .= "\nvar XFS = XFS || {};";
-	$script .= "\nXFS.titleProperty = '".$fsgTitleProperty."';";
-	$script .= "\nXFS.titlePropertyField = '".$fsgTitlePropertyField."';";
-	$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
-	$script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
-	$wgOut->addScript(
-			'<script type="text/javascript">'.$script.'</script>'
-	);
-}
 
 require_once 'src/FacetedSearch/FS_DefaultSettings.php';
 /**

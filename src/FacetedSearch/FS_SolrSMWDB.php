@@ -11,6 +11,7 @@ use SMW\DIProperty as SMWDIProperty;
 use SMW\DIWikiPage as SMWDIWikiPage;
 use SMWDataItem;
 use JobQueueGroup;
+use SMW\DataTypeRegistry;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -134,11 +135,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		// retrieve templates (currently only needed for boosts)
 		$this->retrieveTemplates($db, $pid, $doc, $options);
 		
-		// Get the categories of the article
-		$this->retrieveCategories($db, $pid, $doc, $options);
 		if ($this->retrieveSMWID($db, $pns, $pt, $doc)) {
 			$smwID = $doc['smwh_smw_id'];
-			$this->retrievePropertyValues($db, $pns, $pt, $doc);
+			$this->retrievePropertyValues($db, $pns, $pt, $doc, $options);
 		}
 		
 		if ($t->getNamespace() == NS_FILE) {
@@ -267,73 +266,7 @@ SQL;
 			$this->calculateBoostFactors($options, $max);
 		} 
 	}
-	/**
-	 * Retrieves the categories of the article with the page ID $pid and adds
-	 * them to the document description $doc.
-	 *
-	 * @param Database $db
-	 * 		The database object
-	 * @param int $pid
-	 * 		The page ID.
-	 * @param array $doc
-	 * 		The document description. If the page belongs to categories, an array
-	 * 		of names is added with the key 'smwh_categories'.
-	 * @param array $options Options for the document fields. 
-	 */
-	private function retrieveCategories($db, $pid, array &$doc, array &$options) {
-		$categorylinks = $db->tableName('categorylinks');
 
-		$sql = <<<SQL
-			SELECT CAST(c.cl_to AS CHAR) cat
-			FROM $categorylinks c
-			WHERE cl_from=$pid
-SQL;
-		$prop_ignoreasfacet = wfMessage('fs_prop_ignoreasfacet')->text();
-		$ignoreAsFacetProp = SMWDIProperty::newFromUserLabel($prop_ignoreasfacet);
-		$store = smwfGetStore();
-		$res = $db->query($sql);
-		$categories = array();
-		if ($db->numRows($res) > 0) {
-			$doc['smwh_categories'] = array();
-			while ($row = $db->fetchObject($res)) {
-				$cat = $row->cat;
-				
-				$cTitle = Title::newFromText($cat, NS_CATEGORY);
-				$iafValues = $store->getPropertyValues(SMWDIWikiPage::newFromTitle($cTitle), $ignoreAsFacetProp);
-				if (count($iafValues) > 0) {
-					continue;
-				}
-				
-				$doc['smwh_categories'][] = $cat;
-				$categories[] = str_replace("_", " ", $cat);
-				
-				//TODO: should be recursive
-				$parentCategories = $cTitle->getParentCategories();
-				foreach($parentCategories as $parentCat => $childCat) {
-					$parentCatTitle = \Title::newFromText($parentCat);
-					$doc['smwh_categories'][] = $parentCatTitle->getText();
-					$categories[] = str_replace("_", " ", $parentCatTitle->getText());
-				}
-			}
-
-
-		}
-		$db->freeResult($res);
-
-		// add boost according to categories
-		global $fsgCategoryBoosts, $fsgDefaultBoost;
-		if (count(array_intersect(array_keys($fsgCategoryBoosts), $categories)) > 0) {
-			// boost factor defined by category
-			$categories = array_intersect(array_keys($fsgCategoryBoosts), $categories);
-			$max = 0;
-			foreach($categories as $c) {
-				if ($fsgCategoryBoosts[$c] > $max) {
-					$max = $fsgCategoryBoosts[$c];
-				}
-			}
-			$this->calculateBoostFactors($options, $max);
-		} 
-	}
 
 	/**
 	 * Encodes special characters in title
@@ -365,6 +298,39 @@ SQL;
 			$i++;
 		} while ($i < strlen($str));
 		return $hex;
+	}
+	
+	/**
+	 * Returns the SOLR field name for a property
+	 * @param SMWDIProperty $property
+	 * 
+	 * @return string
+	 */
+	public static function encodeSOLRFieldName($property) {
+		
+		$prop = str_replace(' ', '_', $property->getLabel());
+	
+		$prop = self::encodeTitle($prop);
+		
+		$typeId = $property->findPropertyTypeID();
+		$type = DataTypeRegistry::getInstance()->getDataItemByType($typeId);
+		
+		// The property names of all attributes are according to their type.
+		switch($type) {
+			case SMWDataItem::TYPE_BOOLEAN:
+				return "smwh_{$prop}_xsdvalue_b";
+			case SMWDataItem::TYPE_NUMBER:
+				return "smwh_{$prop}_numvalue_d";
+			case SMWDataItem::TYPE_STRING:
+				return "smwh_{$prop}_xsdvalue_t";
+			case SMWDataItem::TYPE_WIKIPAGE:
+				return "smwh_{$prop}_t";
+			case SMWDataItem::TYPE_TIME:
+				return "smwh_{$prop}_xsdvalue_dt";
+		}
+		
+		// all others are regarded as string/text
+		return "smwh_{$prop}_xsdvalue_t";
 	}
 
 	/**
@@ -442,7 +408,7 @@ SQL;
 	 * 		be an array of relation names and a key will be added for each
 	 * 		relation with the value of the relation.
 	 */
-	private function retrievePropertyValues($db, $namespace, $title, array &$doc) {
+	private function retrievePropertyValues($db, $namespace, $title, array &$doc, array &$options) {
 		global $fsgIndexPredefinedProperties;
 
 		$store = smwfGetStore();
@@ -457,8 +423,21 @@ SQL;
 		global $wgContLang;
 		foreach($properties as $property) {
 		   
-            if ($property->getKey() == "_INST") continue;
+			// handle member categories
+            if ($property->getKey() == "_INST") { 
+            	$categories = $store->getPropertyValues($subject, $property);
+            	$this->indexCategories($categories, $doc, $options);
+            	continue;
+            }
+            
+            // handle super-categories
+            if ($property->getKey() == "_SUBC") {
+            	$categories = $store->getPropertyValues($subject, $property);
+            	$this->indexCategories($categories, $doc, $options);
+            	continue;
+            }
 		    
+            // check if particular pre-defined property should be indexed
 		    $predefPropType = SMWDIProperty::getPredefinedPropertyTypeId($property->getKey());
 		    $p = $property; //SMWDIProperty::newFromUserLabel($prop);
 		    if (!empty($predefPropType)) {
@@ -469,18 +448,23 @@ SQL;
 		        $prop = str_replace(' ', '_', $p->getLabel());
 		    
 		    }
+		    
+		    // check if property should be indexed
 		    $prop_ignoreasfacet = wfMessage('fs_prop_ignoreasfacet')->text();
 		    
 		    $iafValues = $store->getPropertyValues($p->getDiWikiPage(), SMWDIProperty::newFromUserLabel($prop_ignoreasfacet));
 		    if (count($iafValues) > 0) {
 		        continue;
 		    }
-		    	
+
+		    // retrieve all annotations and index them 
 		    $values = $store->getPropertyValues($subject, $property);
 		    
 		    foreach($values as $value) {
 		        if ($value->getDIType() == SMWDataItem::TYPE_WIKIPAGE) {
+		        	
 		            if ($value->getSubobjectName() != "") {
+
 		                // handle record properties
 		                if ($value->getSubobjectName() != "") {
 		                    $subData = smwfGetStore()->getSemanticData($value);
@@ -499,11 +483,13 @@ SQL;
 		                    }
 		                }
 		            } else {
+		                
 		                // handle relation properties
     		            $enc_prop = $this->serializeWikiPageDataItem($subject, $property, $value, $doc);
     		            $relations[] = $enc_prop;
 		            }
 		        } else {
+		            
 		            // handle attribute properties
 		            $enc_prop = $this->serializeDataItem($property, $value, $doc);
 		            $attributes[] = $enc_prop;
@@ -514,6 +500,77 @@ SQL;
 		$doc['smwh_properties'] = array_filter(array_unique($relations), function($e) { return !empty($e); });
 		$doc['smwh_attributes'] = array_filter(array_unique($attributes), function($e) { return !empty($e); });
         
+	}
+	
+	/**
+	 * Indexes categories. Either as member categories or super-categories
+	 * 
+	 * @param array $categories
+	 * @param array $doc
+	 * @param array $options
+	 */
+	private function indexCategories($categories, array &$doc, array &$options) {
+		
+		$prop_ignoreasfacet = wfMessage('fs_prop_ignoreasfacet')->text();
+		$ignoreAsFacetProp = SMWDIProperty::newFromUserLabel($prop_ignoreasfacet);
+		$store = smwfGetStore();
+		
+		$doc['smwh_categories'] = [];
+		$doc['smwh_directcategories'] = [];
+		$allParentCategories = [];
+		foreach($categories as $category) {
+			 
+			// do not index if ignored
+			$iafValues = $store->getPropertyValues(SMWDIWikiPage::newFromTitle($category->getTitle()), $ignoreAsFacetProp);
+			if (count($iafValues) > 0) {
+				continue;
+			}
+			 
+			// index this category
+			$categoryAsText = $category->getTitle()->getText();
+			$doc['smwh_categories'][] = $categoryAsText;
+			$doc['smwh_directcategories'][] = $categoryAsText;
+			$categories[] = str_replace("_", " ", $categoryAsText);
+			 
+			$this->_getAllSupercategories($category->getTitle(), $allParentCategories);
+			
+		}
+		
+		// index all parent categories
+		$allParentCategories = array_unique($allParentCategories);
+		foreach($allParentCategories as $pc) {
+			$doc['smwh_categories'][] = $pc;
+			$categories[] = str_replace("_", " ", $pc);
+		}
+		
+		// add boost according to categories
+		global $fsgCategoryBoosts, $fsgDefaultBoost;
+		if (count(array_intersect(array_keys($fsgCategoryBoosts), $categories)) > 0) {
+			// boost factor defined by category
+			$categories = array_intersect(array_keys($fsgCategoryBoosts), $categories);
+			$max = 0;
+			foreach($categories as $c) {
+				if ($fsgCategoryBoosts[$c] > $max) {
+					$max = $fsgCategoryBoosts[$c];
+				}
+			}
+			$this->calculateBoostFactors($options, $max);
+		}
+	}
+	
+	/**
+	 * Returns all parent categories.
+	 * 
+	 * @param Title $cTitle
+	 * @param array $categories Category names as text
+	 */
+	private function _getAllSupercategories($cTitle, & $categories) {
+		$parentCategories = $cTitle->getParentCategories();
+		foreach($parentCategories as $parentCat => $childCat) {
+			$parentCatTitle = \Title::newFromText($parentCat);
+			$categories[] = $parentCatTitle->getText();
+			$this->_getAllSupercategories($parentCatTitle, $categories);
+		}
 	}
 	
 	/**
@@ -644,8 +701,33 @@ SQL;
 	        $doc[$propXSD] = array();
 	    }
 	    $doc[$propXSD][] = $valueXSD;
+	    
+	    $this->handleSpecialWikiProperties($property, $dataItem, $doc);
 
 	    return $propXSD;
+	}
+	
+	/**
+	 * Special handling for special SMW properties.
+	 * 
+	 * @param SMWDIProperty $property
+	 * @param SMWDataItem $dataItem
+	 * @param array $doc
+	 */
+	private function handleSpecialWikiProperties($property, $dataItem, array &$doc) {
+		
+		if ($property->isUserDefined()) {
+			return; // not special
+		}
+		
+		switch ($property->getKey()) {
+			case '_MDAT':
+				// used for sorting
+				$doc['smwh__MDAT_datevalue_l'] = $dataItem->getMwTimestamp();
+				break;
+				
+		}
+		
 	}
 	
 	/**

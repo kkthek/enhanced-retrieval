@@ -29,6 +29,7 @@
 (function ($) {
 
 	var FS_CATEGORIES = 'smwh_categories';
+	var FS_DIRECTCATEGORIES = 'smwh_directcategories';
 	var FS_ATTRIBUTES = 'smwh_attributes';
 	var FS_PROPERTIES = 'smwh_properties'; // relations
 	var MOD_ATT = 'smwh__MDAT_xsdvalue_dt';
@@ -36,6 +37,7 @@
 	var CAT_SEP = ' | ';
 	var RELATION_REGEX = /^smwh_(.*)_(.*)$/;
 	var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
+	var DATETIME_REGEX = /smwh_(.*)_xsdvalue_dt/;
 
 	var IMAGE_PATH = '/extensions/EnhancedRetrieval/skin/images/';
 	var NS_ICON = {
@@ -255,6 +257,70 @@
 	}
 	
 	/**
+	 * Checks if the given name is a name for a Datetime property.
+	 * 
+	 * @param {string} name
+	 * 		The name to examine
+	 * @return {bool}
+	 * 		true, if name is a Datetime property name
+	 */
+	function isDateTime(name) {
+		return name.match(DATETIME_REGEX);
+	}
+	
+	/**
+	 * Retrieves display name
+	 */
+	function retrieveDisplayName(plainName) {
+		var nicename = window.XFS.translateName ? window.XFS.translateName(plainName) : plainName;
+		nicename = plainName.split('|').length > 1 ? plainName.split('|')[1] : nicename;
+		nicename = nicename.replace(/_/g, ' ');
+		return nicename;
+	}
+	
+	/**
+	 * Checks if one of the categories appear in doc
+	 */
+	function isInCategory(doc, categories) {
+		if (!doc.smwh_categories) return false;
+		
+		for(var i = 0; i < categories.length; i++) {
+			if ($.inArray(categories[i], doc.smwh_categories) != -1) {
+				return true;
+			}
+		}
+		
+		return false;
+	};
+	
+	/**
+	 * Adds annotations directly displayed in the snippets without
+	 * opening the 'properties'-view
+	 */
+	AjaxSolr.theme.prototype.annotationsInSnippet = function (doc, snippets) {
+
+		  var output = '';
+		  output += '<div><div class="xfs_additional_property_table">';
+		  
+		  var atLeastOne = false;
+		  for (var s in snippets) {
+		      if (doc[s]) {
+		    	  var category = snippets[s]['category'];
+		    	  if (!isInCategory(doc, [category])) {
+		    		  continue;
+		    	  }
+		    	  output += "<div class=\"xfs_additional_property_table_row\">";
+		    	  output += snippets[s]['label'] +':<span class="xfs_additional_property_value">' + retrieveDisplayName(doc[s][0]) + "</span>";
+		    	  output += '</div>';
+		    	  atLeastOne = true;
+		      }
+		  }
+	      
+	      output += '</div></div>';  
+	      return atLeastOne ? output : '';	
+	};
+	
+	/**
 	 * Generates an HTML ID for a property value facet with the name {facet}.
 	 * 
 	 * @param {String} facet
@@ -343,7 +409,7 @@
 		var output = '';
 		var attr  = doc[FS_ATTRIBUTES] || [];
 		var props = doc[FS_PROPERTIES] || [];
-		var cats  = doc[FS_CATEGORIES];
+		var cats  = doc[FS_DIRECTCATEGORIES] || [];
 		
 		if (typeof cats !== 'undefined') {
 			// Show CAT_MAX categories
@@ -376,6 +442,10 @@
     
       if (window.XFS.addAddAdditionalData) {
             output += window.XFS.addAddAdditionalData(doc);
+      }
+      
+      if (window.XFS.annotationsInSnippet) {
+    	  output += AjaxSolr.theme.prototype.annotationsInSnippet(doc, window.XFS.annotationsInSnippet);
       }
             
 			// Properties or attributes are present 
@@ -434,10 +504,25 @@
 					vals.push('<a href="' + getLink(0, link) + '">' + noUnderscore(nicename) + '</a>');
 				});
 				output += '<td>' + vals.join(', ') + '</td>';
+			} else if (isDateTime(property)) { 
+				// DateTime properties are rendered with proper locale
+				var vals = [];
+				if (typeof(doc[property]) === "string") {
+					var date = new Date(doc[property]);
+					vals.push(date.toLocaleString());
+                } else {
+                    $.each(doc[property], function() {
+                    	var date = new Date(this);
+        				vals.push(date.toLocaleString());
+                    });
+                }
+				output += '<td>' + vals.join(', ') + '</td>';
+				
+				
 			} else {
 				// Attribute values are rendered as normal text
 				var vals = [];
-                                if (typeof(doc[property]) === "string") {
+								if (typeof(doc[property]) === "string") {
                                     vals.push(doc[property]);
                                 } else {
                                     $.each(doc[property], function() {
@@ -537,12 +622,11 @@
 		var maxWidth = $('.facets').width() * 0.7;
 		var shortName = makeShortName(plainName, maxWidth);
 		var tooltip = shortName === false ? "" : ' title="' + plainName + '" ';
-		var name = shortName === false ? plainName : shortName;
 		
         var cssClass = isProperty(facet) ? "fs_propertyFacet" : "fs_categoryFacet";
+        var nicename = retrieveDisplayName(plainName);
+        
 		if (isRemove) {
-			var nicename = window.XFS.translateName ? window.XFS.translateName(plainName) : plainName;
-			nicename = nicename.replace(/_/g, ' ');
 			html =	
 				'<span' + tooltip + ' class="'+cssClass+'">' +
 				nicename +
@@ -551,10 +635,6 @@
             (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '') +
 				'</span>';
 		} else {
-			
-			var nicename = window.XFS.translateName ? window.XFS.translateName(plainName) : plainName;
-			nicename = name.split('|').length > 1 ? name.split('|')[1] : nicename;
-			nicename = nicename.replace(/_/g, ' ');
 			
 			html =
 				'<span class="addFacet fs_propertyFacet">' +
