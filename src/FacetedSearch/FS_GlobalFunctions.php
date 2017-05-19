@@ -47,15 +47,19 @@ class FSGlobalFunctions {
 		
 		// Register hooks
 		if ($fsgEnableIncrementalIndexer) {
-		
-			$wgHooks['SMW::SQLStore::AfterDataUpdateComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter';
-			$wgHooks['UploadComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete';
-			$wgHooks['AfterImportPage'][]     = 'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage';
-			$wgHooks['TitleMoveComplete'][]   = 'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete';
-			$wgHooks['ArticleDelete'][]       = 'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleDelete';
+			$wgHooks['SMW::SQLStore::AfterDataUpdateComplete'][] =  
+                    'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter';
+			$wgHooks['UploadComplete'][] = 
+                    'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete';
+			$wgHooks['AfterImportPage'][] =
+                    'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage';
+			$wgHooks['TitleMoveComplete'][] = 
+                    'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete';
+            $wgHooks['ArticleDelete'][] =
+                    'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleDelete';
 		}
 		
-		///// Register specials pages
+		// Register specials pages
 		global $wgSpecialPages, $wgSpecialPageGroups;
 		$wgSpecialPages['FacetedSearch']      = array('DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
 		$wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
@@ -251,6 +255,3 @@ class FSGlobalFunctions {
 	}
 	
 }
-
-
-

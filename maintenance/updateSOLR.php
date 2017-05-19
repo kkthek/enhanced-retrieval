@@ -149,7 +149,7 @@ if ( $pages == false ) {
 		
 		if ( !is_null( $title ) ) {
 			$indexer = FSIndexerFactory::create();
-			$indexer->updateIndexForArticle(new Article($title));
+			$indexer->updateIndexForArticle(new WikiPage($title));
 		}
 		
 		$num_files++;

@@ -86,31 +86,40 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * Updates the index for the given $article.
 	 * It retrieves all semantic data of the new version and adds it to the index.
 	 *
-	 * @param Article $article
+	 * @param WikiPage $wikiPage
 	 * 		The article that changed.
 	 * @param User $user
 	 * 		Optional user object
 	 * @param string $text
-	 *		Optional content of the article. If NULL, the content of $article is
+	 *		Optional content of the article. If NULL, the content of $wikiPage is
 	 *		retrieved in this method.
 	 */
 	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL) {
 		$doc = array();
 		$this->dependant = [];
 		
-		$db = wfGetDB( DB_SLAVE );
-
-		$article = Article::newFromID($wikiPage->getId());
-
 		// Get the page ID of the article
-		$t = $article->getTitle();
-		$pid = $t->getArticleID();
+		$t = $wikiPage->getTitle();
+		$pid = $wikiPage->getId();
+		if($pid == 0) {
+		    return;
+		}
+		
+		global $fsgBlacklistPages;
+		if (in_array($t->getPrefixedText(), $fsgBlacklistPages)) {
+		    return;
+		}
+		
 		$pns = $t->getNamespace();
 		$pt  = $t->getDBkey();
 		
 		$parserOptions = new ParserOptions();
 		$parserOut = $wikiPage->getParserOutput($parserOptions);
-		$text = Sanitizer::stripAllTags($parserOut->getText());
+		if(!$parserOut) {
+		    $text = '';
+		} else {
+    		$text = Sanitizer::stripAllTags($parserOut->getText());
+		}
 
 		$doc['id'] = $pid;
 		$doc['smwh_namespace_id'] = $pns;
@@ -122,15 +131,12 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		$options['*']['boost'] = $fsgDefaultBoost;
 		$options['smwh_title']['boost'] = $fsgDefaultBoost;
 		
-		global $fsgBlacklistPages;
-		if (in_array($t->getPrefixedText(), $fsgBlacklistPages)) {
-			return;
-		}
-		
 		global $fsgNamespaceBoosts;
 		if (array_key_exists($pns, $fsgNamespaceBoosts)) {
 			$this->calculateBoostFactors($options, $fsgNamespaceBoosts[$pns]);
 		}
+		
+		$db = wfGetDB( DB_SLAVE );
 		
 		// retrieve templates (currently only needed for boosts)
 		$this->retrieveTemplates($db, $pid, $doc, $options);
@@ -150,6 +156,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			$doc['smwh_full_text'] .= " " . $docData['text'];
 		}
 		
+		// call fs_saveArticle hook
 		\Hooks::run('fs_saveArticle', array( &$rawText, &$doc ));
 		
 		// Let the super class update the index
@@ -159,26 +166,26 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			return;
 		} 
 		
-    	// update dependant articles
-    	if (count($this->dependant) > self::MAX_SYNC_UPDATES) {
-    			// if more than MAX_SYNC_UPDATES updates are required, create jobs for it
-    			foreach($this->dependant as $ttu) {
-    				$params = [];
-    				$params['title'] = $ttu->getPrefixedText();
-    				$title = Title::makeTitle(NS_SPECIAL, 'Search');
-    				$job = new UpdateSolrJob($title, $params);
-    				JobQueueGroup::singleton()->push( $job );
-    			}
-    	} else {
-    			// if less than MAX_SYNC_UPDATES, do it synchronously
-    			global $fsUpdateOnlyCurrentArticle;
-    			$fsUpdateOnlyCurrentArticle = true;
-    			foreach($this->dependant as $ttu) {
-    				$this->updateIndexForArticle(new WikiPage($ttu));
-    			}
-    	}
-		
+		// update dependant articles
+		if (count($this->dependant) > self::MAX_SYNC_UPDATES) {
+			// if more than MAX_SYNC_UPDATES updates are required, create jobs for it
+			foreach($this->dependant as $ttu) {
+				$params = [];
+				$params['title'] = $ttu->getPrefixedText();
+				$title = Title::makeTitle(NS_SPECIAL, 'Search');
+				$job = new UpdateSolrJob($title, $params);
+				JobQueueGroup::singleton()->push( $job );
+			}
+		} else {
+			// if less than MAX_SYNC_UPDATES, do it synchronously
+			global $fsUpdateOnlyCurrentArticle;
+			$fsUpdateOnlyCurrentArticle = true;
+			foreach($this->dependant as $ttu) {
+				$this->updateIndexForArticle(new WikiPage($ttu));
+			}
+		}
 	}
+
 	/**
 	 * Updates the index for a moved article.
 	 *
@@ -483,13 +490,12 @@ SQL;
 		                    }
 		                }
 		            } else {
-		                
 		                // handle relation properties
     		            $enc_prop = $this->serializeWikiPageDataItem($subject, $property, $value, $doc);
     		            $relations[] = $enc_prop;
 		            }
-		        } else {
 		            
+		        } else {
 		            // handle attribute properties
 		            $enc_prop = $this->serializeDataItem($property, $value, $doc);
 		            $attributes[] = $enc_prop;
@@ -619,6 +625,7 @@ SQL;
 		}
 		
 		$inProperties = $store->getInProperties($subject);
+		
 		foreach($inProperties as $inProperty) {
 			$subjects = $store->getPropertySubjects($inProperty, $subject);
 
@@ -627,8 +634,9 @@ SQL;
 			}
 		}
 			
+		// remove duplicates
 		$this->dependant = array_unique($this->dependant);
-	}
+ 	}
 	
 	/**
 	 * Serialize all other SMWDataItems into $doc array (non-SMWDIWikiPage).

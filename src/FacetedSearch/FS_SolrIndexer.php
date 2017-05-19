@@ -153,12 +153,11 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * @return bool
 	 * 		<true> if the update was sent successfully
 	 */
-public function updateIndex(array $document, array $options) {
+    public function updateIndex(array $document, array $options) {
 		// Create the XML for the document
 		$xml = "<add>\n\t<doc>\n";
+
 		foreach ($document as $field => $value) {
-			
-			
 			if (is_array($value)) {
 				foreach ($value as $v) {
 					$xml .= "\t\t<field name=\"$field\" %$field:options%><![CDATA[$v]]></field>\n";
@@ -182,7 +181,6 @@ public function updateIndex(array $document, array $options) {
 			
 			// add them
 			$xml = str_replace("%$field:options%", $optionAtts, $xml);
-			
 		}
 		
 		$xml .= "\t</doc>\n</add>";
