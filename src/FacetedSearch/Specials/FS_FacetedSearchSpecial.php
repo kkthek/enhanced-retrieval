@@ -45,28 +45,37 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	const SPECIAL_PAGE_HTML = '
 {{fs_ext_Top}}
 <div id="wrapper"> 
-			<div>
-		<div id="field_namespaces" class="xfsNamespaces" style="{{fs_show_namespaces}}">
-		</div>
-		<div class="search" id="fs_search_fields">
-			<input type="text" id="query" name="query" value="{{searchTerm}}" />
-			<span class="xfsSortOrder" style="{{fs_show_sortorder}}">
-				{{fs_sort_by}}
-				<select id="search_order" name="search_order" size="1">
-					<option value="relevance" selected="selected">{{fs_relevance}}</option>
-					<option value="newest">{{fs_newest_date_first}}</option>
-					<option value="oldest">{{fs_oldest_date_first}}</option>
-					<option value="ascending">{{fs_title_ascending}}</option>
-					<option value="descending">{{fs_title_descending}}</option>
-				</select>
-			</span>
-			{{extendedFilters}}
-			<input type="button" id="search_button" name="search" value="{{fs_search}}" />
-			<div id="create_article">
-			</div>
-		</div>
-		<hr class="xfsSeparatorLine">
-	</div>
+		<div "container-fluid">
+	       <div class="row">
+    		  <div id="field_namespaces" class="xfsNamespaces col-md-12" style="{{fs_show_namespaces}}"></div>
+	       </div>
+    	   <div class="search row" id="fs_search_fields">
+    	       <div id="fs_query_button" class="col-md-12 col-lg-6">
+    	           <input type="text" id="query" placeholder="{{placeholderText}}" name="query" value="{{searchTerm}}" />
+    	           <input type="button" id="search_button" name="search" value="{{fs_search}}" />
+    	        </div>
+	            <div class="xfsSortOrder col-md-6 col-lg-3" style="{{fs_show_sortorder}}">
+    				{{fs_sort_by}}
+    				<select id="search_order" name="search_order" size="1">
+    					<option value="relevance" selected="selected">{{fs_relevance}}</option>
+    					<option value="newest">{{fs_newest_date_first}}</option>
+    					<option value="oldest">{{fs_oldest_date_first}}</option>
+    					<option value="ascending">{{fs_title_ascending}}</option>
+    					<option value="descending">{{fs_title_descending}}</option>
+    				</select>
+    			</div>
+	            <div class="xfsCategoryFilter col-md-6 col-lg-3">
+    			     {{extendedFilters}}
+	            </div>
+	       </div>
+	       <div class="row">
+    	       <div class="col-md-12" id="create_article">
+	           </div>
+    	   </div>
+	       <div class="row">
+    	       <hr class="xfsSeparatorLine col-md-12">
+	       </div>
+	   </div>
 			
 	<div class="facets">
 		<div>
@@ -108,6 +117,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	<span id="current_search_link"></span>
 	{{fs_ext_BottomMenu}}
 </div>
+<input id="fs-prefix-param" type="hidden" value="{{fs_ext_prefix_param}}" />
 {{fs_ext_Bottom}}
 ';
 
@@ -167,7 +177,11 @@ class FSFacetedSearchSpecial extends SpecialPage {
 		$html = self::SPECIAL_PAGE_HTML;
 		$html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
 		
-		global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces;
+		$prefixParam = $wgRequest->getVal( 'prefix', '' );
+		$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&qout;", $prefixParam), $html);
+		
+		global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText;
+		$html = str_replace('{{placeholderText}}', htmlspecialchars($fsgPlaceholderText), $html);
 		$html = str_replace('{{fs_show_sortorder}}', $fsgShowSortOrder === true ? '' : 'display:none;', $html);
 		$html = str_replace('{{fs_show_categories}}', $fsgShowCategories === true ? '' : 'display:none;', $html);
 		$html = str_replace('{{fs_show_namespaces}}', $fsgShowNamespaces === true ? '' : 'display:none;', $html);
@@ -291,4 +305,3 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	}
     
 }
-

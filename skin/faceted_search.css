@@ -1,19 +1,35 @@
 @media (min-width: 200px) and  (max-width: 768px) {
 
     div.facets { width:100%; }
-
     div#results { width:100%;  }
+    div#xfsPropertyFacetContainer { display: none; }
+	
 
 }
 
-@media (min-width: 769px) and (max-width: 1920px) {
+@media (min-width: 769px) and (max-width: 1100px) {
 
     div.facets { width:30%; }
-
     div#results { width:60%; }  
-
+}
+@media (min-width: 1101px) and (max-width: 1920px) {
+    div.facets { width:25%; }
+    div#results { width:70%; }  
+}
+@media (min-width: 1921px) {
+    div.facets { width:15%; }
+    div#results { width:85%; }  
 }
 
+#fs_query_button, .xfsCategoryFilter, .xfsSortOrder {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	white-space:nowrap;
+	padding: 0px;
+}
+#search_button {
+	font-size: 18px;
+}
 
 .facets {
 	float: left;
@@ -24,7 +40,9 @@
 	cursor: pointer;
 }
 #query {
-	width: 50%;
+	min-width: 80%;
+	font-size: 18px;
+    vertical-align: middle;
 }
 
 .xfsFacetHeader {
@@ -172,10 +190,6 @@ a.xfsFMore, a.xfsFLess {
 	margin-bottom: 10px;
 }
 
-.xfsSortOrder {
-	margin-left: 1em;
-}
-
 .xfsRedLink {
 	color: #CC2200 !important;
 }
@@ -214,15 +228,3 @@ table.xfs_additional_property_table td span.xfs_additional_property_value {
     margin-left: 5px;
 }
 
-@media (min-width: 200px) and  (max-width: 768px) {
-
-    div#xfsPropertyFacetContainer { display: none; }
-	
-}
-
-@media (min-width: 769px) and (max-width: 1920px) {
-
-	div#xfsPropertyFacetContainer { display: block; }
-	div.xfs_additional_property_table_row_first { width: 70%; }
-	div.xfs_additional_property_table_row { width: 30%; }
-}

@@ -205,6 +205,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		createWidgets();
 		addEventHandlers();
 		initializeGUIElements();
+		readPrefixParameter();
 		
 		initNamespaces();
 		
@@ -407,20 +408,73 @@ FacetedSearch.classes.FacetedSearch = function () {
 		}
 		var val='score';
 		switch(sort[0][0]) {
-			case 'smwh__MDAT_xsdvalue_dt desc':
+			case MODIFICATION_DATE_FIELD+' desc':
 				val = 'newest';
 				break;
-			case 'smwh__MDAT_xsdvalue_dt asc':
+			case MODIFICATION_DATE_FIELD+' asc':
 				val = 'oldest';
 				break;
-			case 'smwh_title_s asc':
+			case TITLE_STRING_FIELD+' asc':
 				val = 'ascending';
 				break;
-			case 'smwh_title_s desc':
+			case TITLE_STRING_FIELD+' desc':
 				val = 'descending';
 				break;
 		}
 		$("#search_order option[value="+val+"]").prop('selected', true);
+	}
+	
+	/**
+	 * Prefix parameter (optional)
+	 */
+	function readPrefixParameter() {
+		var fsm = FacetedSearch.singleton.FacetedSearchInstance.getAjaxSolrManager();
+		
+		// parse prefix param
+		var prefix = $('input#fs-prefix-param').val();
+		prefix = decodeURIComponent(prefix);
+		var parts = prefix.split('&');
+		var params = {};
+		for (var i = 0; i < parts.length;i++) {
+			var keyValue = parts[i].split("=");
+			params[keyValue[0]] = keyValue[1];
+		}
+		
+		// apply prefix param
+		for(var param in params) {
+			
+			switch(param.toLowerCase()) {
+			
+				case 'category':
+					
+					$('select#fs_category_filter option[value="'+params[param]+'"]').prop('selected', true);
+					var regex = new RegExp('smwh_categories:.*');
+					fsm.store.removeByValue('fq', regex);
+					
+					var category = params[param];
+					if (category != '') {
+						fsm.store.addByValue('fq', 'smwh_categories:'+category);
+					} 
+					break;
+					
+				case 'sort':	
+					
+					$('select#search_order option[value="'+params[param]+'"]').prop('selected', true); 
+					that.onSearchOrderChanged();
+					
+					break;
+					
+				default:
+					
+					var property = params[param];
+					if (property != '') {
+						fsm.store.addByValue('fq', param+':'+property);
+					} 
+					
+			}
+			
+		}
+		
 	}
 	
 	/**

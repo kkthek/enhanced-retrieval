@@ -20,7 +20,7 @@
 		}
 		
 		var res = {};
-		if (doc.smwh_Titel_xsdvalue_t) {
+		if (doc[XFS.titlePropertyField]) {
 			res.title = doc[XFS.titlePropertyField][0];
 			res.appendix = vals.join(", ");
 		} else {
