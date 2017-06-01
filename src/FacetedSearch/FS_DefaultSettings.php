@@ -144,6 +144,18 @@ $fsgNumericPropertyClusters = [];
 
 ####
 #
+# DateTime property clusters
+#
+# Example:
+#	$fsgDateTimePropertyClusters['smwh_Freigegeben__am_xsdvalue_dt'] = 
+# 			[ 'min' => '1990-01-01-00:00:00', 'max' => '2030-12-31-23:59:59' ];
+#
+#
+global $fsgDateTimePropertyClusters;
+$fsgDateTimePropertyClusters = [];
+
+####
+#
 # User configurable category drop-down
 #
 global $fsgCategoryFilter;

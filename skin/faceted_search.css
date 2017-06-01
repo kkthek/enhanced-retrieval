@@ -204,22 +204,22 @@ a.xfsAddFacetOperation {
 
 div.xfs_additional_property_table {
 	border: 1px solid;
+	border-color: lightgray;
     float: left;
-   
-    margin-top: 5px;
-	margin-bottom: 5px;
     width: 100%;
-	
 }
 
 div.xfs_additional_property_table_row,div.xfs_additional_property_table_row_first {
-	padding: 5px;
+	padding-top: 2px;
+	padding-left: 2px;
+	padding-bottom: 2px;
 	float:left;
-	
 }
-
+.xfs_additional_property_label,
+.xfs_additional_property_separator {
+	color: gray;
+}
 table.xfs_additional_property_table td {
-	padding: 5px;
 }
 
 table.xfs_additional_property_table td span.xfs_additional_property_value {

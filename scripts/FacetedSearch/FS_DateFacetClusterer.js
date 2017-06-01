@@ -110,7 +110,29 @@ FacetedSearch.classes.DateFacetClusterer = function (facetName, plainName) {
 	 * 		The maximal date value of the value range.
 	 */
 	that.makeClusters = function makeClusters(min, max) {
+		
+		if (XFS.dateTimePropertyClusters[facetName]) {
+			
+			if (XFS.dateTimePropertyClusters[facetName]['max']) {
+				var clusterMax = XFS.dateTimePropertyClusters[facetName]['max'];
+				clusterMax = parseInt(clusterMax.replace(/-|:/g,''));
+				if (max > clusterMax) {
+					max = clusterMax;
+				}
+			}
+			
+			if (XFS.dateTimePropertyClusters[facetName]['min']) {
+				var clusterMin = XFS.dateTimePropertyClusters[facetName]['min'];
+				clusterMin = parseInt(clusterMin.replace(/-|:/g,''));
+				if (min < clusterMin) {
+					min = clusterMin;
+				}
+			}
+			
+		}
+		
 		var incr = findIncrement(min, max);
+		
 		mIncrementField = incr.getIncrementField();
 		
 		var values = [];

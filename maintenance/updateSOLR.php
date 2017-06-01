@@ -27,7 +27,7 @@ use DIQA\FacetedSearch\FSIndexerFactory;
  * @ingroup EnhancedRetrieval Maintenance
  */
 
-$optionsWithArgs = array( 'd', 's', 'e', 'n', 'b', 'startidfile', 'server', 'page' ); // -d <delay>, -s <startid>, -e <endid>, -n <numids>, --startidfile <startidfile> -b <backend>
+$optionsWithArgs = array( 'd', 's', 'e', 'n', 'b', 'f', 'startidfile', 'server', 'page' ); // -d <delay>, -s <startid>, -e <endid>, -n <numids>, --startidfile <startidfile> -b <backend>
 
 require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . "/maintenance/commandLine.inc"
@@ -78,6 +78,10 @@ if ( array_key_exists( 'e', $options ) ) { // Note: this might reasonably be lar
 	$end = intval( $options['e'] );
 } elseif ( array_key_exists( 'n', $options ) ) {
 	$end = $start + intval( $options['n'] );
+} elseif ( array_key_exists( 'f', $options ) ) {
+	$title = Title::newFromText($options['f']);
+	$start = $title->getArticleID();
+	$end = $title->getArticleID();
 } else {
 	$query = "SELECT MAX(page_id) as maxid FROM page";
 	$db =& wfGetDB( DB_SLAVE );
@@ -91,6 +95,7 @@ if ( array_key_exists( 'e', $options ) ) { // Note: this might reasonably be lar
 
 
 $verbose = array_key_exists( 'v', $options );
+$debug = array_key_exists( 'x', $options );
 
 $filterarray = array();
 if (  array_key_exists( 'c', $options ) ) {
@@ -124,7 +129,7 @@ if ( $pages == false ) {
 		}
 		$id++;
 		if (is_null($title)) continue;
-		$indexer = FSIndexerFactory::create();
+		$indexer = FSIndexerFactory::create(null, $debug);
 		$indexer->updateIndexForArticle(new WikiPage($title));
 		if ( ( $delay !== false ) && ( ( $num_files + 1 ) % 100 === 0 ) ) {
 			usleep( $delay );

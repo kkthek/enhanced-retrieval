@@ -72,14 +72,21 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	private $dependant = [];
 	
 	/**
+	 * Debug mode
+	 * @var boolean
+	 */
+	private $debug;
+	
+	/**
 	 * Creates a new FSSolrSMWDB indexer object.
 	 * @param string $host
 	 * 		Name or IP address of the host of the server
 	 * @param int $port
 	 * 		Server port of the Solr server
 	 */
-	public function __construct($host, $port) {
+	public function __construct($host, $port, $debug = false) {
 		parent::__construct($host, $port);
+		$this->debug = $debug;
 	}
 
 	/**
@@ -160,7 +167,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		\Hooks::run('fs_saveArticle', array( &$rawText, &$doc ));
 		
 		// Let the super class update the index
-		$this->updateIndex($doc, $options);
+		$this->updateIndex($doc, $options, $this->debug);
 		
 	    if($this->updateOnlyCurrentArticle()) {
 			return;

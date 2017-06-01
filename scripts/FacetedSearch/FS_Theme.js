@@ -269,13 +269,66 @@
 	}
 	
 	/**
-	 * Retrieves display name
+	 * Retrieves display name by formatting plainNames according to property type.
+	 * 
+	 * @param array/string plainNames
+	 * @param string property SOLR property
+	 * @param boolean returnLinks true if HTML links should be returned, otherwise plain text
+	 * 
+	 * @return array Display names (can contain HTML)
 	 */
-	function retrieveDisplayName(plainName) {
-		var nicename = window.XFS.translateName ? window.XFS.translateName(plainName) : plainName;
-		nicename = plainName.split('|').length > 1 ? plainName.split('|')[1] : nicename;
-		nicename = nicename.replace(/_/g, ' ');
-		return nicename;
+	function retrieveDisplayName(plainNames, property, returnLinks) {
+		
+		var vals = [];
+		
+		// make sure plainNames is always an array
+		if (!(plainNames instanceof Array)) {
+			plainNames = [plainNames];
+		}
+		
+		if (property == null) {
+			
+			// if no property given, just extract the nicename
+			$.each(plainNames, function() {
+				
+				var nicename = window.XFS.translateName ? window.XFS.translateName(this) : this;
+				nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
+				vals.push(noUnderscore(nicename));
+			});
+
+		} else if (isRelation(property)) {
+			
+			// Relation values are rendered as link
+			$.each(plainNames, function() {
+				
+				var nicename = window.XFS.translateName ? window.XFS.translateName(this) : this;
+				nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
+				var link = this.split('|').length > 1 ? this.split('|')[0] : this;
+				
+				if (returnLinks) {
+					vals.push('<a href="' + getLink(0, link) + '">' + noUnderscore(nicename) + '</a>');
+				} else {
+					vals.push(noUnderscore(nicename));
+				}
+			});
+			
+		} else if (isDateTime(property)) { 
+			// DateTime properties are rendered with proper locale
+			$.each(plainNames, function() {
+               var date = new Date(this);
+               vals.push(date.toLocaleString());
+            });
+            
+		} else {
+			// Attribute values are rendered as normal text
+			$.each(plainNames, function() {
+            	vals.push(this);
+            });
+            
+		}
+		
+		return vals;
+		
 	}
 	
 	/**
@@ -306,11 +359,13 @@
 		  for (var s in snippets) {
 		      if (doc[s]) {
 		    	  var category = snippets[s]['category'];
-		    	  if (!isInCategory(doc, [category])) {
+		    	  if (!isInCategory(doc, category)) {
 		    		  continue;
 		    	  }
 		    	  output += "<div class=\"xfs_additional_property_table_row\">";
-		    	  output += snippets[s]['label'] +':<span class="xfs_additional_property_value">' + retrieveDisplayName(doc[s][0]) + "</span>";
+		    	  output += '<span class="xfs_additional_property_label">' + snippets[s]['label'] +':&nbsp;</span>';
+		    	  output += '<span class="xfs_additional_property_value">' + retrieveDisplayName(doc[s], s, true) + "</span>";
+		    	  output += '<span class="xfs_additional_property_separator">&nbsp;|&nbsp;</span>';
 		    	  output += '</div>';
 		    	  atLeastOne = true;
 		      }
@@ -330,7 +385,7 @@
 	 */
 	AjaxSolr.theme.prototype.getPropertyValueHTMLID = function (facet) {
 		return 'property_' + facet2HTMLID(facet) + "_value";	
-	}
+	};
 	
 	/**
 	 * Theme for article titles and their semantic data with highlighting.
@@ -495,42 +550,8 @@
                             plainName = decodeTitle(plainName);
                             output += '<td>' + plainName + '</td>';
                         }
-			if (isRelation(property)) {
-				// Relation values are rendered as link
-				var vals = [];
-				$.each(doc[property], function() {
-					var nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
-					var link = this.split('|').length > 1 ? this.split('|')[0] : this;
-					vals.push('<a href="' + getLink(0, link) + '">' + noUnderscore(nicename) + '</a>');
-				});
-				output += '<td>' + vals.join(', ') + '</td>';
-			} else if (isDateTime(property)) { 
-				// DateTime properties are rendered with proper locale
-				var vals = [];
-				if (typeof(doc[property]) === "string") {
-					var date = new Date(doc[property]);
-					vals.push(date.toLocaleString());
-                } else {
-                    $.each(doc[property], function() {
-                    	var date = new Date(this);
-        				vals.push(date.toLocaleString());
-                    });
-                }
-				output += '<td>' + vals.join(', ') + '</td>';
-				
-				
-			} else {
-				// Attribute values are rendered as normal text
-				var vals = [];
-								if (typeof(doc[property]) === "string") {
-                                    vals.push(doc[property]);
-                                } else {
-                                    $.each(doc[property], function() {
-                                            vals.push(this);
-                                    });
-                                }
-				output += '<td>' + vals.join(', ') + '</td>';
-			}
+            var vals = retrieveDisplayName(doc[property], property, true);
+            output += '<td>' + vals.join(', ') + '</td>';
 			output += '</tr>';
 		}
 
@@ -570,15 +591,15 @@
 			return '';
 		}
 		var tooltip = 'title="' + lang.getMessage('namespaceTooltip', count) + '" ';
-		name = name.replace(/ /g, '&nbsp;')
+		name = name.replace(/ /g, '&nbsp;');
 		var emptyNamespace = count === 0 ? " xfsEmptyNamespace" : "";
 		html = $('<span namespace="' + facet + '" class="xfsNamespace' + emptyNamespace + '"/>')
 				.append('&nbsp;')
 				.append($('<span ' + tooltip + '>' + name + '</span>'))
 				.append(' ');
-		html.find("span").click(handler)
+		html.find("span").click(handler);
 		return html;				
-	}
+	};
 	
 	// Global FS extension object
 	window.XFS = window.XFS || {};
@@ -624,7 +645,7 @@
 		var tooltip = shortName === false ? "" : ' title="' + plainName + '" ';
 		
         var cssClass = isProperty(facet) ? "fs_propertyFacet" : "fs_categoryFacet";
-        var nicename = retrieveDisplayName(plainName);
+        var nicename = retrieveDisplayName(plainName, handlerData ? handlerData.field : null, false);
         
 		if (isRemove) {
 			html =	
@@ -739,7 +760,7 @@
 		var lang = FacetedSearch.singleton.Language;
 		return $('<div class="xfsUnderspecifiedSearch">')
 				.text(lang.getMessage('underspecifiedSearch'));
-	}
+	};
 	
 	AjaxSolr.theme.prototype.remove_all_filters = function(handler) {
 		var lang = FacetedSearch.singleton.Language;

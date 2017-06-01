@@ -59,14 +59,14 @@ class FSIndexerFactory  {
      *    'indexerPort'  => port number of the indexer as seen from the wiki server
      *  If <null> (default), the global configuration which is stored in the 
      *  variable $fsgFacetedSearchConfig is used.
-     *    
+     * @param $debug Debugmode (boolean)
      * @return IFSIndexer
      * 	An instance of the interface IFSIndexer
      * @throws ERFSException
      * 	INCOMPLETE_CONFIG: If the configuration is incomplete
      *  UNSUPPORTED_VALUE: If a value for a field in the configuration is not supported
 	 */
-	public static function create(array $indexerConfig = null) {
+	public static function create(array $indexerConfig = null, $debug = false) {
 		if (is_null($indexerConfig)) {
 			global $fsgFacetedSearchConfig;
 			$indexerConfig = $fsgFacetedSearchConfig;
@@ -99,7 +99,7 @@ class FSIndexerFactory  {
 			// Indexer is Apache SOLR
 			if ($indexerConfig['source'] == 'SMWDB') {
 				// The SMW database is indexed
-				return new FSSolrSMWDB($indexerConfig['indexerHost'], $indexerConfig['indexerPort']);
+				return new FSSolrSMWDB($indexerConfig['indexerHost'], $indexerConfig['indexerPort'], $debug);
 			}
 		}
 		return null;

@@ -178,7 +178,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 		$html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
 		
 		$prefixParam = $wgRequest->getVal( 'prefix', '' );
-		$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&qout;", $prefixParam), $html);
+		$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&quot;", $prefixParam), $html);
 		
 		global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText;
 		$html = str_replace('{{placeholderText}}', htmlspecialchars($fsgPlaceholderText), $html);

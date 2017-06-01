@@ -167,7 +167,14 @@ class FSGlobalFunctions {
 	 * Called before parser is initialized
 	 */
 	public static function initializeBeforeParserInit() {
-		global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgTitleProperty, $fsgAnnotationsInSnippet, $wgOut;
+		
+		global 
+		 $fsgExtraPropertiesToRequest,
+		 $fsgNumericPropertyClusters,
+		 $fsgDateTimePropertyClusters,
+		 $fsgTitleProperty,
+		 $fsgAnnotationsInSnippet,
+		 $wgOut;
 		
 		$fsgTitlePropertyField = '';
 		if ($fsgTitleProperty != '') {
@@ -180,6 +187,7 @@ class FSGlobalFunctions {
 		$script .= "\nXFS.titleProperty = '".$fsgTitleProperty."';";
 		$script .= "\nXFS.titlePropertyField = '".$fsgTitlePropertyField."';";
 		$script .= "\nXFS.numericPropertyClusters = ".json_encode($fsgNumericPropertyClusters).";";
+		$script .= "\nXFS.dateTimePropertyClusters = ".json_encode($fsgDateTimePropertyClusters).";";
 		self::addAnnotationSnippets($script);
 		$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
 		
@@ -217,7 +225,11 @@ class FSGlobalFunctions {
 				$value = reset($value);
 				$displayTitle = $value !== false ? $value->getString() : '';
 				
-				$result[$solrFieldName] = ['label' => $displayTitle, 'category' => $category ];
+				if (!array_key_exists($solrFieldName, $result)) {
+					$result[$solrFieldName] = ['label' => $displayTitle, 'category' => [ $category ] ];
+				} else {
+					$result[$solrFieldName]['category'][] = $category;
+				}
 			}
 		}
 		

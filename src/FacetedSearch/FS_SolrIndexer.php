@@ -150,10 +150,13 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * 		This array contains key-value pairs. The key is a field of the
 	 * 		SOLR document. The value may be a single string i.e. the value of
 	 * 		the SOLR field or an array of string if the field is multi-valued.
+	 * @param array $options
+	 * @param boolean $debug
+	 * 
 	 * @return bool
 	 * 		<true> if the update was sent successfully
 	 */
-    public function updateIndex(array $document, array $options) {
+    public function updateIndex(array $document, array $options, $debug = false) {
 		// Create the XML for the document
 		$xml = "<add>\n\t<doc>\n";
 
@@ -186,8 +189,11 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		$xml .= "\t</doc>\n</add>";
 
 		// Send the XML as update command to the SOLR server
-		$this->postCommand(self::COMMIT_UPDATE_CMD, $xml, $rc);
-		
+		$httpResult = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml, $rc);
+		if ($debug) {
+			print_r($httpResult); 
+			print_r($xml);
+		}
 		return $rc == self::HTTP_OK;
 	}
 	

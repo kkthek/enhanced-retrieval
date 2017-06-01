@@ -443,6 +443,10 @@ FacetedSearch.classes.FacetedSearch = function () {
 		// apply prefix param
 		for(var param in params) {
 			
+			if (param == '') {
+				continue;
+			}
+			
 			switch(param.toLowerCase()) {
 			
 				case 'category':
