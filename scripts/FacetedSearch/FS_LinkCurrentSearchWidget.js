@@ -48,7 +48,7 @@ FacetedSearch.classes.LinkCurrentSearchWidget = AjaxSolr.AbstractWidget.extend({
 	beforeRequest: function() {
 		var currentSearch = this.manager.store.string();
 		$(this.target).empty();
-		var link = wgServer + wgScript + '/' + wgPageName + '?' + 
+		var link = mw.config.get('wgServer') + mw.config.get('wgScript') + '/' + mw.config.get('wgPageName') + '?' + 
 		           'fssearch=' + currentSearch;
 		$(this.target)
 				.append(AjaxSolr.theme('currentSearch', link));

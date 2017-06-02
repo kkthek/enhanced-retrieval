@@ -41,7 +41,7 @@ FacetedSearch.classes.FSLanguageFr = function () {
 	
 	that.mMessages = {
 'solrNotFound'		: 'Impossible de se connecter au serveur SOLR. La recherche à facettes ne fonctionnera pas. '+
-					  'Le serveur SOLR devrait se trouver à l\'URL ' + wgFSSolrURL + wgFSSolrServlet + '. ' +
+					  'Le serveur SOLR devrait se trouver à l\'URL ' + mw.config.get('wgFSSolrURL') + mw.config.get('wgFSSolrServlet') + '. ' +
 					  'Peut-être que votre pare-feu bloque le port SOLR.',
 'tryConnectSOLR'	: 'Trying to connect to the search engine...',
 'more' 				: 'plus',

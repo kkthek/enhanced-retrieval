@@ -76,11 +76,11 @@ FacetedSearch.classes.FSLanguage = function () {
 		//that.mMessages must be set by the sub-classes
 		var msg = that.mMessages[id] || '&lt;'+id+'&gt;';
 		// Replace variables
-		msg = msg.replace(/\$n/g,wgCanonicalNamespace); 
-		msg = msg.replace(/\$p/g,wgPageName);
-		msg = msg.replace(/\$t/g,wgTitle);
-		msg = msg.replace(/\$u/g,wgUserName);
-		msg = msg.replace(/\$s/g,wgServer);
+		msg = msg.replace(/\$n/g,mw.config.get('wgCanonicalNamespace')); 
+		msg = msg.replace(/\$p/g,mw.config.get('wgPageName'));
+		msg = msg.replace(/\$t/g,mw.config.get('wgTitle'));
+		msg = msg.replace(/\$u/g,mw.config.get('wgUserName'));
+		msg = msg.replace(/\$s/g,mw.config.get('wgServer'));
 		
 		// Replace additional parameters
 		for (var i = 1; i < arguments.length; ++i) {

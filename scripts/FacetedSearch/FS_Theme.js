@@ -42,21 +42,21 @@
 	var IMAGE_PATH = '/extensions/EnhancedRetrieval/skin/images/';
 	var NS_ICON = {
 		// TODO add missing mappings
-		0 : ['Instance', wgScriptPath + IMAGE_PATH + 'datawiki_instances_icon_16x16.png'],
-		6 : ['Image', wgScriptPath + IMAGE_PATH + 'datawiki_image_icon_16x16.png'],
-		10 : ['Template', wgScriptPath + IMAGE_PATH + 'datawiki_template_icon_16x16.png'],
-		14: ['Category', wgScriptPath + IMAGE_PATH + 'datawiki_category_icon_16x16.png'],
-		102 : ['Property', wgScriptPath + IMAGE_PATH + 'datawiki_property_icon_16x16.png'],
-		120 : ['Document', wgScriptPath + IMAGE_PATH + 'datawiki_document_icon_16x16.png'],
-		122 : ['Audio', wgScriptPath + IMAGE_PATH + 'datawiki_music_icon_16x16.png'],
-		124 : ['Video', wgScriptPath + IMAGE_PATH + 'datawiki_video_icon_16x16.png'],
-		126 : ['Pdf', wgScriptPath + IMAGE_PATH + 'datawiki_pdf_icon_16x16.png'],
-		128 : ['ICalendar', wgScriptPath + IMAGE_PATH + 'datawiki_ical_icon_16x16.gif'],
-		130 : ['VCard', wgScriptPath + IMAGE_PATH + 'datawiki_vcard_icon_16x16.gif'],
-		700 : ['Comment', wgScriptPath + IMAGE_PATH + 'datawiki_comment_icon_16x16.png']
+		0 : ['Instance', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_instances_icon_16x16.png'],
+		6 : ['Image', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_image_icon_16x16.png'],
+		10 : ['Template', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_template_icon_16x16.png'],
+		14: ['Category', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_category_icon_16x16.png'],
+		102 : ['Property', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_property_icon_16x16.png'],
+		120 : ['Document', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_document_icon_16x16.png'],
+		122 : ['Audio', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_music_icon_16x16.png'],
+		124 : ['Video', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_video_icon_16x16.png'],
+		126 : ['Pdf', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_pdf_icon_16x16.png'],
+		128 : ['ICalendar', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_ical_icon_16x16.gif'],
+		130 : ['VCard', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_vcard_icon_16x16.gif'],
+		700 : ['Comment', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_comment_icon_16x16.png']
 	};
 	
-	var REMOVE_ICON = wgScriptPath + IMAGE_PATH + 'delete.png';
+	var REMOVE_ICON = mw.config.get('wgScriptPath') + IMAGE_PATH + 'delete.png';
 
 	var NS_CAT_ID = 14;
 	var NS_PROP_ID = 102;
@@ -83,14 +83,14 @@
 	 * Constructs a relative URL from namespace and page name.
 	 */
 	function getLink(namespaceId, page) {
-		var ns = wgFormattedNamespaces[String(namespaceId)];
+		var ns = mw.config.get('wgFormattedNamespaces')[String(namespaceId)];
 		if (!ns) {
 			ns = "";
 		}
 		if (ns.length > 0) {
 			ns = noUnderscore(ns) + ':';
 		}
-		return wgArticlePath.replace('$1', ns + page);
+		return mw.config.get('wgArticlePath').replace('$1', ns + page);
 	}
 	
 	/**
@@ -579,7 +579,7 @@
 		var lang = FacetedSearch.singleton.Language;
 		var name = facet === 'all' 
 					? lang.getMessage('allNamespaces')
-					: wgFormattedNamespaces[facet];
+					: mw.config.get('wgFormattedNamespaces')[facet];
 		if (name === '') {
 			// Main namespace
 			name = lang.getMessage('mainNamespace');
@@ -665,7 +665,7 @@
 					
 				'</span>';
 		}
-		var path = wgScriptPath + IMAGE_PATH;
+		var path = mw.config.get('wgScriptPath') + IMAGE_PATH;
 		if (isProperty(facet)) {
 			var facetsExpanded = FacetedSearch.singleton.FacetedSearchInstance.isExpandedFacet(facet);
 			var img1Visible = facetsExpanded ? ' style="display:none" ' : '';

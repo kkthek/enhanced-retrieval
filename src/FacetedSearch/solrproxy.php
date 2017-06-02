@@ -146,9 +146,6 @@ if (get_magic_quotes_gpc() == 1)
 	$query = stripslashes($query);
 }
 
-// Is access control enabled?
-$acEnabled = isset($spgHaloACLConfig);
-
 // Get start and number of expected rows from query. Access control might filter
 // results but nevertheless we want to return the expected number of results.
 $queryParser = new FSQueryParser($query);
@@ -159,39 +156,20 @@ if (!$numExpectedResults) {
 }
 $start = $queryParser->get('start');
 
-if ($acEnabled) {
-	$resultFilter = FSResultFilter::getInstance();
-}
 $numPermittedResults = 0;
 $tryNumResults = $numExpectedResults;
 $furtherResultsAvailable = true;
 while ($numPermittedResults < $numExpectedResults && $furtherResultsAvailable) {
 	try
 	{
-		if ($acEnabled) {
-			// Access control is enabled. Ask for more results than necessary
-			// as some of them might be filtered.
-			$tryNumResults += 10;
-			$queryParser->set('rows', $tryNumResults);
-			$query = $queryParser->serialize();
-		}
+		
+		$query = putFilterParamsToMainParams($query);
 		$results = $solr->rawsearch($query, SolrProxy::METHOD_POST);
 		$response = $results->getRawResponse();
-		if ($acEnabled) {
-			list($numPermittedResults, $numNeededResults, $furtherResultsAvailable) =
-				$resultFilter->countPermittedResults($user, 'read', $response, $numExpectedResults);
-			if ($numNeededResults !== -1 && $numNeededResults !== $numPermittedResults) {
-				// There are enough permitted results. Ask the query again to get 
-				// exactly the number of needed results.
-				$queryParser->set('rows', $numNeededResults);
-				$query = $queryParser->serialize();
-				$results = $solr->rawsearch($query);
-				$response = $results->getRawResponse();
-			}
-		} else {
-			// Without access control there is no need searching for further results
-			$numPermittedResults = $numExpectedResults;
-		}
+		
+		// Without access control there is no need searching for further results
+		$numPermittedResults = $numExpectedResults;
+		
 		
 	}
 	catch (Exception $e)
@@ -200,8 +178,55 @@ while ($numPermittedResults < $numExpectedResults && $furtherResultsAvailable) {
 	}
 }	
 
-
-if ($acEnabled) {
-	$response = $resultFilter->filterResult(NULL, 'read', $response);
-}
 echo $response;
+
+/**
+ * Adds filter query parameters to main query parameters.
+ * 
+ * @param string $query
+ * @return string
+ */
+function putFilterParamsToMainParams($query) {
+	
+	// parse query string
+	$parsedResults = [];
+	$params = explode("&", $query);
+	foreach($params as $p) {
+		$keyValue = explode("=", $p);
+		$parsedResults[$keyValue[0]][] = $keyValue[1];
+	}
+	
+	// add fq-params to q-params
+	if (isset($parsedResults['fq'])) {
+		foreach($parsedResults['fq'] as $fq) {
+			$parsedResults['q'][] = $fq;
+		}
+		
+	}
+	
+	// serialize query string
+	$url = '';
+	$first = true;
+	foreach($parsedResults as $key => $values) {
+		
+		if ($key == 'q') {
+			if (!$first) {
+				$url .= '&';
+			}
+			$url .= "q=";
+			$url .= implode(' ', $values);
+			$first = false;
+		} else {
+			foreach($values as $val) {
+				if (!$first) {
+					$url .= '&';
+				}
+				$val = (string) $val;
+				$url .= "$key=$val";
+				$first = false;
+			}
+		}
+	}
+	
+	return $url;
+}

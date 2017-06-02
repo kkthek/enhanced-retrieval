@@ -138,8 +138,8 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		var fsi = FacetedSearch.singleton.FacetedSearchInstance;
 		// Initialize the AjaxSolrManager for getting properties of the articles
 		this.mASMforProperties = new AjaxSolr.FSManager({
-			solrUrl : wgFSSolrURL,
-			servlet: wgFSSolrServlet
+			solrUrl : mw.config.get('wgFSSolrURL'),
+			servlet: mw.config.get('wgFSSolrServlet')
 		});
 		this.mASMforProperties.init();
 		this.mArticlePropertiesWidget = new FacetedSearch.classes.ArticlePropertiesWidget({
@@ -150,8 +150,8 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		// Initialize the AjaxSolrManager for checking if the search term is an
 		// existing article
 		this.mASMforTitleCheck = new AjaxSolr.FSManager({
-			solrUrl : wgFSSolrURL,
-			servlet: wgFSSolrServlet
+			solrUrl : mw.config.get('wgFSSolrURL'),
+			servlet: mw.config.get('wgFSSolrServlet')
 		});
 		this.mASMforTitleCheck.init();
 		this.mCreateArticleWidget = new FacetedSearch.classes.CreateArticleWidget({
@@ -260,8 +260,8 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		var ns = '';
 		var selectedNamespace = false; 
 		var title = query;
-		for (var nsid in wgFormattedNamespaces) {
-			var fns = wgFormattedNamespaces[nsid];
+		for (var nsid in mw.config.get('wgFormattedNamespaces')) {
+			var fns = mw.config.get('wgFormattedNamespaces')[nsid];
 			if (title.indexOf(fns + ':') === 0) {
 				ns = fns;
 				title = title.substr(fns.length + 1);

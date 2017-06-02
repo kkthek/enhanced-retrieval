@@ -487,6 +487,7 @@ SQL;
 		                        if (strpos($rp->getKey(), "_") === 0) continue;
 		                        $propertyValues = $subData->getPropertyValues($rp);
 		                        $record_value = reset($propertyValues);
+		                        if ($record_value === false) continue;
 		                        if ($record_value->getDIType() == SMWDataItem::TYPE_WIKIPAGE) {
 		                            $enc_prop = $this->serializeWikiPageDataItem($subject, $rp, $record_value, $doc);
 		                            $relations[] = $enc_prop;
