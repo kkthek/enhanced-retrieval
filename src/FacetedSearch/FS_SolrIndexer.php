@@ -159,7 +159,11 @@ abstract class FSSolrIndexer implements IFSIndexer {
     public function updateIndex(array $document, array $options, $debug = false) {
 		// Create the XML for the document
 		$xml = "<add>\n\t<doc>\n";
-
+		
+		// this is a dummy boost for the sole purpose of being requested even if no filter is applied
+		// it assures that boosting is actually effective. it always has the value "1"
+		$xml .= "\t\t<field name=\"smwh_boost_dummy\" boost=\"".$options['smwh_boost_dummy']['boost']."\"><![CDATA[1]]></field>\n";
+		
 		foreach ($document as $field => $value) {
 			if (is_array($value)) {
 				foreach ($value as $v) {

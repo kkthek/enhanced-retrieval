@@ -137,6 +137,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		global $fsgDefaultBoost;
 		$options['*']['boost'] = $fsgDefaultBoost;
 		$options['smwh_title']['boost'] = $fsgDefaultBoost;
+		$options['smwh_boost_dummy']['boost'] = $fsgDefaultBoost;
 		
 		global $fsgNamespaceBoosts;
 		if (array_key_exists($pns, $fsgNamespaceBoosts)) {
@@ -226,7 +227,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 */
 	private function calculateBoostFactors(array &$options, $value) {
 		$options['*']['boost'] += $value;
+		$options['smwh_boost_dummy']['boost'] += $value;
 		$options['smwh_title']['boost'] *= 3;
+		
 	}
 	/**
 	 * Retrieves the templates of the article with the page ID $pid and calculate

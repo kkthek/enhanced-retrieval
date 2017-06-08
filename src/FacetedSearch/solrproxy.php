@@ -182,6 +182,7 @@ echo $response;
 
 /**
  * Adds filter query parameters to main query parameters.
+ * This is required for boosting.
  * 
  * @param string $query
  * @return string
@@ -204,6 +205,9 @@ function putFilterParamsToMainParams($query) {
 		
 	}
 	
+	// add boost dummy
+	$parsedResults['q'][] = 'smwh_boost_dummy%3A1';
+	
 	// serialize query string
 	$url = '';
 	$first = true;
@@ -214,7 +218,7 @@ function putFilterParamsToMainParams($query) {
 				$url .= '&';
 			}
 			$url .= "q=";
-			$url .= implode(' ', $values);
+			$url .= implode(' AND ', $values);
 			$first = false;
 		} else {
 			foreach($values as $val) {
