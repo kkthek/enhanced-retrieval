@@ -205,7 +205,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 		createWidgets();
 		addEventHandlers();
 		initializeGUIElements();
-		readPrefixParameter();
 		
 		initNamespaces();
 		
@@ -305,6 +304,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			qs = qs.replace(/(:)/g,"\\$1");
 		}
 		mAjaxSolrManager.store.addByValue('q', QUERY_FIELD+':'+qs);
+		readPrefixParameter();
 		mAjaxSolrManager.doRequest(0);
 		
 	}

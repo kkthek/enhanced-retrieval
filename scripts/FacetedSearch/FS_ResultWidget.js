@@ -101,7 +101,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 				// Get the highlight information
 				if (this.manager.response.highlighting) {
 					highlight = this.manager.response.highlighting[doc[docIdField]];
-					highlight = highlight[highlightField][0];
+					highlight = highlight[highlightField] ? highlight[highlightField][0] : '';
 					highlight = AjaxSolr.theme('highlight', highlight);
 				}
 			}			

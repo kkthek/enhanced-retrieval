@@ -42,33 +42,27 @@ use DIQA\FacetedSearch\Solrproxy\FSResultFilter;
  * $SOLRport: Port of the SOLR server
  */
 
-error_reporting(E_ALL);
-ini_set( 'display_errors', 1 );
 
 $SOLRhost = 'localhost';
 $SOLRport = 8080;
 
-// Please comment this configuration if your are NOT using HaloACL
-/*
-$spgHaloACLConfig = array(
-			'wikiDBprefix'	=> '',
-			'wikiDBname'	=> 'testdb',
-			'cookiePath'	=> '/',		 // must be equal to $wgCookiePath
-			'cookieDomain'	=> '', 		 // must be equal to $wgCookieDomain = "";
-			'cookieSecure'	=> false,	 // must be equal to $wgCookieSecure = false;
-			'cookieHttpOnly'	=> true, // must be equal to $wgCookieHttpOnly = true;
-			'memcacheconfig' => array(
-				'servers' => array('localhost:11211'),
-				'debug'   => false,
-				'compress_threshold' => 10240,
-				'persistant' => true),
-			'mediawikiIndex' => 'http://localhost/mediawiki/index.php',
-			'categoryNS'	=> 14,
-			'propertyNS'	=> 102,
-			'contentlanguage' => 'en'
+// if solr-env.php exists create a proxy-session
+if (file_exists(__DIR__ . '/../../solr-env.php')) {
+	
+	session_start();
+	require_once(__DIR__ . '/../../solr-env.php');
+	$userid = $_COOKIE[$wgDBname.'UserID'];
+	$userName = $_COOKIE[$wgDBname.'UserName'];
+	
+	// access Wiki once to retrieve user groups and store it in a proxy-session
+	if (!isset($_SESSION['user_groups'.$userid])) {
+		$_SESSION['user_groups'.$userid] = [];
+		$res = HttpGet($wgServerHTTP . $wgScriptPath . "/api.php?action=fs_userdataapi&format=json");
+		$o = json_decode($res[2]);
+		$_SESSION['user_groups'.$userid] = isset($o->result->user_groups) ? $o->result->user_groups : [];
+	}
+}
 
-);
-*/
 
 // Used to control a valid entry point for some classes that are only used by the
 // solrproxy.
@@ -162,7 +156,7 @@ $furtherResultsAvailable = true;
 while ($numPermittedResults < $numExpectedResults && $furtherResultsAvailable) {
 	try
 	{
-		
+		$query = applyConstraints($query);
 		$query = putFilterParamsToMainParams($query);
 		$results = $solr->rawsearch($query, SolrProxy::METHOD_POST);
 		$response = $results->getRawResponse();
@@ -180,6 +174,39 @@ while ($numPermittedResults < $numExpectedResults && $furtherResultsAvailable) {
 
 echo $response;
 
+/**
+ * Applies constraints depending on user groups.
+ *
+ * @param string $query
+ * @return string
+ */
+function applyConstraints($query) {
+	global $userid, $userName;
+	global $fsgNamespaceConstraint, $fsgCustomConstraint;
+	
+	$userGroups = $_SESSION['user_groups'.$userid];
+	
+	// namespace constraints
+	if (!isset($fsgNamespaceConstraint)) $fsgNamespaceConstraint = [];
+	foreach($fsgNamespaceConstraint as $group => $namespaces) {
+		if (in_array($group, $userGroups)) {
+			$constraints = [];
+			foreach($namespaces as $namespace) {
+				$constraints[] = "smwh_namespace_id:$namespace";
+			}
+			
+			$query = $query . "&fq=".urlencode(implode(' OR ', $constraints));
+		}
+	}
+	
+	// custom constraints
+	if (!isset($fsgCustomConstraint)) $fsgCustomConstraint = [];
+	foreach($fsgCustomConstraint as $operation) {
+		$query = $operation($query, $userGroups, $userName);
+	}
+	return $query;
+	
+}
 /**
  * Adds filter query parameters to main query parameters.
  * This is required for boosting.
@@ -218,7 +245,7 @@ function putFilterParamsToMainParams($query) {
 				$url .= '&';
 			}
 			$url .= "q=";
-			$url .= implode(' AND ', $values);
+			$url .= '(' . implode(' ) AND ( ', $values) . ')';
 			$first = false;
 		} else {
 			foreach($values as $val) {
@@ -233,4 +260,38 @@ function putFilterParamsToMainParams($query) {
 	}
 	
 	return $url;
+}
+
+/**
+ * Does a HTTP GET request containing MW session data. 
+ * (requires php-curl to be activated)
+ * 
+ * @param string $url
+ * @return (header, HTTP status code, content)
+ */
+function HttpGet($url) {
+	$res = "";
+	$header = "";
+	global $wgDBname;
+	$sessionId = $_COOKIE[$wgDBname.'_session'];
+	$username = $_COOKIE[$wgDBname.'UserName'];
+	$userid = $_COOKIE[$wgDBname.'UserID'];
+
+	// Create a curl handle to a non-existing location
+	$ch = curl_init($url);
+
+	$cookieprefix =
+	// Execute
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HEADER, true);
+	curl_setopt($ch, CURLOPT_COOKIE, "{$wgDBname}_session=$sessionId; {$wgDBname}UserName=$username; {$wgDBname}UserID=$userid;");
+	$res = curl_exec($ch);
+
+	$status = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+	curl_close($ch);
+
+	$bodyBegin = strpos($res, "\r\n\r\n");
+	list($header, $res) = $bodyBegin !== false ? array(substr($res, 0, $bodyBegin), substr($res, $bodyBegin+4)) : array($res, "");
+	return array($header, $status, str_replace("%0A%0D%0A%0D", "\r\n\r\n", $res));
 }

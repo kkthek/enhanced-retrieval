@@ -66,6 +66,7 @@ $wgHooks['fs_extendedFilters'][] = 'DIQA\FacetedSearch\FacetedCategoryFilter::ad
 
 global $wgAPIModules;
 $wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Dialogs\DialogAjaxAPI';
+$wgAPIModules['fs_userdataapi'] = 'DIQA\FacetedSearch\Api\UserDataAPI';
 
 require_once 'src/FacetedSearch/FS_DefaultSettings.php';
 /**
