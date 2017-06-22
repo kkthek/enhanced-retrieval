@@ -84,7 +84,7 @@ if ( array_key_exists( 'e', $options ) ) { // Note: this might reasonably be lar
 	$end = $title->getArticleID();
 } else {
 	$query = "SELECT MAX(page_id) as maxid FROM page";
-	$db =& wfGetDB( DB_SLAVE );
+	$db = wfGetDB( DB_SLAVE );
 	$res = $db->query( $query );
 	if($db->numRows( $res ) > 0) {
 		while($row = $db->fetchObject($res)) {
