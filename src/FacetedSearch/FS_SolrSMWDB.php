@@ -83,9 +83,13 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * 		Name or IP address of the host of the server
 	 * @param int $port
 	 * 		Server port of the Solr server
+	 * @param string $user
+	 * @param string $pass
+	 * @param string $indexCore SOLR core
+	 * @param boolean debug
 	 */
-	public function __construct($host, $port, $debug = false) {
-		parent::__construct($host, $port);
+	public function __construct($host, $port, $user = '', $pass = '', $indexCore = '', $debug = false) {
+		parent::__construct($host, $port, $user, $pass, $indexCore);
 		$this->debug = $debug;
 	}
 

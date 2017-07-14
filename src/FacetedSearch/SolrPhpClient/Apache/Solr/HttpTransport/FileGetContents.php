@@ -71,7 +71,7 @@ class Apache_Solr_HttpTransport_FileGetContents extends Apache_Solr_HttpTranspor
 		$this->_postContext = stream_context_create();
 	}
 
-	public function performGetRequest($url, $timeout = false)
+	public function performGetRequest($url, $timeout = false, $authBase64 = '')
 	{
 		// set the timeout if specified
 		if ($timeout !== FALSE && $timeout > 0.0)
@@ -97,7 +97,7 @@ class Apache_Solr_HttpTransport_FileGetContents extends Apache_Solr_HttpTranspor
 		return $this->_getResponseFromParts($responseBody, $http_response_header);
 	}
 
-	public function performHeadRequest($url, $timeout = false)
+	public function performHeadRequest($url, $timeout = false, $authBase64 = '')
 	{
 		stream_context_set_option($this->_headContext, array(
 				'http' => array(
@@ -129,7 +129,7 @@ class Apache_Solr_HttpTransport_FileGetContents extends Apache_Solr_HttpTranspor
 		return $this->_getResponseFromParts($responseBody, $http_response_header);
 	}
 	
-	public function performPostRequest($url, $rawPost, $contentType, $timeout = false)
+	public function performPostRequest($url, $rawPost, $contentType, $timeout = false, $authBase64 = '')
 	{
 		stream_context_set_option($this->_postContext, array(
 				'http' => array(

@@ -101,6 +101,16 @@ function wfUSSetupExtension() {
 	#          If the solrproxy is used and the port of the indexer host (SOLR) is 
 	#          different from 8983, the variable $SOLRport must be set in solrproxy.php.
 	##
+	
+	// load local config
+	$SOLRhost = 'localhost';
+	$SOLRport = 8080;
+	$SOLRuser = '';
+	$SOLRpass = '';
+	$SOLRcore = '';
+	if (file_exists(__DIR__ . '/solr-env.php')) {
+		require_once('solr-env.php');
+	}
 	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
 	if (!isset($fsgFacetedSearchConfig)) {
 		$fsgFacetedSearchConfig = array(
@@ -109,8 +119,11 @@ function wfUSSetupExtension() {
 		    'proxyHost'    => $wgServer,
 		//	'proxyPort'    => 8983,		
 			'proxyServlet' => "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php",
-			'indexerHost' => 'localhost', // must be equal to $SOLRhost in solrproxy.php
-			'indexerPort' => 8080         // must be equal to $SOLRport in solrproxy.php
+			'indexerHost' => $SOLRhost,
+			'indexerPort' => $SOLRport,
+			'indexerUser' => $SOLRuser,
+			'indexerPass' => $SOLRpass,
+			'indexerCore' => $SOLRcore
 		);
 	}
 	

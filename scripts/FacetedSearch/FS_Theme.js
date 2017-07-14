@@ -632,7 +632,8 @@
 		var plainName = extractPlainName(facet);
                 
                 // check if it is a pre-defined property
-                var key = plainName.replace(/\s/, "_");
+                var key = plainName.replace(/\s{2}/g, "_");
+                
                 var langText = lang.containsMessage(key);
                 if (langText) {
                     plainName = langText;
@@ -749,6 +750,14 @@
 
 	AjaxSolr.theme.prototype.no_items_found = function() {
 		return 'no items found in current selection';
+	};
+	
+	AjaxSolr.theme.prototype.no_items_found_with_facetvalue = function(facet) {
+		var parts = facet.split(':');
+		var value = parts.length > 1 ? parts[1].split('|') : parts;
+		var label = (value.length > 1 ? value[1] : value[0]) + ' (0)';
+		label = label.replace(/"/g, '');
+		return $('<div>').addClass('xfsClusterEntry').html(label);
 	};
 
 	AjaxSolr.theme.prototype.no_facet_filter_set = function() {

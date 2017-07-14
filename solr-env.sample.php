@@ -5,6 +5,19 @@
  * Make sure you adjust the server properties below.
  * 
  */
+
+/**
+ * SOLR connection data
+ */
+$SOLRhost = 'localhost';
+$SOLRport = 8080;
+$SOLRuser = '';
+$SOLRpass = '';
+$SOLRcore = '';
+
+/**
+ * Wiki connection data
+ */
 $wgServerHTTP = "http://wimawiki.local";
 $wgScriptPath = "/mediawiki";
 $wgDBname = 'wima_wiki';

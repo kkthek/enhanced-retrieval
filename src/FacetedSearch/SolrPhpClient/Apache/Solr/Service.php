@@ -180,6 +180,12 @@ class Apache_Solr_Service
 	 * @var Apache_Solr_HttpTransport_Interface
 	 */
 	protected $_httpTransport = false;
+	
+	/**
+	 * HTTP Basic Auth value
+	 * @var string
+	 */
+	protected $authBase64;
 
 	/**
 	 * Escape a value for special query characters such as ':', '(', ')', '*', '?', etc.
@@ -232,12 +238,13 @@ class Apache_Solr_Service
 	 * @param string $path
 	 * @param Apache_Solr_HttpTransport_Interface $httpTransport
 	 */
-	public function __construct($host = 'localhost', $port = 8180, $path = '/solr/', $httpTransport = false)
+	public function __construct($host = 'localhost', $port = 8180, $path = '/solr/', $httpTransport = false, $authBase64)
 	{
 		$this->setHost($host);
 		$this->setPort($port);
 		$this->setPath($path);
-
+		$this->setAuth($authBase64);
+		
 		$this->_initUrls();
 
 		if ($httpTransport)
@@ -330,7 +337,7 @@ class Apache_Solr_Service
 	{
 		$httpTransport = $this->getHttpTransport();
 
-		$httpResponse = $httpTransport->performGetRequest($url, $timeout);
+		$httpResponse = $httpTransport->performGetRequest($url, $timeout, $this->authBase64);
 		$solrResponse = new Apache_Solr_Response($httpResponse, $this->_createDocuments, $this->_collapseSingleValueArrays);
 
 		if ($solrResponse->getHttpStatus() != 200)
@@ -356,7 +363,7 @@ class Apache_Solr_Service
 	{
 		$httpTransport = $this->getHttpTransport();
 
-		$httpResponse = $httpTransport->performPostRequest($url, $rawPost, $contentType, $timeout);
+		$httpResponse = $httpTransport->performPostRequest($url, $rawPost, $contentType, $timeout, $this->authBase64);
 		$solrResponse = new Apache_Solr_Response($httpResponse, $this->_createDocuments, $this->_collapseSingleValueArrays);
 
 		if ($solrResponse->getHttpStatus() != 200)
@@ -465,6 +472,16 @@ class Apache_Solr_Service
 			$this->_initUrls();
 		}
 	}
+	
+	/**
+	 * Sets Basic auth header. Format: user:pass
+	 * 
+	 * @param string user:pass
+	 */
+	public function setAuth($userpass)
+	{
+		$this->authBase64 = base64_encode($userpass);
+	}
 
 	/**
 	 * Get the current configured HTTP Transport
@@ -476,9 +493,9 @@ class Apache_Solr_Service
 		// lazy load a default if one has not be set
 		if ($this->_httpTransport === false)
 		{
-			require_once(dirname(__FILE__) . '/HttpTransport/FileGetContents.php');
+			require_once(dirname(__FILE__) . '/HttpTransport/Curl.php');
 
-			$this->_httpTransport = new Apache_Solr_HttpTransport_FileGetContents();
+			$this->_httpTransport = new Apache_Solr_HttpTransport_Curl();
 		}
 
 		return $this->_httpTransport;
@@ -629,7 +646,7 @@ class Apache_Solr_Service
 		
 		$httpTransport = $this->getHttpTransport();
 
-		$httpResponse = $httpTransport->performHeadRequest($this->_pingUrl, $timeout);
+		$httpResponse = $httpTransport->performHeadRequest($this->_pingUrl, $timeout, $this->authBase64);
 		$solrResponse = new Apache_Solr_Response($httpResponse, $this->_createDocuments, $this->_collapseSingleValueArrays);
 
 		if ($solrResponse->getHttpStatus() == 200)

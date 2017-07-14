@@ -66,9 +66,10 @@ interface Apache_Solr_HttpTransport_Interface
 	 *
 	 * @param string $url
 	 * @param float $timeout
+	 * @param string authBase64 Basic authentication header
 	 * @return Apache_Solr_HttpTransport_Response HTTP response
 	 */
-	public function performGetRequest($url, $timeout = false);
+	public function performGetRequest($url, $timeout = false, $authBase64 = '');
 	
 	/**
 	 * Perform a HEAD HTTP operation with an optional timeout and return the response
@@ -76,9 +77,10 @@ interface Apache_Solr_HttpTransport_Interface
 	 *
 	 * @param string $url
 	 * @param float $timeout
+	 * @param string authBase64 Basic authentication header
 	 * @return Apache_Solr_HttpTransport_Response HTTP response
 	 */
-	public function performHeadRequest($url, $timeout = false);
+	public function performHeadRequest($url, $timeout = false, $authBase64 = '');
 	
 	/**
 	 * Perform a POST HTTP operation with an optional timeout and return the response
@@ -88,7 +90,8 @@ interface Apache_Solr_HttpTransport_Interface
 	 * @param string $rawPost
 	 * @param string $contentType
 	 * @param float $timeout
+	 * @param string authBase64 Basic authentication header
 	 * @return Apache_Solr_HttpTransport_Response HTTP response
 	 */
-	public function performPostRequest($url, $rawPost, $contentType, $timeout = false);
+	public function performPostRequest($url, $rawPost, $contentType, $timeout = false, $authBase64 = '');
 }

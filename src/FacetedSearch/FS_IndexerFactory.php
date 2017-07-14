@@ -99,7 +99,12 @@ class FSIndexerFactory  {
 			// Indexer is Apache SOLR
 			if ($indexerConfig['source'] == 'SMWDB') {
 				// The SMW database is indexed
-				return new FSSolrSMWDB($indexerConfig['indexerHost'], $indexerConfig['indexerPort'], $debug);
+				return new FSSolrSMWDB($indexerConfig['indexerHost'],
+									   $indexerConfig['indexerPort'],
+									   $indexerConfig['indexerUser'],
+									   $indexerConfig['indexerPass'],
+									   $indexerConfig['indexerCore'],
+									   $debug);
 			}
 		}
 		return null;

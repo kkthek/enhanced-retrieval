@@ -37,9 +37,11 @@ class DialogAjaxAPI extends \ApiBase {
 			return strcmp(strtolower($e1['label']), strtolower($e2['label']));
 		});
 		
+		$propertyTitle = \Title::newFromText($params ['property'], SMW_NS_PROPERTY);
+		
 		$html = $this->blade->view ()->make ( "dialogs.facet-value-dialog", 
 				array ('values' => $distinctPropertyValues,
-					   'facetName' => $params ['property'])
+					   'facetName' => $propertyTitle->getText())
 		 )->render ();
 		
 		$htmlResult = ['html'=>$html];

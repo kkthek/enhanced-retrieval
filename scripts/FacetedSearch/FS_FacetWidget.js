@@ -164,6 +164,15 @@ FacetedSearch.classes.FacetWidget = AjaxSolr.AbstractFacetWidget.extend({
 		var contentDiv = target.find(':first');
 		
 		if (this.mFacetItems.length == 0) {
+			var emptyFacet = this.fields[0];
+			
+			var fq = this.manager.store.values('fq');
+			for(var i = 0; i < fq.length;i++) {
+				if (fq[i].indexOf(emptyFacet) === 0) {
+					target.html(AjaxSolr.theme('no_items_found_with_facetvalue', fq[i]));
+					return false;
+				}
+			}
 			target.html(AjaxSolr.theme('no_items_found'));
 			return false;
 		}

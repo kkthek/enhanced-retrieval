@@ -44,14 +44,14 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 abstract class FSSolrIndexer implements IFSIndexer {
 	
 	//--- Constants ---
-	const PING_CMD = 'solr/admin/ping';
-	const CREATE_FULL_INDEX_CMD = 'solr/dataimport?command=full-import';	
+	const PING_CMD = 'solr/<CORE>/admin/ping';
+	const CREATE_FULL_INDEX_CMD = 'solr/<CORE>/dataimport?command=full-import';	
 	const FULL_INDEX_CLEAN_OPT = '&clean=true';
-	const COMMIT_UPDATE_CMD = 'solr/update?commit=true';
-	const EXTRACT_CMD = 'solr/update/extract?extractOnly=true';
+	const COMMIT_UPDATE_CMD = 'solr/<CORE>/update?commit=true';
+	const EXTRACT_CMD = 'solr/<CORE>/update/extract?extractOnly=true';
 	const DELETE_INDEX_QUERY = '<delete><query>*:*</query></delete>';
 	const DELETE_DOCUMENT_BY_ID = '<delete><id>$1</id></delete>'; // $1 must be replaced by the actual ID
-	const QUERY_PREFIX = 'solr/select/?';
+	const QUERY_PREFIX = 'solr/<CORE>/select/?';
 		
 	const HTTP_OK = 200; 
 
@@ -66,6 +66,11 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	// string: Base URL for all HTTP request to the SOLR server
 	private $mBaseURL;
 	
+	// string: Base64-encoded user:pass
+	private $authBase64;
+	
+	// string: name of SOLR core
+	private $indexCore;
 	
 	//--- getter/setter ---
 	public function getHost()	{ return $this->mHost; }
@@ -81,11 +86,19 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * 		Name or IP address of the host of the server
 	 * @param int $port
 	 * 		Server port of the Solr server
+	 * @param string $user
+	 * 		Username for Basic Auth
+	 * @param string $pass
+	 * 		Password for Basic Auth
+	 * @param string $indexCore
+	 * 		Name of SOLR core
 	 */
-	protected function __construct($host, $port) {
+	protected function __construct($host, $port, $user, $pass, $indexCore) {
 		$this->mHost = $host;
 		$this->mPort = $port;
 		$this->mBaseURL = "http://$host:$port/";
+		$this->authBase64 = base64_encode("$user:$pass");
+		$this->indexCore = $indexCore;
 	}
 	
 	
@@ -196,7 +209,9 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		$httpResult = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml, $rc);
 		if ($debug) {
 			print_r($httpResult); 
+			print "\n\n";
 			print_r($xml);
+			print "\n-------------------------------\n";
 		}
 		return $rc == self::HTTP_OK;
 	}
@@ -357,15 +372,19 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * 		Result of the request
 	 */
 	private function sendCommand($command, &$resultCode) {
+		$command = str_replace("<CORE>/", $this->indexCore == '' ? $this->indexCore : $this->indexCore . '/', $command);
 		$url = $this->mBaseURL.$command;
 		$fetch = curl_init( $url );
 		if( defined( 'ERDEBUG' ) ) {
 			curl_setopt( $fetch, CURLOPT_VERBOSE, 1 );
 		}
-		
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Authorization: Basic {$this->authBase64}"));
 		ob_start();
 		$ok = curl_exec( $fetch );
 		$result = ob_get_contents();
+		if ($ok === false) {
+			$result = curl_error($curl);
+		}
 		ob_end_clean();
 		
 		$info = curl_getinfo( $fetch );
@@ -392,9 +411,10 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * 			200 - HTTP_OK
 	 */
 	private function postCommand($command, $data, &$resultCode) {
+		$command = str_replace("<CORE>/", $this->indexCore == '' ? $this->indexCore : $this->indexCore . '/', $command);
 		$url = $this->mBaseURL.$command;
 		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: text/xml', "Authorization: Basic {$this->authBase64}"));
 		curl_setopt($curl, CURLOPT_HEADER, 1);
 //		curl_setopt($curl, CURLOPT_USERAGENT, $this->user_agent);
 //		if ($this->cookies == TRUE) curl_setopt($curl, CURLOPT_COOKIEFILE, $this->cookie_file);
@@ -408,6 +428,9 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		curl_setopt($curl, CURLOPT_POST, 1);
 		
 		$result = curl_exec($curl);
+		if ($result === false) {
+			$result = curl_error($curl);
+		}
 		$info = curl_getinfo($curl);
 		curl_close($curl);
 		
@@ -433,9 +456,10 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * 			
 	 */
 	private function postCommandReturn($command, $data, $contentType, &$resultCode) {
+		$command = str_replace("<CORE>/", $this->indexCore == '' ? $this->indexCore : $this->indexCore . '/', $command);
 		$url = $this->mBaseURL.$command;
 		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: '.$contentType));
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: '.$contentType, "Authorization: Basic {$this->authBase64}"));
 		curl_setopt($curl, CURLOPT_HEADER, 0);
 
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
@@ -444,6 +468,9 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		curl_setopt($curl, CURLOPT_POST, 1);
 
 		$result = curl_exec($curl);
+		if ($result === false) {
+			$result = curl_error($curl);
+		}
 		$info = curl_getinfo($curl);
 		curl_close($curl);
 

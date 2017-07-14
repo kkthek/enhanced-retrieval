@@ -45,6 +45,9 @@ use DIQA\FacetedSearch\Solrproxy\FSResultFilter;
 
 $SOLRhost = 'localhost';
 $SOLRport = 8080;
+$SOLRuser = '';
+$SOLRpass = '';
+$SOLRcore = '';
 
 // if solr-env.php exists create a proxy-session
 if (file_exists(__DIR__ . '/../../solr-env.php')) {
@@ -89,11 +92,13 @@ class SolrProxy extends Apache_Solr_Service {
 	 * @param string $host
 	 * @param string $port
 	 * @param string $path
+	 * @param Boolean
+	 * @param string $userpass user:pass
 	 * @param Apache_Solr_HttpTransport_Interface $httpTransport
 	 */
-	public function __construct($host = 'localhost', $port = 8983, $path = '/solr/', $httpTransport = false)
+	public function __construct($host = 'localhost', $port = 8983, $path = '/solr/', $httpTransport = false, $userpass)
 	{
-		parent::__construct($host, $port, $path, $httpTransport);
+		parent::__construct($host, $port, $path, $httpTransport, $userpass);
 	}
 	
 	/**
@@ -132,7 +137,8 @@ header('Content-Type: application/javascript'); // required for JSONP by IE
 $query = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : false;
 
 // create a new solr service instance with the configured settings
-$solr = new SolrProxy($SOLRhost, $SOLRport, '/solr/');
+$core = $SOLRcore == '' ? '/solr/' : '/solr/' . $SOLRcore . '/';
+$solr = new SolrProxy($SOLRhost, $SOLRport, $core, false, "$SOLRuser:$SOLRpass");
 
 // if magic quotes is enabled then stripslashes will be needed
 if (get_magic_quotes_gpc() == 1)
