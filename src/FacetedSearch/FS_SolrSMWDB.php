@@ -113,24 +113,44 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		$t = $wikiPage->getTitle();
 		$pid = $wikiPage->getId();
 		if($pid == 0) {
-		    return;
+		    throw new \Exception("invalid page ID for " . $t->getPrefixedText());
 		}
 		
 		global $fsgBlacklistPages;
 		if (in_array($t->getPrefixedText(), $fsgBlacklistPages)) {
-		    return;
+			throw new \Exception("blacklisted page: " . $t->getPrefixedText());
 		}
 		
 		$pns = $t->getNamespace();
 		$pt  = $t->getDBkey();
 		
 		$parserOptions = new ParserOptions();
-		$parserOut = $wikiPage->getParserOutput($parserOptions);
-		if(!$parserOut) {
-		    $text = '';
+		
+		global $egApprovedRevsBlankIfUnapproved, $egApprovedRevsNamespaces;
+		if (defined('APPROVED_REVS_VERSION') 
+			&& $egApprovedRevsBlankIfUnapproved 
+			&& in_array($wikiPage->getTitle()->getNamespace(), $egApprovedRevsNamespaces)) {
+			
+			// indexed approved revision
+			$revision = $this->getApprovedRevision($wikiPage);
+			if ($revision === false) {
+				throw new \Exception("unapproved " . $t->getPrefixedText());
+			}
+			$content = $revision->getContent();
+			$text = $content->getParserOutput($wikiPage->getTitle(),
+					$revision->getId(), $parserOptions)->getText();
+			$text = Sanitizer::stripAllTags($text);
+			
 		} else {
-    		$text = Sanitizer::stripAllTags($parserOut->getText());
+			// index latest revision
+			$parserOut = $wikiPage->getParserOutput($parserOptions);
+			if(!$parserOut) {
+			    $text = '';
+			} else {
+		    	$text = Sanitizer::stripAllTags($parserOut->getText());
+			}
 		}
+		
 
 		$doc['id'] = $pid;
 		$doc['smwh_namespace_id'] = $pns;
@@ -175,7 +195,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		$this->updateIndex($doc, $options, $this->debug);
 		
 	    if($this->updateOnlyCurrentArticle()) {
-			return;
+			return true;
 		} 
 		
 		// update dependant articles
@@ -196,6 +216,35 @@ class FSSolrSMWDB extends FSSolrIndexer {
 				$this->updateIndexForArticle(new WikiPage($ttu));
 			}
 		}
+		
+		return true;
+	}
+	
+	private function getApprovedRevision(WikiPage $wikiPage) {
+		
+		// get approved rev_id
+		$db = wfGetDB( DB_MASTER );
+		
+		$queryString = sprintf(
+				'SELECT rev_id' .
+				' FROM approved_revs' .
+				' WHERE page_id = %s',
+				$wikiPage->getTitle()->getArticleID());
+		$res = $db->query($queryString);
+		$rev_id = null;
+		if ($db->numRows( $res ) > 0) {
+			
+			if($row = $db->fetchRow( $res )) {
+				$rev_id = $row['rev_id'];
+			}	
+		}
+		
+		if (is_null($rev_id)) {
+			return false;
+		}
+		
+		$revision = \Revision::newFromId($rev_id);
+		return $revision;
 	}
 
 	/**
@@ -216,7 +265,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			// The article with the new name has the same page id as before
 			$article = Article::newFromID($oldid);
 			$text = $article->getContent();
-			return $this->updateIndexForArticle($article->getPage(), $wgUser, $text);
+			try {
+				$this->updateIndexForArticle($article->getPage(), $wgUser, $text);	
+			} catch(\Exception $e) { }
 		}
 		return false;
 	}

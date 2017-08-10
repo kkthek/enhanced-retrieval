@@ -83,7 +83,9 @@ class FSIncrementalUpdater  {
 		
 		$WikiPageContent = $Revision->getContent ( Revision::RAW )->serialize ();
 		$indexer = FSIndexerFactory::create();
-		$indexer->updateIndexForArticle(new \WikiPage($wikiTitle), null, $WikiPageContent);
+		try {
+			$indexer->updateIndexForArticle(new \WikiPage($wikiTitle), null, $WikiPageContent);
+		} catch(\Exception $e) { }
 		return true;
 	}
 	
@@ -91,7 +93,9 @@ class FSIncrementalUpdater  {
 		global $wgUser;
 		$wikiPage = new WikiPage($image->getLocalFile()->getTitle());
 		$indexer = FSIndexerFactory::create();
-		$indexer->updateIndexForArticle($wikiPage, $wgUser, "");
+		try {
+			$indexer->updateIndexForArticle($wikiPage, $wgUser, "");	
+		} catch(\Exception $e) { }
 		return true;
 	}
 	
@@ -115,7 +119,9 @@ class FSIncrementalUpdater  {
 	public static function onAfterImportPage($title, $origTitle, $revCount, $sRevCount, $pageInfo) {
 		$indexer = FSIndexerFactory::create();
 		$wikiPage = new WikiPage($title);
-		$indexer->updateIndexForArticle($wikiPage);
+		try {
+			$indexer->updateIndexForArticle($wikiPage);
+		} catch(\Exception $e) { }
 		return true;
 	}
 	
@@ -153,6 +159,30 @@ class FSIncrementalUpdater  {
 		$indexer->deleteDocument($article->getID());
 		return true;
 	}	
+	
+	/**
+	 * This method called when a revision is approved.
+	 * Only if ApprovedRev extension is installed.
+	 * 
+	 * @param Parser $parser
+	 * @param Title $title
+	 * @param int $rev_id
+	 * @return void|boolean
+	 */
+	public static function onRevisionApproved($parser, $title, $rev_id) {
+		
+		$Revision = Revision::newFromTitle ( $title, $rev_id );
+		if (is_null($Revision)) {
+			return;
+		}
+		
+		$WikiPageContent = $Revision->getContent ( Revision::RAW )->serialize ();
+		$indexer = FSIndexerFactory::create();
+		try {
+			$indexer->updateIndexForArticle(new \WikiPage($title), null, $WikiPageContent);
+		} catch(\Exception $e) { }
+		return true;
+	}
 
 	//--- Private methods ---
 }

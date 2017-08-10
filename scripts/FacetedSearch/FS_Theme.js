@@ -42,10 +42,10 @@
 	var IMAGE_PATH = '/extensions/EnhancedRetrieval/skin/images/';
 	var NS_ICON = {
 		// TODO add missing mappings
-		0 : ['Instance', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_instances_icon_16x16.png'],
-		6 : ['Image', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_image_icon_16x16.png'],
+		0 : ['Wiki', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_instances_icon_16x16.png'],
+		6 : ['File', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_image_icon_16x16.png'],
 		10 : ['Template', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_template_icon_16x16.png'],
-		14: ['Category', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_category_icon_16x16.png'],
+		14: ['Kategorie', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_category_icon_16x16.png'],
 		102 : ['Property', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_property_icon_16x16.png'],
 		120 : ['Document', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_document_icon_16x16.png'],
 		122 : ['Audio', mw.config.get('wgScriptPath') + IMAGE_PATH + 'datawiki_music_icon_16x16.png'],
@@ -347,6 +347,23 @@
 	};
 	
 	/**
+	 * Returns css class for files that have an extension defined
+	 * in $fsgShowFileInOverlay
+	 */
+	function cssClassForFileType(doc) {
+		if (doc.smwh_namespace_id != 6) {
+			return '';
+		}
+		var cssClass = ""; 
+		var fileParts = doc.smwh_title.split(".");
+		var fileExtension = fileParts[fileParts.length-1].toLowerCase();
+		if (XFS.SHOW_FILE_IN_OVERLAY.indexOf(fileExtension) > -1) {
+			cssClass = "imageOverlay";
+		}
+		return cssClass;
+	};
+	
+	/**
 	 * Adds annotations directly displayed in the snippets without
 	 * opening the 'properties'-view
 	 */
@@ -403,7 +420,9 @@
 		if (doc.smwh_diqa_import_fullpath_xsdvalue_t) {
 			link = doc.smwh_diqa_import_fullpath_xsdvalue_t;
 		}
-		var output = '<div class="xfsResult"><a class="xfsResultTitle" href="' + link + '">';
+		
+		var cssClass = cssClassForFileType(doc);
+		var output = '<div class="xfsResult"><a class="xfsResultTitle '+cssClass+'" href="' + link + '">';
 		
 		// get page title
 	    if (window.XFS.getPageTitle) {
@@ -439,6 +458,7 @@
     	}
 		return output;
 	};
+	
 	
 	/**
 	 * Theme for rendering a highlighted text.
@@ -495,23 +515,26 @@
 		
 		if (props.length + attr.length > 0) {
     
-      if (window.XFS.addAddAdditionalData) {
-            output += window.XFS.addAddAdditionalData(doc);
-      }
-      
-      if (window.XFS.annotationsInSnippet) {
-    	  output += AjaxSolr.theme.prototype.annotationsInSnippet(doc, window.XFS.annotationsInSnippet);
-      }
-            
-			// Properties or attributes are present 
-			// => add a table header
-			output += 
-				'<div>' +
-					'(<a class="xfsShow">' +
-						lang.getMessage('show') +
-					'</a>)' +
-					'<div class="xfsResultTable"></div>' +
-				'</div>';
+	      if (window.XFS.addAddAdditionalData) {
+	            output += window.XFS.addAddAdditionalData(doc);
+	      }
+	      
+	      if (window.XFS.annotationsInSnippet) {
+	    	  output += AjaxSolr.theme.prototype.annotationsInSnippet(doc, window.XFS.annotationsInSnippet);
+	      }
+	       
+	      if (window.XFS.fsgShowArticleProperties) {
+				// Properties or attributes are present 
+				// => add a table header
+				output += 
+					'<div>' +
+						'(<a class="xfsShow">' +
+							lang.getMessage('show') +
+						'</a>)' +
+						'<div class="xfsResultTable"></div>' +
+					'</div>';
+	      }
+	      
 		}
 		
 		if (window.XFS.addAdditionalActions) {

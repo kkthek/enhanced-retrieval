@@ -55,7 +55,7 @@
 }
 
 .xfsHighlightSearch {
-	background-color: #EEF3FF;
+	/*background-color: #EEF3FF;*/
 }
 
 .results {
@@ -205,7 +205,7 @@ a.xfsAddFacetOperation {
 div.xfs_additional_property_table {
 	border: 1px solid;
 	border-color: lightgray;
-    float: left;
+	display: block;
     width: 100%;
 }
 
@@ -213,7 +213,8 @@ div.xfs_additional_property_table_row,div.xfs_additional_property_table_row_firs
 	padding-top: 2px;
 	padding-left: 2px;
 	padding-bottom: 2px;
-	float:left;
+	display: inline-block;
+	
 }
 .xfs_additional_property_label,
 .xfs_additional_property_separator {

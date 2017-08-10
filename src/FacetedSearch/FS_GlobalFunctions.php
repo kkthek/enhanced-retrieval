@@ -57,6 +57,8 @@ class FSGlobalFunctions {
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete';
             $wgHooks['ArticleDelete'][] =
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleDelete';
+            $wgHooks['ApprovedRevsRevisionApproved'][] =
+            'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved';
 		}
 		
 		// Register specials pages
@@ -66,12 +68,13 @@ class FSGlobalFunctions {
 		$wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
 		
 		// Register configuration used in Javascript
-		global $wgOut, $fsgShownFacets, $fsgFacetsWithOR, $fsgCategoriesToShowInTitle;
+		global $wgOut, $fsgShownFacets, $fsgFacetsWithOR, $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay;
 		$script = "";
 		$script .= "\nvar XFS = XFS || {};";
 		$script .= "\nXFS.SHOWNFACETS = ".json_encode($fsgShownFacets).";";
 		$script .= "\nXFS.OREDFACETS = ".json_encode($fsgFacetsWithOR).";";
 		$script .= "\nXFS.CATEGORIES_TO_SHOW_IN_TITLE = ".json_encode($fsgCategoriesToShowInTitle).";";
+		$script .= "\nXFS.SHOW_FILE_IN_OVERLAY = ".json_encode($fsgShowFileInOverlay).";";
 		$wgOut->addScript(
 				'<script type="text/javascript">'.$script.'</script>'
 		);
@@ -174,6 +177,7 @@ class FSGlobalFunctions {
 		 $fsgDateTimePropertyClusters,
 		 $fsgTitleProperty,
 		 $fsgAnnotationsInSnippet,
+		 $fsgShowArticleProperties,
 		 $wgOut;
 		
 		$fsgTitlePropertyField = '';
@@ -190,6 +194,7 @@ class FSGlobalFunctions {
 		$script .= "\nXFS.dateTimePropertyClusters = ".json_encode($fsgDateTimePropertyClusters).";";
 		self::addAnnotationSnippets($script);
 		$script .= "\nXFS.extraPropertiesToRequest = ".json_encode($fsgExtraPropertiesToRequest).";";
+		$script .= "\nXFS.fsgShowArticleProperties = ".($fsgShowArticleProperties?'true':'false').";";
 		
 		$wgOut->addScript(
 				'<script type="text/javascript">'.$script.'</script>'

@@ -175,3 +175,18 @@ $fsgCategoryFilter = [];
 #
 global $fsgAnnotationsInSnippet;
 $fsgAnnotationsInSnippet = [];
+
+####
+#
+# Shows the article properties button
+# under each search result.
+#
+global $fsgShowArticleProperties;
+$fsgShowArticleProperties = true;
+
+####
+#
+# Show in overlay
+#
+global $fsgShowFileInOverlay;
+$fsgShowFileInOverlay = ['pdf'];

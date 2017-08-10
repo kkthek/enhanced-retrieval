@@ -130,7 +130,11 @@ if ( $pages == false ) {
 		$id++;
 		if (is_null($title)) continue;
 		$indexer = FSIndexerFactory::create(null, $debug);
-		$indexer->updateIndexForArticle(new WikiPage($title));
+		try {
+			$indexer->updateIndexForArticle(new WikiPage($title));
+		} catch(Exception $e) {
+			print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
+		}
 		if ( ( $delay !== false ) && ( ( $num_files + 1 ) % 100 === 0 ) ) {
 			usleep( $delay );
 		}
@@ -154,7 +158,11 @@ if ( $pages == false ) {
 		
 		if ( !is_null( $title ) ) {
 			$indexer = FSIndexerFactory::create();
-			$indexer->updateIndexForArticle(new WikiPage($title));
+			try {
+				$indexer->updateIndexForArticle(new WikiPage($title));
+			} catch(Exception $e) {
+				print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
+			}
 		}
 		
 		$num_files++;

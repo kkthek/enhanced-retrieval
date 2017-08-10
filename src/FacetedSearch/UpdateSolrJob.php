@@ -37,8 +37,13 @@ class UpdateSolrJob extends Job {
 		$fsUpdateOnlyCurrentArticle = true;
 		
 		$indexer = FSIndexerFactory::create();
-		$indexer->updateIndexForArticle($wp);
-		
+		try {
+			$indexer->updateIndexForArticle($wp);
+		} catch(\Exception $e) {
+			if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
+				print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
+			}
+		}
 		if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
 			echo "Updated (SOLR): $title";
 		}

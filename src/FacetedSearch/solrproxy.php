@@ -62,7 +62,11 @@ if (file_exists(__DIR__ . '/../../solr-env.php')) {
 		$_SESSION['user_groups'.$userid] = [];
 		$res = HttpGet($wgServerHTTP . $wgScriptPath . "/api.php?action=fs_userdataapi&format=json");
 		$o = json_decode($res[2]);
-		$_SESSION['user_groups'.$userid] = isset($o->result->user_groups) ? $o->result->user_groups : [];
+		$groups = isset($o->result->user_groups) ? $o->result->user_groups : [];
+		if (count($groups) === 0) {
+			$groups[] = 'user'; // add default group
+		}
+		$_SESSION['user_groups'.$userid] = $groups;
 	}
 }
 
@@ -146,40 +150,39 @@ if (get_magic_quotes_gpc() == 1)
 	$query = stripslashes($query);
 }
 
-// Get start and number of expected rows from query. Access control might filter
-// results but nevertheless we want to return the expected number of results.
-$queryParser = new FSQueryParser($query);
-$numExpectedResults = $queryParser->get('rows');
-if (!$numExpectedResults) {
-	// 10 results is the default
-	$numExpectedResults = 10;
-}
-$start = $queryParser->get('start');
-
-$numPermittedResults = 0;
-$tryNumResults = $numExpectedResults;
-$furtherResultsAvailable = true;
-while ($numPermittedResults < $numExpectedResults && $furtherResultsAvailable) {
-	try
-	{
+try {
 		$query = applyConstraints($query);
 		$query = putFilterParamsToMainParams($query);
 		$results = $solr->rawsearch($query, SolrProxy::METHOD_POST);
 		$response = $results->getRawResponse();
+		if (isset($fsgUseStatistics) && $fsgUseStatistics === true) {
+			updateSearchStats($response);
+		}
 		
-		// Without access control there is no need searching for further results
-		$numPermittedResults = $numExpectedResults;
-		
-		
-	}
-	catch (Exception $e)
-	{
-		die("<html><head><title>SEARCH EXCEPTION</title><body><pre>{$e->__toString()}</pre></body></html>");
-	}
-}	
+} catch (Exception $e) {
+	die("<html><head><title>SEARCH EXCEPTION</title><body><pre>{$e->__toString()}</pre></body></html>");
+}
+	
 
 echo $response;
 
+/**
+ * Updates the search statistics in MW object cache.
+ * 
+ * @param string $response SOLR response (JSONp)
+ */
+function updateSearchStats($response) {
+	$response = substr($response, strlen('_jqjsp('), -2);
+	$jsonResponse = json_decode($response);
+	
+	$numFound = $jsonResponse->response->numFound;
+	$params = '--searches';
+	if ($numFound > 0) {
+		$params .= ' --searchHits';
+	}
+	
+	BackgroundProcess::open("php " . __DIR__ . "/../../maintenance/updateSearchStats.php $params");
+}
 /**
  * Applies constraints depending on user groups.
  *
@@ -300,4 +303,55 @@ function HttpGet($url) {
 	$bodyBegin = strpos($res, "\r\n\r\n");
 	list($header, $res) = $bodyBegin !== false ? array(substr($res, 0, $bodyBegin), substr($res, $bodyBegin+4)) : array($res, "");
 	return array($header, $status, str_replace("%0A%0D%0A%0D", "\r\n\r\n", $res));
+}
+
+class BackgroundProcess {
+
+	static function open($exec, $cwd = null) {
+		if (!is_string($cwd)) {
+			$cwd = @getcwd();
+		}
+
+		@chdir($cwd);
+
+		if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+			$WshShell = new COM("WScript.Shell");
+			$WshShell->CurrentDirectory = str_replace('/', '\\', $cwd);
+			$WshShell->Run($exec, 0, false);
+		} else {
+			exec($exec . " > /dev/null 2>&1 &");
+		}
+	}
+
+	static function fork($phpScript, $phpExec = null) {
+		$cwd = dirname($phpScript);
+
+		@putenv("PHP_FORCECLI=true");
+
+		if (!is_string($phpExec) || !file_exists($phpExec)) {
+			if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+				$phpExec = str_replace('/', '\\', dirname(ini_get('extension_dir'))) . '\php.exe';
+
+				if (@file_exists($phpExec)) {
+					BackgroundProcess::open(escapeshellarg($phpExec) . " " . escapeshellarg($phpScript), $cwd);
+				}
+			} else {
+				$phpExec = exec("which php-cli");
+
+				if ($phpExec[0] != '/') {
+					$phpExec = exec("which php");
+				}
+
+				if ($phpExec[0] == '/') {
+					BackgroundProcess::open(escapeshellarg($phpExec) . " " . escapeshellarg($phpScript), $cwd);
+				}
+			}
+		} else {
+			if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+				$phpExec = str_replace('/', '\\', $phpExec);
+			}
+
+			BackgroundProcess::open(escapeshellarg($phpExec) . " " . escapeshellarg($phpScript), $cwd);
+		}
+	}
 }

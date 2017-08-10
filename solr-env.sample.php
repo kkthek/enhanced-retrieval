@@ -32,8 +32,14 @@ $wgDBname = 'wima_wiki';
  * ];
  * 
  * Please note: You CANNOT use Mediawiki constants like NS_MAIN here.
+ * 'user' is default group if a user is in no other group.
+ * 
  */
-$fsgNamespaceConstraint = [ ];
+$fsgNamespaceConstraint = [
+    'user'          => [ 0, 14, 6, 2, 12 ],             /* Main, Kategorie, File, User, Help */
+    'riskmanager'   => [ 0, 14, 6, 2, 12, 3302 ],       /* Main, Kategorie, File, User, Help, NS_RM */
+    'wimaadmin'     => [ 0, 14, 6, 2, 12, 10, 102, 106 ]/* Main, Kategorie, File, User, Help, Property, Template, Formular */
+];
 
 $fsgCustomConstraint = [
 
@@ -50,3 +56,9 @@ $fsgCustomConstraint = [
 	}
 	
 ];
+
+/**
+ * Use statistics logging
+ * 
+ */
+$fsgUseStatistics = false;	
