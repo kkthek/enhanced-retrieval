@@ -159,8 +159,6 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
 		$options = array();
 		global $fsgDefaultBoost;
-		$options['*']['boost'] = $fsgDefaultBoost;
-		$options['smwh_title']['boost'] = $fsgDefaultBoost;
 		$options['smwh_boost_dummy']['boost'] = $fsgDefaultBoost;
 		
 		global $fsgNamespaceBoosts;
@@ -281,9 +279,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * @param float $value
 	 */
 	private function calculateBoostFactors(array &$options, $value) {
-		$options['*']['boost'] += $value;
 		$options['smwh_boost_dummy']['boost'] += $value;
-		$options['smwh_title']['boost'] *= 3;
 		
 	}
 	/**

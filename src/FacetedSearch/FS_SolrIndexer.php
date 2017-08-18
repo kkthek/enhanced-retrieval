@@ -199,6 +199,10 @@ abstract class FSSolrIndexer implements IFSIndexer {
 				}
 			}
 			
+			if (isset($options[$field]['boost']) && $options[$field]['boost'] === false) {
+				$optionAtts = '';
+			}
+			
 			// add them
 			$xml = str_replace("%$field:options%", $optionAtts, $xml);
 		}
