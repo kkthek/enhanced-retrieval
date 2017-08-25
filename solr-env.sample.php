@@ -9,6 +9,7 @@
 /**
  * SOLR connection data
  */
+global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 $SOLRhost = 'localhost';
 $SOLRport = 8080;
 $SOLRuser = '';
@@ -18,6 +19,7 @@ $SOLRcore = '';
 /**
  * Wiki connection data
  */
+global $wgServerHTTP, $wgScriptPath, $wgDBname;
 $wgServerHTTP = "http://wimawiki.local";
 $wgScriptPath = "/mediawiki";
 $wgDBname = 'wima_wiki';
@@ -35,12 +37,14 @@ $wgDBname = 'wima_wiki';
  * 'user' is default group if a user is in no other group.
  * 
  */
+global $fsgNamespaceConstraint;
 $fsgNamespaceConstraint = [
     'user'          => [ 0, 14, 6, 2, 12 ],             /* Main, Kategorie, File, User, Help */
     'riskmanager'   => [ 0, 14, 6, 2, 12, 3302 ],       /* Main, Kategorie, File, User, Help, NS_RM */
     'wimaadmin'     => [ 0, 14, 6, 2, 12, 10, 102, 106 ]/* Main, Kategorie, File, User, Help, Property, Template, Formular */
 ];
 
+global $fsgCustomConstraint;
 $fsgCustomConstraint = [
 
 	 /**
@@ -61,4 +65,5 @@ $fsgCustomConstraint = [
  * Use statistics logging
  * 
  */
+global $fsgUseStatistics;
 $fsgUseStatistics = false;	
