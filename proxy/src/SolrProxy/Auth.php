@@ -27,7 +27,10 @@ class Auth {
 			];
 			
 			global $wgServerHTTP, $wgScriptPath;
-			$res = self::http($wgServerHTTP . $wgScriptPath . "/api.php?action=fs_userdataapi&format=json", $cookies);
+			$res = self::http(
+					$wgServerHTTP . $wgScriptPath . 
+					"/api.php?action=diqa_util_userdataapi&format=json", 
+					$cookies);
 			$o = json_decode($res[2]);
 			$groups = isset($o->result->user_groups) ? $o->result->user_groups : [];
 			
