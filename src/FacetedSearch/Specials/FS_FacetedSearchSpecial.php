@@ -135,70 +135,78 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	
 		global $wgOut, $wgRequest;
 		
-		$wgOut->setPageTitle(wfMessage('fs_title')->text());
-		
-		$search = str_replace( "\n", " ", $wgRequest->getText( 'search', '' ) );
-		if ($search === wfMessage('smw_search_this_wiki')->text()) {
-			// If the help text of the search field is passed, assume an empty 
-			// search string
-			$search = '';
-		}
-		
-		Hooks::run( 'fs_searchRedirect', array( &$wgOut, &$search ) );
-		
-		$restrict = $wgRequest->getText( 'restrict', '' );
-		$specialPageTitle = $wgRequest->getText( 'title', '' );
-		$t = Title::newFromText( $search );
-
-		$fulltext = $wgRequest->getVal( 'fulltext', '' );
-		$fulltext_x = $wgRequest->getVal( 'fulltext_x', '' );
-		if ($fulltext == NULL && $fulltext_x == NULL) {
+		try {
+			$wgOut->setPageTitle(wfMessage('fs_title')->text());
+			$wgOut->addModules('ext.facetedSearch.special');
+			$wgOut->addModules('ext.facetedSearch.enhancements');
 			
-			# If the string cannot be used to create a title
-			if(!is_null( $t ) ){
-
-				# If there's an exact or very near match, jump right there.
-				$t = \SearchEngine::getNearMatch( $search );
-				if( !is_null( $t ) ) {
-					$wgOut->redirect( $t->getFullURL() );
-					return;
-				}
-
-				# If just the case is wrong, jump right there.
-//				$t = USStore::getStore()->getSingleTitle($search);
-//				if (!is_null( $t ) ) {
-//					$wgOut->redirect( $t->getFullURL() );
-//					return;
-//				}
+			$this->checkSolrConfigurationFile();
+			
+			$search = str_replace( "\n", " ", $wgRequest->getText( 'search', '' ) );
+			if ($search === wfMessage('smw_search_this_wiki')->text()) {
+				// If the help text of the search field is passed, assume an empty 
+				// search string
+				$search = '';
 			}
+			
+			Hooks::run( 'fs_searchRedirect', array( &$wgOut, &$search ) );
+			
+			$restrict = $wgRequest->getText( 'restrict', '' );
+			$specialPageTitle = $wgRequest->getText( 'title', '' );
+			$t = Title::newFromText( $search );
+	
+			$fulltext = $wgRequest->getVal( 'fulltext', '' );
+			$fulltext_x = $wgRequest->getVal( 'fulltext_x', '' );
+			if ($fulltext == NULL && $fulltext_x == NULL) {
+				
+				# If the string cannot be used to create a title
+				if(!is_null( $t ) ){
+	
+					# If there's an exact or very near match, jump right there.
+					$t = \SearchEngine::getNearMatch( $search );
+					if( !is_null( $t ) ) {
+						$wgOut->redirect( $t->getFullURL() );
+						return;
+					}
+	
+					# If just the case is wrong, jump right there.
+	//				$t = USStore::getStore()->getSingleTitle($search);
+	//				if (!is_null( $t ) ) {
+	//					$wgOut->redirect( $t->getFullURL() );
+	//					return;
+	//				}
+				}
+			}
+	        
+			// Insert the search term into the input field of the UI
+			$html = self::SPECIAL_PAGE_HTML;
+			$html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
+			
+			$prefixParam = $wgRequest->getVal( 'prefix', '' );
+			$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&quot;", $prefixParam), $html);
+			
+			global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText;
+			$html = str_replace('{{placeholderText}}', htmlspecialchars($fsgPlaceholderText), $html);
+			$html = str_replace('{{fs_show_sortorder}}', $fsgShowSortOrder === true ? '' : 'display:none;', $html);
+			$html = str_replace('{{fs_show_categories}}', $fsgShowCategories === true ? '' : 'display:none;', $html);
+			$html = str_replace('{{fs_show_namespaces}}', $fsgShowNamespaces === true ? '' : 'display:none;', $html);
+			
+			$extendedFacets = '';
+			Hooks::run('fs_extendedFacets', array( & $extendedFacets));
+			$html = str_replace('{{extendedFacets}}', $extendedFacets, $html);
+			
+			$extendedFilters = '';
+			Hooks::run('fs_extendedFilters', array( & $extendedFilters));
+			$html = str_replace('{{extendedFilters}}', $extendedFilters, $html);
+			
+			$html = $this->addExtensions($html);
+			
+			$wgOut->addHTML($this->replaceLanguageStrings($html));
+			
+			
+		} catch(\Exception $e) {
+			$wgOut->addHTML(sprintf('<div class="fs_error_hint">%s</div>', $e->getMessage()));
 		}
-        
-		// Insert the search term into the input field of the UI
-		$html = self::SPECIAL_PAGE_HTML;
-		$html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
-		
-		$prefixParam = $wgRequest->getVal( 'prefix', '' );
-		$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&quot;", $prefixParam), $html);
-		
-		global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText;
-		$html = str_replace('{{placeholderText}}', htmlspecialchars($fsgPlaceholderText), $html);
-		$html = str_replace('{{fs_show_sortorder}}', $fsgShowSortOrder === true ? '' : 'display:none;', $html);
-		$html = str_replace('{{fs_show_categories}}', $fsgShowCategories === true ? '' : 'display:none;', $html);
-		$html = str_replace('{{fs_show_namespaces}}', $fsgShowNamespaces === true ? '' : 'display:none;', $html);
-		
-		$extendedFacets = '';
-		Hooks::run('fs_extendedFacets', array( & $extendedFacets));
-		$html = str_replace('{{extendedFacets}}', $extendedFacets, $html);
-		
-		$extendedFilters = '';
-		Hooks::run('fs_extendedFilters', array( & $extendedFilters));
-		$html = str_replace('{{extendedFilters}}', $extendedFilters, $html);
-		
-		$html = $this->addExtensions($html);
-		
-		$wgOut->addHTML($this->replaceLanguageStrings($html));
-		$wgOut->addModules('ext.facetedSearch.special');
-		$wgOut->addModules('ext.facetedSearch.enhancements');
     }
     
     /**
@@ -247,6 +255,17 @@ class FSFacetedSearchSpecial extends SpecialPage {
     		
     	}
     	return $pageHTML;
+    }
+    
+    private function checkSolrConfigurationFile() {
+    	if ( !file_exists(__DIR__ . '/../../../solr-env.php')) {
+    		throw new \Exception('extensions/EnhancedRetrieval/solr-env.php does not exist. '.
+    				'Please create from template file (solr-env.sample.php).');
+    	}
+    	
+    	if ( !is_readable(__DIR__ . '/../../../solr-env.php')) {
+    		throw new \Exception('extensions/EnhancedRetrieval/solr-env.php is not readable from webserver.');
+    	}
     }
 
 	/**

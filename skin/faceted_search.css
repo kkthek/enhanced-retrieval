@@ -229,3 +229,8 @@ table.xfs_additional_property_table td span.xfs_additional_property_value {
     margin-left: 5px;
 }
 
+div.fs_error_hint {
+	padding: 15px;
+	background-color: red;
+	color: white;
+}
