@@ -6,6 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'DIQA\\' => array($baseDir . '/src'),
+    'DIQA\\SolrProxy\\' => array($baseDir . '/src/SolrProxy'),
     'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
 );

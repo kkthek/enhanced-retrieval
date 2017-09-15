@@ -228,7 +228,7 @@ class FSGlobalFunctions {
 				$value = $store->getPropertyValues( $smwProperty->getDiWikiPage(),
 						\SMWDIProperty::newFromUserLabel ( $fsgTitleProperty ) );
 				$value = reset($value);
-				$displayTitle = $value !== false ? $value->getString() : '';
+				$displayTitle = $value !== false ? $value->getString() : $smwProperty->getDiWikiPage()->getTitle()->getText();
 				
 				if (!array_key_exists($solrFieldName, $result)) {
 					$result[$solrFieldName] = ['label' => $displayTitle, 'category' => [ $category ] ];

@@ -24,10 +24,10 @@ namespace DIQA\FacetedSearch\Exceptions;
  * @ingroup ER_Exception
  *
  * This file contains the base class for enhanced retrieval exceptions
- * 
+ *
  * @author Thomas Schweitzer
  * Date: 22.02.2011
- * 
+ *
  */
 if ( !defined( 'MEDIAWIKI' ) ) {
 	die( "This file is part of the Enhanced Retrieval extension. It is not a valid entry point.\n" );
@@ -37,7 +37,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  * Base class for all exceptions of Enhanced Retrieval.
  *
  */
-class ERException extends Exception {
+class ERException extends \Exception {
 
 	// An internal error occurred
 	// Parameters:

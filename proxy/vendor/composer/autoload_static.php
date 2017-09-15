@@ -13,7 +13,7 @@ class ComposerStaticInit5925688b292b0c1b2c75bd4923ac0ad4
     public static $prefixLengthsPsr4 = array (
         'D' => 
         array (
-            'DIQA\\' => 5,
+            'DIQA\\SolrProxy\\' => 15,
         ),
         'C' => 
         array (
@@ -22,9 +22,9 @@ class ComposerStaticInit5925688b292b0c1b2c75bd4923ac0ad4
     );
 
     public static $prefixDirsPsr4 = array (
-        'DIQA\\' => 
+        'DIQA\\SolrProxy\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src',
+            0 => __DIR__ . '/../..' . '/src/SolrProxy',
         ),
         'Composer\\Installers\\' => 
         array (

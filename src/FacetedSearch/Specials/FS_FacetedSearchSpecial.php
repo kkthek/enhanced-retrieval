@@ -44,7 +44,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	
 	const SPECIAL_PAGE_HTML = '
 {{fs_ext_Top}}
-<div id="wrapper"> 
+<div id="wrapper">
 		<div "container-fluid">
 	       <div class="row">
     		  <div id="field_namespaces" class="xfsNamespaces col-md-12" style="{{fs_show_namespaces}}"></div>
@@ -89,13 +89,13 @@ class FSFacetedSearchSpecial extends SpecialPage {
 			<span class="xfsFacetHeader">{{fs_categories}}</span>
 			<div id="field_categories">
 			</div>
-		</div> 
+		</div>
 		<div id="xfsPropertyFacetContainer">
 			<span class="xfsFacetHeader">{{fs_properties}}</span>
 			<div id="field_properties">
 			</div>
 			{{extendedFacets}}
-		</div> 
+		</div>
 	</div>
 	
 	<div class="results" id="results">
@@ -140,11 +140,9 @@ class FSFacetedSearchSpecial extends SpecialPage {
 			$wgOut->addModules('ext.facetedSearch.special');
 			$wgOut->addModules('ext.facetedSearch.enhancements');
 			
-			$this->checkSolrConfigurationFile();
-			
 			$search = str_replace( "\n", " ", $wgRequest->getText( 'search', '' ) );
 			if ($search === wfMessage('smw_search_this_wiki')->text()) {
-				// If the help text of the search field is passed, assume an empty 
+				// If the help text of the search field is passed, assume an empty
 				// search string
 				$search = '';
 			}
@@ -211,29 +209,29 @@ class FSFacetedSearchSpecial extends SpecialPage {
     
     /**
      * The HTML structure of Faceted Search offers sections for other extensions
-     * that can inject their HTML. 
+     * that can inject their HTML.
      * These sections are named {{fs_ext_X}} where X is variable e.g. {{fs_ext_Top}}.
      * For each such section a hook with the name FacetedSearchExtensionX is called
      * e.g. FacetedSearchExtensionTop.
      * Functions that are registered for this hook must have the following
      * signature
-     * 
+     *
      * function fn(&$html)
-     * 
+     *
      * The parameter $html contains the HTML that was assembled so far and the
      * function can augment it.
-     * 
+     *
      * Finally the {{fs_ext_X}} section is replaced by the HTML.
-     * 
+     *
      * After the HTML was collected, the hook FacetedSearchExtensionAddResources
-     * is called where extensions should add their resources like scripts and 
+     * is called where extensions should add their resources like scripts and
      * styles. This function has no parameters i.e.
-     * 
+     *
      * function fn()
-     * 
+     *
      * @param {String} $pageHTML
      * 		The HTML of the whole page where the extensions are injected.
-     * 
+     *
      * @return {String}
      * 		The modified HTML
      */
@@ -257,17 +255,6 @@ class FSFacetedSearchSpecial extends SpecialPage {
     	return $pageHTML;
     }
     
-    private function checkSolrConfigurationFile() {
-    	if ( !file_exists(__DIR__ . '/../../../solr-env.php')) {
-    		throw new \Exception('extensions/EnhancedRetrieval/solr-env.php does not exist. '.
-    				'Please create from template file (solr-env.sample.php).');
-    	}
-    	
-    	if ( !is_readable(__DIR__ . '/../../../solr-env.php')) {
-    		throw new \Exception('extensions/EnhancedRetrieval/solr-env.php is not readable from webserver.');
-    	}
-    }
-
 	/**
 	 * Add a global JavaScript variable for the SOLR URL.
 	 * @param $vars
@@ -299,7 +286,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	/**
 	 * Language dependent identifiers in $text that have the format {{identifier}}
 	 * are replaced by the string that corresponds to the identifier.
-	 * 
+	 *
 	 * @param string $text
 	 * 		Text with language identifiers
 	 * @return string

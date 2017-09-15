@@ -1,6 +1,7 @@
 <?php
 use DIQA\FacetedSearch\FSGlobalFunctions;
-use DIQA\FacetedSearch\FSSolrSMWDB;
+use DIQA\SolrProxy\ConfigLoader;
+
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
  *
@@ -46,9 +47,9 @@ $wgExtensionCredits['other'][] = array(
         'name' => 'Enhanced Retrieval extension',
         'version' => US_SEARCH_EXTENSION_VERSION,
 		'license-name' => 'GPL-2.0+',
-        'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].", 
+        'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].",
         'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
-        'description' => 'Enhanced retrieval provides a faceted search for Mediawiki and SMW. 
+        'description' => 'Enhanced retrieval provides a faceted search for Mediawiki and SMW.
 It requires a SOLR server as backend.',
 );
 
@@ -82,44 +83,42 @@ function wfUSSetupExtension() {
 	# indexer: Type of the indexer. Currently only 'SOLR' is supported.
 	# source:  The source for indexing semantic data. Currently only the database
 	#          of SMW is supported: 'SMWDB'
-	# proxyHost: Protocol and name or IP address of the proxy to the indexer server 
+	# proxyHost: Protocol and name or IP address of the proxy to the indexer server
 	#          as seen from the client e.g. 'http://www.mywiki.com' or $wgServer
-	# proxyPort: The port number of the indexer server e.g. 8983 as seen from the 
-	#          client. 
+	# proxyPort: The port number of the indexer server e.g. 8983 as seen from the
+	#          client.
 	#          If the solrproxy is used this can be omitted.
-	# proxyServlet: Servlet of the indexer proxy as seen from the client. If the 
+	# proxyServlet: Servlet of the indexer proxy as seen from the client. If the
 	#          solrproxy is used it should be
 	#          "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php"
 	#          If the indexer is addressed directly it should be '/solr/select' (for SOLR)
 	# indexerHost: Name or IP address of the indexer server as seen from the wiki server
 	#          e.g. 'localhost'
-	#          If the solrproxy is used and the indexer host (SOLR) is different from 
-	#          'localhost', i.e. SOLR is running on another machine than the wiki server, 
+	#          If the solrproxy is used and the indexer host (SOLR) is different from
+	#          'localhost', i.e. SOLR is running on another machine than the wiki server,
 	#          the variable $SOLRhost must be set in solrproxy.php.
-	# indexerPort: The port number of the indexer server e.g. 8983 as seen from the 
+	# indexerPort: The port number of the indexer server e.g. 8983 as seen from the
 	#          wiki server.
-	#          If the solrproxy is used and the port of the indexer host (SOLR) is 
+	#          If the solrproxy is used and the port of the indexer host (SOLR) is
 	#          different from 8983, the variable $SOLRport must be set in solrproxy.php.
 	##
 	
-	// load local config
-	$SOLRhost = 'localhost';
-	$SOLRport = 8080;
-	$SOLRuser = '';
-	$SOLRpass = '';
-	$SOLRcore = '';
-	if (file_exists(__DIR__ . '/solr-env.php')) {
-		require_once('solr-env.php');
-	}
+	require_once __DIR__ . '/proxy/src/SolrProxy/ConfigLoader.php';
+	ConfigLoader::loadConfig();
+	
+	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
+	global $fsgCustomConstraint;
+	global $wgServerHTTP, $wgScriptPath, $wgDBname;
+	
 	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
 	if (!isset($fsgFacetedSearchConfig)) {
 		$fsgFacetedSearchConfig = array(
 		    'indexer' => 'SOLR',
 		    'source'  => 'SMWDB',
 		    'proxyHost'    => $wgServer,
-		//	'proxyPort'    => 8983,		
+		//	'proxyPort'    => 8983,
 			'proxyServlet' => "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php",
-			'indexerHost' => $SOLRhost,
+		    'indexerHost' => $SOLRhost,
 			'indexerPort' => $SOLRport,
 			'indexerUser' => $SOLRuser,
 			'indexerPass' => $SOLRpass,
@@ -150,7 +149,6 @@ function wfUSSetupExtension() {
 	
 	// Set up Faceted Search
 	FSGlobalFunctions::setupFacetedSearch();
-	
 	
 	return true;
 }

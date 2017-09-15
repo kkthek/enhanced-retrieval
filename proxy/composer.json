@@ -19,7 +19,7 @@
 	
 	"autoload": {
 		"psr-4": {
-			"DIQA\\": "src/"
+            "DIQA\\SolrProxy\\": "src/SolrProxy/"
 		},
 		"files" : [
 			"SolrProxy.php"

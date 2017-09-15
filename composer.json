@@ -48,7 +48,8 @@
 			"EnhancedRetrieval.php"
 		],
 		"psr-4": {
-			"DIQA\\": "src/"
+			"DIQA\\FacetedSearch\\": "src/FacetedSearch/"
+
 		}
 	},
 	"config": {
