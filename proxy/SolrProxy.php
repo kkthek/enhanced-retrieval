@@ -16,7 +16,6 @@ global $fsgUseStatistics;
 
 ConfigLoader::loadConfig();
 
-
 // required for JSONP by IE
 header('Content-Type: application/javascript');
 
@@ -31,7 +30,7 @@ $solr = new SolrService($SOLRhost, $SOLRport, $core, false, "$SOLRuser:$SOLRpass
 if (get_magic_quotes_gpc() == 1) {
 	$query = stripslashes($query);
 }
-
+	
 try {
 	$query = $solr->applyConstraints($query);
 	$query = $solr->putFilterParamsToMainParams($query);

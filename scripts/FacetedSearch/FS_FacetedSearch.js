@@ -518,7 +518,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 				$("#waiting_for_solr").hide();
 				$("#results").show();
 			}
-		}, 300);
+		}, 1000);
 
 	}
 	

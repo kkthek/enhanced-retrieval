@@ -7,7 +7,7 @@ require_once( __DIR__ . '/../SolrPhpClient/Apache/Solr/Service.php');
 /**
  * This is a sub class of the Apache_Solr_Service. It adds an additional method
  * for sending raw queries to SOLR.
- * 
+ *
  * @author thsc
  *
  */
@@ -33,7 +33,7 @@ class SolrService extends \Apache_Solr_Service {
 		$this->groups = Auth::session();
 		if (count($this->groups) === 0) {
 			throw new \Apache_Solr_InvalidArgumentException("Not logged in");
-		}
+		}		
 	}
 	
 	/**

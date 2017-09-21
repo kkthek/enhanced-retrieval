@@ -1,11 +1,11 @@
 <?php
 /*
- * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH 
- * 
+ * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
+ *
  * This program is free software;
- * 
+ *
  * you can redistribute it and/or modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2 of the License, or 
+ * as published by the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version. This program is distributed in the hope that it
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -25,10 +25,10 @@
  *
  * @author Thomas Schweitzer
  *         Date: 22.11.2011
- *        
+ *
  */
 
-// Used to control a valid entry point for 
+// Used to control a valid entry point for
 // some classes that are only used by the
 // solrproxy.
 define ( 'SOLRPROXY', true );

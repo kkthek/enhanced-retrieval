@@ -20,16 +20,16 @@ class Auth {
 			$_SESSION['user_groups'.$userid] = [];
 			
 			$sessionId = self::getCookie($wgDBname.'_session');
-			$cookies = [ 
+			$cookies = [
 					$wgDBname.'UserID' => $userid,
 					$wgDBname.'UserName' => $userName,
-					$wgDBname.'_session' => $sessionId 
+					$wgDBname.'_session' => $sessionId
 			];
 			
 			global $wgServerHTTP, $wgScriptPath;
 			$res = self::http(
-					$wgServerHTTP . $wgScriptPath . 
-					"/api.php?action=diqa_util_userdataapi&format=json", 
+					$wgServerHTTP . $wgScriptPath .
+					"/api.php?action=diqa_util_userdataapi&format=json",
 					$cookies);
 			$o = json_decode($res[2]);
 			$groups = isset($o->result->user_groups) ? $o->result->user_groups : [];
@@ -65,7 +65,7 @@ class Auth {
 
 		$cookieArray = [];
 		foreach($cookies as $key => $value) {
-			$cookieArray[] = "$key=$value"; 
+			$cookieArray[] = "$key=$value";
 		}
 		
 		
