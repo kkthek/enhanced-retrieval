@@ -90,6 +90,11 @@ class SolrService extends \Apache_Solr_Service {
         
         $userGroups = $this->groups;
         
+        // if user has no groups at all, treat him as member of "user"
+        if (count($userGroups) == 0) {
+        	$userGroups[] = 'user';
+        }
+        
         // namespace constraints
         if (! isset($fsgNamespaceConstraint))
             $fsgNamespaceConstraint = [];
