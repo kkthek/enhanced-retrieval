@@ -500,15 +500,15 @@ FacetedSearch.classes.FacetedSearch = function () {
 		sm.doRequest(0);
 		
 		var lang = FacetedSearch.singleton.Language;
-		$("#waiting_for_solr").text(lang.getMessage('tryConnectSOLR'));
+		$("#waiting_for_solr").text(mw.msg('tryConnectSOLR'));
 		$("#results").hide();
 		$("#waiting_for_solr").show();
 		
 		var interval = setInterval(function () {
 			if (!solrPresent) {
 				var msg = (numTries < 3)
-					? lang.getMessage('tryConnectSOLR')
-					: lang.getMessage('solrNotFound') + dots
+					? mw.msg('tryConnectSOLR')
+					: mw.msg('solrNotFound', mw.config.get('wgFSSolrURL') + mw.config.get('wgFSSolrServlet')) + dots
 				$("#waiting_for_solr").text(msg);
 				dots += '.';
 				++numTries;
@@ -703,17 +703,17 @@ FacetedSearch.classes.FacetedSearch = function () {
 		mAjaxSolrManager.addWidget(new FacetedSearch.classes.PagerWidget({
 			id : 'pager',
 			target : '#pager',
-			prevLabel : lang.getMessage('pagerPrevious'),
-			nextLabel : lang.getMessage('pagerNext'),
+			prevLabel : mw.msg('pagerPrevious'),
+			nextLabel : mw.msg('pagerNext'),
 			renderHeader : function(perPage, offset, total, approx) {
 				$('#pager-header').html(
 						$('<span/>').text(
-								lang.getMessage('results') + ' ' 
+								mw.msg('results') + ' ' 
 								+ Math.min(total, offset + 1)
-								+ ' ' + lang.getMessage('to') + ' '
+								+ ' ' + mw.msg('to') + ' '
 								+ Math.min(total, offset + perPage)
 								+ ' ' 
-								+ lang.getMessage(approx ? 'ofapprox' : 'of') 
+								+ mw.msg(approx ? 'ofapprox' : 'of') 
 								+ ' ' + total));
 			}
 		}));

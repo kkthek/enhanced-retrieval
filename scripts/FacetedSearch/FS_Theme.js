@@ -442,7 +442,7 @@
 			var lang = FacetedSearch.singleton.Language;
 			output += 
 				'<div class="xfsResultModified">' + 
-					'<p>'+ lang.getMessage('lastChange') +': ' + 
+					'<p>'+ mw.msg('lastChange') +': ' + 
 						String(doc[MOD_ATT])
 							.replace('T', ' ')
 							.substring(0, 16) + 
@@ -490,7 +490,7 @@
 			// Show CAT_MAX categories
 			output += 
 				'<div class="xfsResultCategory">' +
-				'<p>'+ lang.getMessage('inCategory') +': ';
+				'<p>'+ mw.msg('inCategory') +': ';
 			var count = Math.min(cats.length, CAT_MAX);
 			var vals = [];
 			for ( var i = 0; i < count; i++) {
@@ -508,7 +508,7 @@
 				}
 				output += CAT_SEP;
 				output += '<span class="xfsToggle" style="display: none">' + vals.join(CAT_SEP) + '</span>';
-				output += ' (<a class="xfsMore">'+lang.getMessage('more')+'</a>)';
+				output += ' (<a class="xfsMore">'+mw.msg('more')+'</a>)';
 			}
 			output += '</p></div>';
 		}
@@ -529,7 +529,7 @@
 				output += 
 					'<div>' +
 						'(<a class="xfsShow">' +
-							lang.getMessage('show') +
+							mw.msg('show') +
 						'</a>)' +
 						'<div class="xfsResultTable"></div>' +
 					'</div>';
@@ -566,7 +566,7 @@
 			
                         // check if it is a pre-defined property
                         var key = plainName.replace(/\s/, "_");
-                        var langText = lang.containsMessage(key);
+                        var langText = mw.msg(key) != '<'+key+'>';
                         if (langText) {
                              output += '<td>' + langText + '</td>';
                         } else {
@@ -601,11 +601,11 @@
 	AjaxSolr.theme.prototype.namespaceFacet = function(facet, count, handler, showPropertyDetailsHandler, isRemove){
 		var lang = FacetedSearch.singleton.Language;
 		var name = facet === 'all' 
-					? lang.getMessage('allNamespaces')
+					? mw.msg('allNamespaces')
 					: mw.config.get('wgFormattedNamespaces')[facet];
 		if (name === '') {
 			// Main namespace
-			name = lang.getMessage('mainNamespace');
+			name = mw.msg('mainNamespace');
 		}
 		
 		if (typeof name === 'undefined') {
@@ -613,7 +613,7 @@
 			// was disabled after the creation of the index.
 			return '';
 		}
-		var tooltip = 'title="' + lang.getMessage('namespaceTooltip', count) + '" ';
+		var tooltip = 'title="' + mw.msg('namespaceTooltip', count) + '" ';
 		name = name.replace(/ /g, '&nbsp;');
 		var emptyNamespace = count === 0 ? " xfsEmptyNamespace" : "";
 		html = $('<span namespace="' + facet + '" class="xfsNamespace' + emptyNamespace + '"/>')
@@ -657,7 +657,7 @@
                 // check if it is a pre-defined property
                 var key = plainName.replace(/\s{2}/g, "_");
                 
-                var langText = lang.containsMessage(key);
+                var langText = mw.msg(key) != '<'+key+'>';
                 if (langText) {
                     plainName = langText;
                 } else {
@@ -676,7 +676,7 @@
 				'<span' + tooltip + ' class="'+cssClass+'">' +
 				nicename +
 					'<img class="xfsRemoveFacet" src="' + REMOVE_ICON +'" ' +
-						'title="'+ lang.getMessage('removeFilter') +'"/>' +
+						'title="'+ mw.msg('removeFilter') +'"/>' +
             (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '') +
 				'</span>';
 		} else {
@@ -715,11 +715,11 @@
 			
 			var img1 = 
 				'<img src="'+ path + 'right.png" ' +
-					'title="'+ lang.getMessage('showDetails') +
+					'title="'+ mw.msg('showDetails') +
 					'" id="'+img1ID+'"'+img1Visible+' class="detailsImage fs_propertyFacet"/>';
 			var img2 = 
 				'<img src="'+ path + 'down.png" ' +
-					'title="'+ lang.getMessage('hideDetails') +
+					'title="'+ mw.msg('hideDetails') +
 					'" id="'+img2ID+'"'+img2Visible+'" class="detailsImage fs_propertyFacet"/>';
 			html = img1 + img2 + html;
 			html += '<div id="' + divID +'"'+ img2Visible + '></div>';
@@ -756,13 +756,13 @@
 		var html = 
 			'<div>' +
 				'<a class="xfsFMore">' +
-					lang.getMessage('more') +
+					mw.msg('more') +
 				'</a>' +
 				'<span style="display: none">' +
 				' &#124; ' + 
 				'</span>' +
 				'<a class="xfsFLess" style="display: none">' +
-					lang.getMessage('less') +
+					mw.msg('less') +
 				'</a>' +
 			'</div>';
 		html = $(html);
@@ -785,32 +785,32 @@
 
 	AjaxSolr.theme.prototype.no_facet_filter_set = function() {
 		var lang = FacetedSearch.singleton.Language;
-		return $('<div class="xfsMinor">').text(lang.getMessage('noFacetFilter'));
+		return $('<div class="xfsMinor">').text(mw.msg('noFacetFilter'));
 	};
 	
 	AjaxSolr.theme.prototype.underspecified_search = function() {
 		var lang = FacetedSearch.singleton.Language;
 		return $('<div class="xfsUnderspecifiedSearch">')
-				.text(lang.getMessage('underspecifiedSearch'));
+				.text(mw.msg('underspecifiedSearch'));
 	};
 	
 	AjaxSolr.theme.prototype.remove_all_filters = function(handler) {
 		var lang = FacetedSearch.singleton.Language;
 		return $('<a href="#"/>')
-				.text(lang.getMessage('removeAllFilters'))
+				.text(mw.msg('removeAllFilters'))
 				.click(handler);
 	};
 	
 	AjaxSolr.theme.prototype.emptyQuery = function(handler) {
 		var lang = FacetedSearch.singleton.Language;
-		return lang.getMessage('addFacetOrQuery');
+		return mw.msg('addFacetOrQuery');
 	};
 		
 	AjaxSolr.theme.prototype.createArticle = function(articleName, link) {
 		var lang = FacetedSearch.singleton.Language;
 		link = escapeHTML(link);
 		articleName = escapeHTML(articleName);
-		var html = lang.getMessage('nonexArticle', '<em>'+articleName+'</em>') + 
+		var html = mw.msg('nonexArticle', '<em>'+articleName+'</em>') + 
 					' <a href="' + link + '" class="xfsRedLink">' + 
 						articleName + 
 					'</a>';
@@ -829,8 +829,8 @@
 		var lang = FacetedSearch.singleton.Language;
 		link = escapeHTML(link);
 		var html = ' <a href="' + link + '" title="' + 
-						lang.getMessage('searchLinkTT') + '">' + 
-						lang.getMessage('searchLink') + 
+						mw.msg('searchLinkTT') + '">' + 
+						mw.msg('searchLink') + 
 					'</a>';
 		return html;
 	};
@@ -872,7 +872,7 @@
 			var lang = FacetedSearch.singleton.Language;
 			var removeIcon = isRangeRestricted 
 				? '<img class="xfsRemoveRange" src="' + REMOVE_ICON +'" ' +
-					    'title="'+ lang.getMessage('removeRestriction') +'"/>'
+					    'title="'+ mw.msg('removeRestriction') +'"/>'
 				: "";
 			html = 
 				$('<div>' +

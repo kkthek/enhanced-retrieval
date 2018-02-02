@@ -167,10 +167,10 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		$( document ).on('click', 'a.xfsMore', function() {
 			if ($(this).prev('span.xfsToggle').is(':visible')) {
 				$(this).prev('span.xfsToggle').hide();
-				$(this).text(lang.getMessage('more'));
+				$(this).text(mw.msg('more'));
 			} else {
 				$(this).prev('span.xfsToggle').show();
-				$(this).text(lang.getMessage('less'));
+				$(this).text(mw.msg('less'));
 			}
 			return false;
 		});
@@ -188,7 +188,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		// Check if the table with property values is already present
 		var table = $this.parent().find('table');
 		if (table.length === 0) {
-			$this.text(lang.getMessage('hide'));
+			$this.text(mw.msg('hide'));
 			
 			var docData = $this.data('documentData');
 			var resultWidget = docData.resultWidget;
@@ -199,10 +199,10 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		
 		if (table.is(':visible')) {
 			table.hide();
-			$this.text(lang.getMessage('show'));
+			$this.text(mw.msg('show'));
 		} else {
 			table.show();
-			$this.text(lang.getMessage('hide'));
+			$this.text(mw.msg('hide'));
 		}
 		
 		return false;

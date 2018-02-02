@@ -139,9 +139,60 @@ class FSGlobalFunctions {
 				'/skin/faceted_search.css',
 				),
 				'dependencies' => array(
-				'ext.facetedSearch.Language',
+				
 				'ext.facetedSearch.ajaxSolr',
-				)
+				),
+		       'messages' => [   'solrNotFound',
+		        'tryConnectSOLR'	,
+		        'more' 				,
+		        'less' 				,
+		        'noFacetFilter'		,
+		        'underspecifiedSearch' ,
+		        'removeFilter'		,
+		        'removeRestriction'	,
+		        'removeAllFilters'	,
+		        'pagerPrevious'		,
+		        'pagerNext'			,
+		        'results'			,
+		        'to'				,
+		        'of'				,
+		        'ofapprox'			,
+		        'inCategory'		,
+		        'show'				,
+		        'hide'				,
+		        'showDetails'		,
+		        'hideDetails'		,
+		        'lastChange'		,
+		        'addFacetOrQuery'	,
+		        'mainNamespace'		,
+		        'namespaceTooltip'  ,
+		        'allNamespaces'		,
+		        'nonexArticle'		,
+		        'searchLink' 		,
+		        'searchLinkTT'		,
+		    
+		        '_TYPE' ,
+		        '_URI'  ,
+		        '_SUBP' ,
+		        '_SUBC' ,
+		        '_UNIT' ,
+		        '_IMPO' ,
+		        '_CONV' ,
+		        '_SERV' ,
+		        '_PVAL' ,
+		        '_MDAT' ,
+		        '_CDAT' ,
+		        '_NEWP' ,
+		        '_LEDT' ,
+		        '_ERRP' ,
+		        '_LIST' ,
+		        '_SOBJ' ,
+		        '_ASK'  ,
+		        '_ASKST',
+		        '_ASKFO',
+		        '_ASKSI',
+		        '_ASKDE'
+		    ]
 	
 		);
 		
@@ -160,9 +211,11 @@ class FSGlobalFunctions {
 						'ext.diqa.util',
 						'jquery.ui.autocomplete',
 						'ext.bootstrap.styles',
-				'ext.bootstrap.scripts' )
+				        'ext.bootstrap.scripts' 
+				)
+		    
 		);
-		self::addJSLanguageScripts();
+		
 	
 	}
 	
@@ -240,35 +293,6 @@ class FSGlobalFunctions {
 		
 		$script .= "\nXFS.annotationsInSnippet = ".json_encode($result).";";
 	}
-	
-	
-	
-	/**
-	 * Add appropriate JS language script
-	 */
-	private static function addJSLanguageScripts() {
-		global $fsgIP, $wgUser, $wgResourceModules;
-		// user language file
-		$ulngScript = '/scripts/FacetedSearch/Language/FS_Language.js';
-		$lngBase = '/scripts/FacetedSearch/Language/FS_Language';
-		if (isset($wgUser)) {
-			$lng = $lngBase . ucfirst($wgUser->getOption('language')).'.js';
-			if (file_exists($fsgIP. $lng)) {
-				$ulngScript = $lng;
-			} else {
-				// No language file => Fall back to english
-				$ulngScript =  $lngBase . 'En.js';
-			}
-		}
-		$wgResourceModules['ext.facetedSearch.Language'] = array(
-				'scripts' => array(
-						"scripts/FacetedSearch/Language/FS_Language.js",
-						$ulngScript
-				),
-				'localBasePath' => $fsgIP,
-				'remoteExtPath' => 'EnhancedRetrieval'
-		);
-	
-	}
+
 	
 }
