@@ -30,8 +30,8 @@ class Auth {
                 $wgDBname . '_session' => $sessionId
             ];
 
-            global $wgServerHTTP, $wgScriptPath;
-            $res = self::http("$wgServerHTTP$wgScriptPath/api.php?action=diqa_util_userdataapi&format=json", $cookies);
+            global $wgServer, $wgScriptPath;
+            $res = self::http("$wgServer$wgScriptPath/api.php?action=diqa_util_userdataapi&format=json", $cookies);
             
             $o = json_decode($res[2]);
             
