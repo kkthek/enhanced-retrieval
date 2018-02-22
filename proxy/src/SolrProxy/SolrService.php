@@ -90,28 +90,32 @@ class SolrService extends \Apache_Solr_Service {
         
         $userGroups = $this->groups;
         
-        // if user has no groups at all, treat him as member of "user"
-        if (count($userGroups) == 0) {
+        // treat him always as member of "user"
+        if (! in_array('user', $userGroups)) {
         	$userGroups[] = 'user';
         }
         
         // namespace constraints
-        if (! isset($fsgNamespaceConstraint))
+        if (! isset($fsgNamespaceConstraint)) {
             $fsgNamespaceConstraint = [];
+        }
+        $constraints = [];
         foreach ($fsgNamespaceConstraint as $group => $namespaces) {
             if (in_array($group, $userGroups)) {
-                $constraints = [];
                 foreach ($namespaces as $namespace) {
                     $constraints[] = "smwh_namespace_id:$namespace";
                 }
-                
-                $query = $query . "&fq=" . urlencode(implode(' OR ', $constraints));
             }
+        }
+        $constraints = array_unique($constraints);
+        if (count($constraints) > 0) {
+            $query = $query . "&fq=" . urlencode(implode(' OR ', $constraints));
         }
         
         // custom constraints
-        if (! isset($fsgCustomConstraint))
+        if (! isset($fsgCustomConstraint)) {
             $fsgCustomConstraint = [];
+        }
         foreach ($fsgCustomConstraint as $operation) {
             $query = $operation($query, $userGroups, $userName);
         }

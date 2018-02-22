@@ -532,7 +532,12 @@ SQL;
 		        if ($value->getDIType() == SMWDataItem::TYPE_WIKIPAGE) {
 		        	
 		            if ($value->getSubobjectName() != "") {
-
+                        
+		                global $fsgIndexSubobjects;
+		                if ($fsgIndexSubobjects !== true) {
+		                    continue;
+		                }
+		                
 		                // handle record properties
 		                if ($value->getSubobjectName() != "") {
 		                    $subData = smwfGetStore()->getSemanticData($value);

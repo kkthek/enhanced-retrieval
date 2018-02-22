@@ -248,3 +248,9 @@ $fsgShowArticleProperties = true;
 #
 global $fsgShowFileInOverlay;
 $fsgShowFileInOverlay = ['pdf'];
+
+####
+#
+# Index subobjects
+global $fsgIndexSubobjects;
+$fsgIndexSubobjects = true;

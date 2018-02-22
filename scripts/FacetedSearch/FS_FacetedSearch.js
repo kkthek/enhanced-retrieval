@@ -479,6 +479,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 			
 		}
 		
+		// clear init parameters
+		$('input#fs-prefix-param').val('');
 	}
 	
 	/**
