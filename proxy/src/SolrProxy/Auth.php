@@ -29,10 +29,12 @@ class Auth {
                 $wgDBname . 'UserName' => $userName,
                 $wgDBname . '_session' => $sessionId
             ];
-
-            global $wgServer, $wgScriptPath;
-            $res = self::http("$wgServer$wgScriptPath/api.php?action=diqa_util_userdataapi&format=json", $cookies);
-            
+           
+            global $wgHTTPAuthForLocalProxies;
+            global $wgServer, $wgServerHTTP, $wgScriptPath;
+            $server = isset($wgHTTPAuthForLocalProxies) && $wgHTTPAuthForLocalProxies === true ? $wgServerHTTP : $wgServer;
+            $res = self::http("$server$wgScriptPath/api.php?action=diqa_util_userdataapi&format=json", $cookies);
+           
             $o = json_decode($res[2]);
             
             if (isset($o->result)) {
@@ -105,6 +107,9 @@ class Auth {
 
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        if ($status == 0) {
+            throw new \Exception("Could not connect to $url");
+        }
 
         $bodyBegin = strpos($res, "\r\n\r\n");
         list ($header, $res) = $bodyBegin !== false ? array(

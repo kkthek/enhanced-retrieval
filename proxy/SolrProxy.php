@@ -24,14 +24,16 @@ $query = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : false;
 
 // create a new solr service instance with the configured settings
 $core = $SOLRcore == '' ? '/solr/' : '/solr/' . $SOLRcore . '/';
-$solr = new SolrService($SOLRhost, $SOLRport, $core, false, "$SOLRuser:$SOLRpass");
-
-// if magic quotes is enabled then stripslashes will be needed
-if (get_magic_quotes_gpc() == 1) {
-	$query = stripslashes($query);
-}
-	
 try {
+    
+    $solr = new SolrService($SOLRhost, $SOLRport, $core, false, "$SOLRuser:$SOLRpass");
+    
+    // if magic quotes is enabled then stripslashes will be needed
+    if (get_magic_quotes_gpc() == 1) {
+    	$query = stripslashes($query);
+    }
+	
+ 
 	$query = $solr->applyConstraints($query);
 	$query = $solr->putFilterParamsToMainParams($query);
 

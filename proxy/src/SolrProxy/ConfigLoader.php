@@ -9,7 +9,13 @@ use DIQA\Util\Configuration\ConfigLoader as UtilConfigLoader;
 class ConfigLoader {
         
     public static function loadConfig() {
-        require_once __DIR__ . '/../../../../Util/src/Util/Configuration/ConfigLoader.php';
+        
+        $configLoaderClass = __DIR__ . '/../../../../Util/src/Util/Configuration/ConfigLoader.php';
+        if (!file_exists($configLoaderClass)) {
+            return;
+        }
+        
+        require_once $configLoaderClass;
         
         $mwPath = __DIR__ . '/../../../../..';
         $ds = __DIR__ . '/../../../DefaultSettings.php';

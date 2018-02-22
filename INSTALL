@@ -37,4 +37,12 @@
 
 That's it.
 
+=== Troubleshooting ===
+
+SSL users: Sometimes servers are configured to not allow *local* HTTPS requests but only HTTP.
+		   In this case set: 
+		   
+		   $wgServerHTTP = http://....
+		   $wgHTTPAuthForLocalProxies = true;
+
 

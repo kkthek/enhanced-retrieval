@@ -31,7 +31,7 @@ class SolrService extends \Apache_Solr_Service {
         try {
             $this->groups = Auth::session();
         } catch (\Exception $e) {
-            throw new \Apache_Solr_InvalidArgumentException("Not logged in");
+            throw new \Apache_Solr_InvalidArgumentException("Not logged in: " .$e->getMessage());
         }
     }
 
