@@ -105,6 +105,10 @@ function wfUSSetupExtension() {
 	
 	require_once __DIR__ . '/proxy/src/SolrProxy/ConfigLoader.php';
 	ConfigLoader::loadConfig();
+
+	if (file_exists(__DIR__ . '/proxy/env.php')) {
+	    require_once __DIR__ . '/proxy/env.php';
+	}
 	
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 	global $fsgCustomConstraint;
