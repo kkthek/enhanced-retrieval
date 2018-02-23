@@ -61,4 +61,7 @@ SSL users: Sometimes servers are configured to not allow *local* HTTPS requests 
 		   $wgServerHTTP = http://....
 		   $wgHTTPAuthForLocalProxies = true;
 
+HTTP Auth: If the wiki is protected by Basic Auth, set $fsgHTTPAuth
 
+			$fsgHTTPAuth = "user:pass";
+			

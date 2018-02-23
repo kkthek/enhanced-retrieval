@@ -102,6 +102,10 @@ class Auth {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, true);
+        global $fsgHTTPAuth;
+        if (isset($fsgHTTPAuth)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Basic ' . base64_encode($fsgHTTPAuth)]);
+        }
         curl_setopt($ch, CURLOPT_COOKIE, implode('; ', $cookieArray));
         $res = curl_exec($ch);
 
