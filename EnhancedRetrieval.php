@@ -104,11 +104,11 @@ function wfUSSetupExtension() {
 	##
 	
 	require_once __DIR__ . '/proxy/src/SolrProxy/ConfigLoader.php';
-	ConfigLoader::loadConfig();
-
-	if (file_exists(__DIR__ . '/proxy/env.php')) {
-	    require_once __DIR__ . '/proxy/env.php';
-	}
+    if (file_exists(__DIR__ . '/env.php')) {
+        require_once __DIR__ . '/env.php';
+    } else {
+        ConfigLoader::loadConfig();
+    }
 	
 	if (!isset($SOLRhost)) {
 	    $SOLRhost = 'localhost';

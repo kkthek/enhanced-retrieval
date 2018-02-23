@@ -254,3 +254,21 @@ $fsgShowFileInOverlay = ['pdf'];
 # Index subobjects
 global $fsgIndexSubobjects;
 $fsgIndexSubobjects = true;
+
+####
+#
+# Facets shown under search hits
+global $fsgShownFacets;
+$fsgShownFacets = [];
+
+####
+#
+# Facets with a OR-dialog
+global $fsgFacetsWithOR;
+$fsgFacetsWithOR=[];
+
+####
+#
+# Categories which should be shown in title of search hit
+global $fsgCategoriesToShowInTitle;
+$fsgCategoriesToShowInTitle=[];

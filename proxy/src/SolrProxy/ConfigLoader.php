@@ -21,7 +21,7 @@ class ConfigLoader {
         $ds = __DIR__ . '/../../../DefaultSettings.php';
         $configVariables = [
             'wgDBname', 'wgDBuser', 'wgDBpassword',
-            'wgServerHTTP', 'wgScriptPath',
+            'wgServer', 'wgScriptPath',
             'SOLRhost', 'SOLRport', 'SOLRuser', 'SOLRpass', 'SOLRcore',
             'fsgNamespaceConstraint', 'fsgCustomConstraint', 'fsgUseStatistics'
         ];

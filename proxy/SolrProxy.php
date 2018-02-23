@@ -14,10 +14,10 @@ global $SOLRuser;
 global $SOLRpass;
 global $fsgUseStatistics;
 
-ConfigLoader::loadConfig();
 if (file_exists(__DIR__ . '/env.php')) {
     require_once __DIR__ . '/env.php';
-    
+} else {
+    ConfigLoader::loadConfig();
 }
 if (!isset($SOLRhost)) {
    $SOLRhost = 'localhost';
