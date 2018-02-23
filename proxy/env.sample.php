@@ -19,8 +19,8 @@ $SOLRcore = '';
 /**
  * Wiki connection data
  */
-global $wgServerHTTP, $wgScriptPath, $wgDBname;
-$wgServerHTTP = "http://wimawiki.local";
+global $wgServer, $wgScriptPath, $wgDBname;
+$wgServer = "http://wimawiki.local";
 $wgScriptPath = "/mediawiki";
 $wgDBname = 'wima_wiki';
 

@@ -32,6 +32,12 @@
 	$SOLRuser = 'user';
 	$SOLRpass = 'geheim';
 	$SOLRcore = 'my_index';
+
+	global $wgServer, $wgScriptPath, $wgDBname;
+	$wgServer = "http://wimawiki.local";
+	$wgScriptPath = "/mediawiki";
+	$wgDBname = 'wima_wiki';
+	
 -----------------------------------------------------------------------------------
 
 	Note: SOLRuser / SOLRpass / SOLRcore are optional, default is empty. 
