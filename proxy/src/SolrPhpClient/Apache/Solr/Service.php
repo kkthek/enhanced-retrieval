@@ -238,12 +238,15 @@ class Apache_Solr_Service
 	 * @param string $path
 	 * @param Apache_Solr_HttpTransport_Interface $httpTransport
 	 */
-	public function __construct($host = 'localhost', $port = 8180, $path = '/solr/', $httpTransport = false, $authBase64)
+	public function __construct($host = 'localhost', $port = 8180, $path = '/solr/', $httpTransport = false, $userpass)
 	{
 		$this->setHost($host);
 		$this->setPort($port);
 		$this->setPath($path);
-		$this->setAuth($authBase64);
+		
+		if ($userpass != ':') {
+		  $this->setAuth($userpass);
+		}
 		
 		$this->_initUrls();
 

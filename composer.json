@@ -55,7 +55,6 @@
 		"process-timeout": 0
 	},
 	"scripts": {
-		"setup": "php maintenance/setup.php",
 		"update": "php maintenance/updateSOLR.php -v"
 	}
 }

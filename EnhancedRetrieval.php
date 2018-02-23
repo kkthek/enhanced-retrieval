@@ -110,6 +110,22 @@ function wfUSSetupExtension() {
 	    require_once __DIR__ . '/proxy/env.php';
 	}
 	
+	if (!isset($SOLRhost)) {
+	    $SOLRhost = 'localhost';
+	}
+	if (!isset($SOLRport)) {
+	    $SOLRport = 8983;
+	}
+	if (!isset($SOLRuser)) {
+	    $SOLRuser = '';
+	}
+	if (!isset($SOLRpass)) {
+	    $SOLRpass = '';
+	}
+	if (!isset($SOLRcore)) {
+	    $SOLRcore = '';
+	}
+	
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 	global $fsgCustomConstraint;
 	global $wgServerHTTP, $wgScriptPath, $wgDBname;

@@ -1,31 +1,41 @@
-== Enhanced Retrieval Extension ==
+== Enhanced Retrieval Extension 2.0 ==
 
 === Requirements ===
 * MediaWiki 1.27.x 
-* SMW 2.4.x
-* Apache SOLR server v4.4 
-	find a preconfigured SOLR with the DataWiki configuration at
-	http://downloads.diqa-pm.com/free/power-search/1.9.0/
+* SMW 2.5.x
+* Apache SOLR server v6.6+ 
 
-	We recommend using Tomcat as an application server for SOLR. Installation instructions are contained.
+	You can setup your own Solr server. Please use the SOLR-schema given in:
+		core-name.zip (tested with Solr 6.6)
 	
+	We recommend using Tomcat as an application server for SOLR. 
+	Installation instructions are contained.
+		
 === Installation Instructions ===
 
+* Run in MW root folder:
+
+	composer require diqa/enhanced-retrieval
+ 
 * Add to your LocalSettings.php:
   $smwgEnabledDeferredUpdate = false;
-  
-* Add this ONLY IF you DID NOT use composer to install  
-	require_once("extensions/EnhancedRetrieval/includes/EnhancedRetrieval.php");
-
-* Then run:
-	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/setup.php
-
-* Adapt configuration to SOLR Server
-	If the SOLR server does not run on port 8080 (default port of Tomcat), please configure it in 
-		{wiki-path}/extensions/EnhancedRetrieval/includes/FacetedSearch/solrproxy.php
-		{wiki-path}/extensions/EnhancedRetrieval/includes/FacetedSearch/FS_Settings.php
 
 * Start the SOLR server 
+
+* Create a file proxy/env.php with the following content:
+
+-----------------------------------------------------------------------------------
+<?php
+	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
+	$SOLRhost = '10.0.08';
+	$SOLRport = 80;
+	$SOLRuser = 'user';
+	$SOLRpass = 'geheim';
+	$SOLRcore = 'my_index';
+-----------------------------------------------------------------------------------
+
+	Note: SOLRuser / SOLRpass / SOLRcore are optional, default is empty. 
+		  Default SOLR port is 8983. Default host is "localhost"
 
 * Create the initial index:
 	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/updateSOLR.php -v
@@ -40,7 +50,7 @@ That's it.
 === Troubleshooting ===
 
 SSL users: Sometimes servers are configured to not allow *local* HTTPS requests but only HTTP.
-		   In this case set: 
+		   In this case set in proxy/env.php 
 		   
 		   $wgServerHTTP = http://....
 		   $wgHTTPAuthForLocalProxies = true;
