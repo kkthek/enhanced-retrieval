@@ -28,7 +28,8 @@
 		"composer/installers": "1.*,>=1.0.1",
 		"mediawiki/semantic-media-wiki": "~2.4",
 		"philo/laravel-blade": "3.1.*",
-		"mediawiki/bootstrap": "~1.1"
+		"mediawiki/bootstrap": "~1.1",
+		"diqa/util": "~2.0"
 	},
 	"require-dev": {
 		"mediawiki/semantic-media-wiki": "~2.4"

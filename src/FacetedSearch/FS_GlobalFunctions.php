@@ -208,7 +208,7 @@ class FSGlobalFunctions {
 				'styles' => array('skin/dialogs.css'),
 				'dependencies' => array(
 						'ext.facetedSearch.special',
-						'ext.diqa.util',
+					    'ext.diqa.util',
 						'jquery.ui.autocomplete',
 						'ext.bootstrap.styles',
 				        'ext.bootstrap.scripts' 
@@ -233,6 +233,10 @@ class FSGlobalFunctions {
 		 $fsgShowArticleProperties,
 		 $wgOut;
 		
+		if (!isset($fsgExtraPropertiesToRequest)) {
+		    $fsgExtraPropertiesToRequest = [];
+		}
+		 
 		$fsgTitlePropertyField = '';
 		if ($fsgTitleProperty != '') {
 			$fsgTitlePropertyField = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgTitleProperty));
