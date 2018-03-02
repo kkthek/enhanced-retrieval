@@ -27,7 +27,9 @@ use DIQA\FacetedSearch\FSIndexerFactory;
  * @ingroup EnhancedRetrieval Maintenance
  */
 
-$optionsWithArgs = array( 'd', 's', 'e', 'n', 'b', 'f', 'startidfile', 'server', 'page' ); // -d <delay>, -s <startid>, -e <endid>, -n <numids>, --startidfile <startidfile> -b <backend>
+$optionsWithArgs = array( 'd', 's', 'e', 'n', 'b', 'f', 'startidfile', 'server', 'page' ); 
+// -d <delay>, -s <startid>, -e <endid>, -n <numids>, --startidfile <startidfile> -b <backend>
+$optionsWithoutArgs = array('x');
 
 require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . "/maintenance/commandLine.inc"
@@ -90,7 +92,11 @@ if ( array_key_exists( 'e', $options ) ) { // Note: this might reasonably be lar
 		while($row = $db->fetchObject($res)) {
 			$end = $row->maxid;
 		}
-	}
+		if ($end == '') {
+		    echo "\nThere are no pages. Nothing to do.\n";
+		    die();
+		}
+	} 
 }
 
 
@@ -118,7 +124,8 @@ if ( $pages == false ) {
 	" If your machine gets very slow after many pages (typically more than\n" .
 	" 1000) were refreshed, please abort with CTRL-C and resume this script\n" .
 	" at the last processed page id using the parameter -s (use -v to display\n" .
-	" page ids during refresh). Continue this until all pages were refreshed.\n---\n";
+	" page ids during refresh). \n\n[Use -x for debugging information]\n\n".
+	"Continue this until all pages were refreshed.\n---\n";
 	print "Processing all IDs from $start to " . ( $end ? "$end" : 'last ID' ) . " ...\n";
 	new SMWDIProperty("_wpg");
 	$id = $start;
@@ -133,7 +140,12 @@ if ( $pages == false ) {
 		try {
 			$indexer->updateIndexForArticle(new WikiPage($title));
 		} catch(Exception $e) {
-			print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
+		    if (!$debug) {
+			    print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
+		    } else {
+		        print sprintf("\n[NOT INDEXED]\n%s\n", $e->getMessage());
+		        print "---------------------------------------------------------\n";
+		    }
 		}
 		if ( ( $delay !== false ) && ( ( $num_files + 1 ) % 100 === 0 ) ) {
 			usleep( $delay );

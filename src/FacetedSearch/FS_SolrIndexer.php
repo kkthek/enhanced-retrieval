@@ -210,13 +210,8 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		$xml .= "\t</doc>\n</add>";
 
 		// Send the XML as update command to the SOLR server
-		$httpResult = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml, $rc);
-		if ($debug) {
-			print_r($httpResult); 
-			print "\n\n";
-			print_r($xml);
-			print "\n-------------------------------\n";
-		}
+		$rc = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml, $rc);
+		
 		return $rc == self::HTTP_OK;
 	}
 	
@@ -420,12 +415,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		$curl = curl_init($url);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: text/xml', "Authorization: Basic {$this->authBase64}"));
 		curl_setopt($curl, CURLOPT_HEADER, 1);
-//		curl_setopt($curl, CURLOPT_USERAGENT, $this->user_agent);
-//		if ($this->cookies == TRUE) curl_setopt($curl, CURLOPT_COOKIEFILE, $this->cookie_file);
-//		if ($this->cookies == TRUE) curl_setopt($curl, CURLOPT_COOKIEJAR, $this->cookie_file);
-//		curl_setopt($curl, CURLOPT_ENCODING , $this->compression);
-//		curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-//		if ($this->proxy) curl_setopt($curl, CURLOPT_PROXY, $this->proxy);
+
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -433,13 +423,17 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		
 		$result = curl_exec($curl);
 		if ($result === false) {
-			$result = curl_error($curl);
+		    throw new \Exception(curl_error($curl), 500);
 		}
 		$info = curl_getinfo($curl);
 		curl_close($curl);
 		
-		$resultCode = $info['http_code']; # ????
-		return $result;
+		$HTTPCode = $info['http_code']; 
+		if ($HTTPCode != 200) {
+		    $header = @explode("\r\n\r\n", $result)[1];
+		    throw new \Exception("\n[Payload]:\n$data\n[HTTP header]:\n$header", $HTTPCode);
+		}
+		return $HTTPCode;
 		
 	}
 	

@@ -91,6 +91,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 	// Wait 500ms for new key presses before the search is executed
 	var KEY_DELAY = 500;
 	
+	var solrPresent = false;
+	
 	//--- Private members ---
 
 	// The instance of this object
@@ -223,6 +225,10 @@ FacetedSearch.classes.FacetedSearch = function () {
 			if (that.timerstamp == timestamp) {
 				
 				updateSearchResults();
+				
+				if (!solrPresent) {
+					checkSolrPresent();
+				}
 			}
 		},KEY_DELAY);
 		return false;
@@ -266,6 +272,10 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 */
 	that.onSearchButtonClicked = function () {
 		updateSearchResults();
+
+		if (!solrPresent) {
+			checkSolrPresent();
+		}
 	}
 	
 	/**
@@ -487,12 +497,23 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * Checks if the SOLR server is responding
 	 */
 	function checkSolrPresent() {
-		var solrPresent = false;
+		
 		var sm = new AjaxSolr.FSManager({
 			solrUrl : mw.config.get('wgFSSolrURL'),
 			servlet : mw.config.get('wgFSSolrServlet'),
 			handleResponse : function (data) {
 				solrPresent = true;
+			},
+			handleErrorResponse: function() {
+				if (numTries >= 15) {
+					
+					$("#waiting_for_solr div").remove();
+					var errorHint = $('<div>')
+						.text(mw.msg('solrConnectionError'));
+					errorHint.css({'color' : 'red', 'font-weight' : 'bold'});
+					$("#waiting_for_solr").append(errorHint);
+					
+				}
 			}
 		});
 		var dots = '';
@@ -514,6 +535,11 @@ FacetedSearch.classes.FacetedSearch = function () {
 				$("#waiting_for_solr").text(msg);
 				dots += '.';
 				++numTries;
+				if (numTries >= 15) {
+					// stop after 15 retries
+					clearInterval(interval);
+					return;
+				}
 				sm.doRequest(0);
 			} else {
 				clearInterval(interval);

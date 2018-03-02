@@ -62,7 +62,13 @@ try {
 		$solr->updateSearchStats($response);
 	}
 } catch (Exception $e) {
-	die("<html><head><title>SEARCH EXCEPTION</title><body><pre>{$e->__toString()}</pre></body></html>");
+    $res = new stdClass();
+    $res->error = true;
+    $res->msg = $e->getMessage();
+    header("HTTP/1.0 500 Internal error");
+    header('Content-Type: application/json');
+    echo json_encode($res);
+	die();
 }
 
 echo $response;

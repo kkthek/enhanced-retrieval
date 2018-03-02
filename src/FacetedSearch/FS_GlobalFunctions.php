@@ -143,6 +143,7 @@ class FSGlobalFunctions {
 				'ext.facetedSearch.ajaxSolr',
 				),
 		       'messages' => [   'solrNotFound',
+		        'solrConnectionError',
 		        'tryConnectSOLR'	,
 		        'more' 				,
 		        'less' 				,
