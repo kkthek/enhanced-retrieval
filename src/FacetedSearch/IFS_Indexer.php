@@ -74,6 +74,6 @@ interface IFSIndexer {
 	 * @param Article $article
 	 * 		The article that changed.
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL);
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL, & $messages = []);
 	
 }

@@ -71,11 +71,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 */
 	private $dependant = [];
 	
-	/**
-	 * Debug mode
-	 * @var boolean
-	 */
-	private $debug;
+	
 	
 	/**
 	 * Creates a new FSSolrSMWDB indexer object.
@@ -86,11 +82,10 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * @param string $user
 	 * @param string $pass
 	 * @param string $indexCore SOLR core
-	 * @param boolean debug
+	 *
 	 */
-	public function __construct($host, $port, $user = '', $pass = '', $indexCore = '', $debug = false) {
+	public function __construct($host, $port, $user = '', $pass = '', $indexCore = '') {
 		parent::__construct($host, $port, $user, $pass, $indexCore);
-		$this->debug = $debug;
 	}
 
 	/**
@@ -104,8 +99,10 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * @param string $text
 	 *		Optional content of the article. If NULL, the content of $wikiPage is
 	 *		retrieved in this method.
+	 * @param array $messages User readible messages
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL) {
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL, & $messages = [] ) {
+	    
 		$doc = array();
 		$this->dependant = [];
 		
@@ -182,15 +179,19 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
 		// extract document if a file was uploaded
 		if ($pns == NS_FILE) {
-			$docData = $this->extractDocument($t);
-			$doc['smwh_full_text'] .= " " . $docData['text'];
+		    try {
+			   $docData = $this->extractDocument($t);
+		    } catch(\Exception $e) {
+		        $messages[] = $e->getMessage();
+			   $doc['smwh_full_text'] .= " " . $e->getMessage();
+		    }
 		}
 		
 		// call fs_saveArticle hook
 		\Hooks::run('fs_saveArticle', array( &$rawText, &$doc ));
 		
 		// Let the super class update the index
-		$this->updateIndex($doc, $options, $this->debug);
+		$this->updateIndex($doc, $options);
 		
 	    if($this->updateOnlyCurrentArticle()) {
 			return true;
@@ -211,7 +212,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			global $fsUpdateOnlyCurrentArticle;
 			$fsUpdateOnlyCurrentArticle = true;
 			foreach($this->dependant as $ttu) {
-				$this->updateIndexForArticle(new WikiPage($ttu));
+				$this->updateIndexForArticle(new WikiPage($ttu), $user, $rawText, $messages);
 			}
 		}
 		

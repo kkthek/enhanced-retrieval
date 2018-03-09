@@ -1,184 +1,221 @@
 <?php
-
 use DIQA\FacetedSearch\FSIndexerFactory;
-/*
- * Copyright (C) DIQA-Projektmanagement GmbH 2013
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program.If not, see <http://www.gnu.org/licenses/>.
- *
- */
 
 /**
- * Recreates all the semantic data in the SOLR server.
- * Note: Does NOT remove the semantic data before.
+ * Updates the solr index.
  *
- * @author Kai Kuehn
- * @ingroup EnhancedRetrieval Maintenance
+ * @ingroup EnhancedRetrieval
  */
+require_once __DIR__ . '/../../../maintenance/Maintenance.php';
 
-$optionsWithArgs = array( 'd', 's', 'e', 'n', 'b', 'f', 'startidfile', 'server', 'page' ); 
-// -d <delay>, -s <startid>, -e <endid>, -n <numids>, --startidfile <startidfile> -b <backend>
-$optionsWithoutArgs = array('x');
+class UpdateSolr extends Maintenance
+{
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
-	? getenv( 'MW_INSTALL_PATH' ) . "/maintenance/commandLine.inc"
-	: dirname( __FILE__ ) . '/../../../maintenance/commandLine.inc' );
+    private $linkCache;
+    private $writeToStartidfile;
 
-global $smwgEnableUpdateJobs, $wgServer, $wgTitle;
-$wgTitle = Title::newFromText( 'SMW_refreshData.php' );
-$smwgEnableUpdateJobs = false; // do not fork additional update jobs while running this script
+    public function __construct()
+    {
+        parent::__construct();
+        $this->mDescription = "Updates SOLR index";
+        $this->addOption('v', 'Verbose mode', false, false);
+        $this->addOption('d', 'Delay every 100 pages (miliseconds)', false, true);
+        $this->addOption('x', 'Debug mode', false, false);
+        $this->addOption('p', 'Page title(s), separated by ","', false, true);
+        $this->addOption('s', 'Start-ID', false, true);
+        $this->addOption('e', 'End-ID', false, true);
+        $this->addOption('n', 'Number of IDs from Start-ID', false, true);
+        $this->addOption('f', 'End-ID by Pagename', false, true);
+        $this->addOption('startidfile', 'File containing ID to start processing and saves last processed ID to this file', false, true);
+    }
 
-// when indexing everything, dependent pages do not need special treatment
-global $fsUpdateOnlyCurrentArticle;
-$fsUpdateOnlyCurrentArticle = true;
+    public function execute()
+    {
+        
+        // when indexing everything, dependent pages do not need special treatment
+        global $fsUpdateOnlyCurrentArticle;
+        $fsUpdateOnlyCurrentArticle = true;
+        
+        $this->linkCache = LinkCache::singleton();
+        $this->num_files = 0;
+        $this->printDocHeader();
+        
+        if (!$this->hasOption('p')) {
+            $startId = $this->getStartId();
+            $endId = $this->getEndId($startId);
+            $this->refreshPagesByIds($startId, $endId);
+        } else {
+            $pages = explode(',', $this->getOption('p'));
+            $this->refreshPages($pages);
+        }
+        
+        print "{$this->num_files} IDs refreshed.\n";
+    }
+    
+    /**
+     * Print Documatation header
+     */
+    private function printDocHeader() {
+        print "Refreshing all semantic data in the SOLR server!\n---\n" .
+            " Some versions of PHP suffer from memory leaks in long-running scripts.\n" .
+            " If your machine gets very slow after many pages (typically more than\n" .
+            " 1000) were refreshed, please abort with CTRL-C and resume this script\n" .
+            " at the last processed page id using the parameter -s (use -v to display\n" .
+            " page ids during refresh). \n\n[Use -x for debugging information]\n\n" .
+            "Continue this until all pages were refreshed.\n---\n";
+        
+    }
 
-if ( isset( $options['server'] ) ) {
-	$wgServer = $options['server'];
+    /**
+     * Refresh all pages from ID start to ID end
+     * Writes last processed ID to a file if option 'startidfile' is set.
+     * 
+     * @param int $start
+     * @param int $end
+     */
+    private function refreshPagesByIds($start, $end)
+    {
+        
+        print "Processing all IDs from $start to " . ($end ? "$end" : 'last ID') . " ...\n";
+        new SMWDIProperty("_wpg");
+        $id = $start;
+        while (((! $end) || ($id <= $end)) && ($id > 0)) {
+            $title = Title::newFromID($id);
+            if ($this->hasOption('v')) {
+                print sprintf("(%s) Processing ID %s ... [%s]\n", 
+                    $this->num_files, $id, ! is_null($title) ? $title->getPrefixedText() : "-");
+            }
+            $id ++;
+            if (is_null($title)) {
+                continue;
+            }
+            
+            $this->updateIndex($title);
+            
+            if (($this->hasOption('d')) && (($this->num_files + 1) % 100 === 0)) {
+                usleep($this->getOption('d'));
+            }
+            $this->num_files ++;
+            $this->linkCache->clear(); // avoid memory leaks
+            
+            if ($this->writeToStartidfile) {
+                file_put_contents($this->getOption('startidfile'), "$id");
+            }
+        }
+        
+    }
+
+    /**
+     * Refresh given pages.
+     * 
+     * @param array of string $pages Page titles
+     */
+    private function refreshPages($pages)
+    {
+        print "Refreshing specified pages!\n\n";
+        
+        foreach ($pages as $page) {
+            
+            $page = trim($page);
+            if ($this->getOption('v')) {
+                print sprintf("(%s) Processing page %s ... \n", $this->num_files, $page);
+            }
+            
+            $title = Title::newFromText($page);
+            
+            if (! is_null($title)) {
+                $this->updateIndex($title);
+            }
+            
+            $this->num_files ++;
+        }
+     
+    }
+    
+    /**
+     * Update SOLR index of $title.
+     * 
+     * @param Title $title
+     */
+    private function updateIndex($title) {
+        $indexer = FSIndexerFactory::create();
+        try {
+            $messages = [];
+            $indexer->updateIndexForArticle(new WikiPage($title), null, null, $messages);
+            if (count($messages > 0)) {
+                print implode("\t\n", $messages);
+            }
+        } catch (Exception $e) {
+            if (! $this->hasOption('x')) {
+                print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
+            } else {
+                print sprintf("\n[NOT INDEXED]\n%s\n", $e->getMessage());
+                print "---------------------------------------------------------\n";
+            }
+        }
+    }
+
+    /**
+     * Calculates startID of MW-page 
+     * Reads ID from a file if option 'startidfile' is specified.
+     * 
+     * @return int
+     */
+    private function getStartId()
+    {
+        $this->writeToStartidfile = false;
+        if ($this->hasOption('s')) {
+            $start = max(1, intval($this->getOption('s')));
+        } elseif ($this->hasOption('startidfile')) {
+            if (! is_writable(file_exists($this->getOption('startidfile')) ? $this->getOption('startidfile') : dirname($this->getOption('startidfile')))) {
+                die("Cannot use a startidfile that we can't write to.\n");
+            }
+            $this->writeToStartidfile = true;
+            if (is_readable($this->getOption('startidfile'))) {
+                $start = max(1, intval(file_get_contents($this->getOption('startidfile'))));
+            } else {
+                $start = 1;
+            }
+        } else {
+            $start = 1;
+        }
+        return $start;
+    }
+
+    /**
+     * Calculates endID of MW-page
+     * 
+     * @param int $start Start-ID
+     * 
+     * @return int
+     */
+    private function getEndId($start)
+    {
+        if ($this->hasOption('e')) { // Note: this might reasonably be larger than the page count
+            $end = intval($this->getOption('e'));
+        } elseif ($this->hasOption('n')) {
+            $end = $start + intval($this->getOption('n'));
+        } elseif ($this->hasOption('f')) {
+            $title = Title::newFromText($this->getOption('f'));
+            $start = $title->getArticleID();
+            $end = $title->getArticleID();
+        } else {
+            $query = "SELECT MAX(page_id) as maxid FROM page";
+            $db = wfGetDB(DB_SLAVE);
+            $res = $db->query($query);
+            if ($db->numRows($res) > 0) {
+                while ($row = $db->fetchObject($res)) {
+                    $end = $row->maxid;
+                }
+                if ($end == '') {
+                    echo "\nThere are no pages. Nothing to do.\n";
+                    die();
+                }
+            }
+        }
+        return $end;
+    }
 }
 
-if ( array_key_exists( 'd', $options ) ) {
-	$delay = intval( $options['d'] ) * 100000; // sleep 100 times the given time, but do so only each 100 pages
-} else {
-	$delay = false;
-}
-
-if ( isset( $options['page'] ) ) {
-	$pages = explode( '|', $options['page'] );
-} else {
-	$pages = false;
-}
-
-$writeToStartidfile = false;
-if ( array_key_exists( 's', $options ) ) {
-	$start = max( 1, intval( $options['s'] ) );
-} elseif ( array_key_exists( 'startidfile', $options ) ) {
-	if ( !is_writable( file_exists( $options['startidfile'] ) ? $options['startidfile'] : dirname( $options['startidfile'] ) ) ) {
-		die("Cannot use a startidfile that we can't write to.\n");
-	}
-	$writeToStartidfile = true;
-	if ( is_readable( $options['startidfile'] ) ) {
-		$start = max( 1, intval( file_get_contents( $options['startidfile'] ) ) );
-	} else {
-		$start = 1;
-	}
-} else {
-	$start = 1;
-}
-
-if ( array_key_exists( 'e', $options ) ) { // Note: this might reasonably be larger than the page count
-	$end = intval( $options['e'] );
-} elseif ( array_key_exists( 'n', $options ) ) {
-	$end = $start + intval( $options['n'] );
-} elseif ( array_key_exists( 'f', $options ) ) {
-	$title = Title::newFromText($options['f']);
-	$start = $title->getArticleID();
-	$end = $title->getArticleID();
-} else {
-	$query = "SELECT MAX(page_id) as maxid FROM page";
-	$db = wfGetDB( DB_SLAVE );
-	$res = $db->query( $query );
-	if($db->numRows( $res ) > 0) {
-		while($row = $db->fetchObject($res)) {
-			$end = $row->maxid;
-		}
-		if ($end == '') {
-		    echo "\nThere are no pages. Nothing to do.\n";
-		    die();
-		}
-	} 
-}
-
-
-$verbose = array_key_exists( 'v', $options );
-$debug = array_key_exists( 'x', $options );
-
-$filterarray = array();
-if (  array_key_exists( 'c', $options ) ) {
-	$filterarray[] = NS_CATEGORY;
-}
-if (  array_key_exists( 'p', $options ) ) {
-	$filterarray[] = SMW_NS_PROPERTY;
-}
-if (  array_key_exists( 't', $options ) ) {
-	$filterarray[] = SMW_NS_TYPE;
-}
-$filter = count( $filterarray ) > 0 ? $filterarray : false;
-
-
-$linkCache = LinkCache::singleton();
-$num_files = 0;
-if ( $pages == false ) {
-	print "Refreshing all semantic data in the SOLR server!\n---\n" .
-	" Some versions of PHP suffer from memory leaks in long-running scripts.\n" .
-	" If your machine gets very slow after many pages (typically more than\n" .
-	" 1000) were refreshed, please abort with CTRL-C and resume this script\n" .
-	" at the last processed page id using the parameter -s (use -v to display\n" .
-	" page ids during refresh). \n\n[Use -x for debugging information]\n\n".
-	"Continue this until all pages were refreshed.\n---\n";
-	print "Processing all IDs from $start to " . ( $end ? "$end" : 'last ID' ) . " ...\n";
-	new SMWDIProperty("_wpg");
-	$id = $start;
-	while ( ( ( !$end ) || ( $id <= $end ) ) && ( $id > 0 ) ) {
-		$title = Title::newFromID($id);
-		if ( $verbose ) {
-			print sprintf("(%s) Processing ID %s ... [%s]\n", $num_files, $id, !is_null($title) ? $title->getPrefixedText() : "-");
-		}
-		$id++;
-		if (is_null($title)) continue;
-		$indexer = FSIndexerFactory::create(null, $debug);
-		try {
-			$indexer->updateIndexForArticle(new WikiPage($title));
-		} catch(Exception $e) {
-		    if (!$debug) {
-			    print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
-		    } else {
-		        print sprintf("\n[NOT INDEXED]\n%s\n", $e->getMessage());
-		        print "---------------------------------------------------------\n";
-		    }
-		}
-		if ( ( $delay !== false ) && ( ( $num_files + 1 ) % 100 === 0 ) ) {
-			usleep( $delay );
-		}
-		$num_files++;
-		$linkCache->clear(); // avoid memory leaks
-	}
-	if ( $writeToStartidfile ) {
-		file_put_contents( $options['startidfile'], "$id" );
-	}
-	print "$num_files IDs refreshed.\n";
-} else {
-	print "Refreshing specified pages!\n\n";
-	
-	foreach ( $pages as $page ) {
-		
-		if ( $verbose ) {
-			print sprintf("(%s) Processing page %s ... \n", $num_files, $page);
-		}
-		
-		$title = Title::newFromText( $page );
-		
-		if ( !is_null( $title ) ) {
-			$indexer = FSIndexerFactory::create();
-			try {
-				$indexer->updateIndexForArticle(new WikiPage($title));
-			} catch(Exception $e) {
-				print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
-			}
-		}
-		
-		$num_files++;
-	}
-	
-	print "$num_files pages refreshed.\n";
-}
+$maintClass = "UpdateSolr";
+require_once RUN_MAINTENANCE_IF_MAIN;

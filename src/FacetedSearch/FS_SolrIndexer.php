@@ -164,12 +164,11 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	 * 		SOLR document. The value may be a single string i.e. the value of
 	 * 		the SOLR field or an array of string if the field is multi-valued.
 	 * @param array $options
-	 * @param boolean $debug
 	 * 
 	 * @return bool
 	 * 		<true> if the update was sent successfully
 	 */
-    public function updateIndex(array $document, array $options, $debug = false) {
+    public function updateIndex(array $document, array $options) {
 		// Create the XML for the document
 		$xml = "<add>\n\t<doc>\n";
 		
@@ -265,14 +264,14 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		// send document to Tika and extract text
 		if ($filepath == '') {
 			if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
-		    	echo sprintf("\n - WARNING: Empty file path for '%s'. Can not index document properly.\n", $title->getPrefixedText());
+			    throw new \Exception(sprintf("\n - WARNING: Empty file path for '%s'. Can not index document properly.\n", $title->getPrefixedText()));
 			}
 		    return;
 		}
 		$result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);
 		
 		if ($rc != 200) {
-			return [ 'xml' => NULL, 'text' => 'Keine Extraktion möglich' ]; // could not extract
+		    throw new \Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
 		}
 		
 		$xml =    simplexml_load_string($result);

@@ -29,6 +29,8 @@ class UpdateSolrJob extends Job {
 	 * @see Job::run()
 	 */
 	public function run() {
+	    
+	    $consoleMode = PHP_SAPI === 'cli' && !defined('UNITTEST_MODE');
 		$title = $this->params['title'];
 		$wp = new WikiPage(Title::newFromText($title));
 		
@@ -38,13 +40,17 @@ class UpdateSolrJob extends Job {
 		
 		$indexer = FSIndexerFactory::create();
 		try {
-			$indexer->updateIndexForArticle($wp);
+		    $messages = [];
+			$indexer->updateIndexForArticle($wp, null, null, $messages );
+			if ($consoleMode && count($messages > 0)) {
+			    print implode("\t\n", $messages);
+			}
 		} catch(\Exception $e) {
-			if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
+			if ( $consoleMode ) {
 				print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
 			}
 		}
-		if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
+		if ( $consoleMode ) {
 			echo "Updated (SOLR): $title";
 		}
 		
