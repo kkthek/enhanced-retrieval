@@ -66,8 +66,10 @@ try {
     $res->error = true;
     $res->msg = $e->getMessage();
     header("HTTP/1.0 500 Internal error");
-    header('Content-Type: application/json');
-    echo json_encode($res);
+    header('Content-Type: text/html');
+    echo '<h1 style="color:red;">ERROR</h1>';
+    echo "<br>Error message from SOLR-proxy: " . $e->getMessage();
+    echo "<br>Please make sure that proxy/env.php is configured. You'll find an example at proxy/env.sample.php";
 	die();
 }
 

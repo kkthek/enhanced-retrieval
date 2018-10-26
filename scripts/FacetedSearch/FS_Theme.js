@@ -564,15 +564,15 @@
 			output += '<tr class="s' + (row % 2) + '">';
 			row += 1;
 			
-                        // check if it is a pre-defined property
-                        var key = plainName.replace(/\s/, "_");
-                        var langText = mw.msg(key) != '<'+key+'>';
-                        if (langText) {
-                             output += '<td>' + langText + '</td>';
-                        } else {
-                            plainName = decodeTitle(plainName);
-                            output += '<td>' + plainName + '</td>';
-                        }
+			// check if it is a pre-defined property
+			var key = plainName.replace(/\s/, "_");
+			if (mw.messages[key]) {
+				output += '<td>' + mw.messages[key] + '</td>';
+			} else {
+				plainName = decodeTitle(plainName);
+				output += '<td>' + plainName + '</td>';
+			}
+			
             var vals = retrieveDisplayName(doc[property], property, true);
             output += '<td>' + vals.join(', ') + '</td>';
 			output += '</tr>';
@@ -654,15 +654,14 @@
 		var lang = FacetedSearch.singleton.Language;
 		var plainName = extractPlainName(facet);
                 
-                // check if it is a pre-defined property
-                var key = plainName.replace(/\s{2}/g, "_");
-                
-                var langText = mw.msg(key) != '<'+key+'>';
-                if (langText) {
-                    plainName = langText;
-                } else {
-                    plainName = decodeTitle(plainName);
-                }
+        // check if it is a pre-defined property
+        var key = plainName.replace(/\s{2}/g, "_");
+               
+        if (mw.messages[key]) {
+        	plainName = mw.messages[key];
+        } else {
+            plainName = decodeTitle(plainName);
+        }
                 
 		var maxWidth = $('.facets').width() * 0.7;
 		var shortName = makeShortName(plainName, maxWidth);
@@ -778,7 +777,7 @@
 	AjaxSolr.theme.prototype.no_items_found_with_facetvalue = function(facet) {
 		var parts = facet.split(':');
 		var value = parts.length > 1 ? parts[1].split('|') : parts;
-		var label = (value.length > 1 ? value[1] : value[0]) + ' (0)';
+		var label = (value.length > 1 ? value[1] : value[0]);
 		label = label.replace(/"/g, '');
 		return $('<div>').addClass('xfsClusterEntry').html(label);
 	};

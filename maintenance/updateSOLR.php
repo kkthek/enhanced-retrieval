@@ -142,7 +142,7 @@ class UpdateSolr extends Maintenance
         try {
             $messages = [];
             $indexer->updateIndexForArticle(new WikiPage($title), null, null, $messages);
-            if (count($messages > 0)) {
+            if (count($messages) > 0) {
                 print implode("\t\n", $messages);
             }
         } catch (Exception $e) {

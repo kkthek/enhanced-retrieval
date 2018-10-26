@@ -7,7 +7,7 @@
  */
 
 /**
- * SOLR connection data
+ * SOLR connection data (REQUIRED!)
  */
 global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 $SOLRhost = 'localhost';
@@ -17,12 +17,16 @@ $SOLRpass = '';
 $SOLRcore = '';
 
 /**
- * Wiki connection data
+ * Wiki connection data (REQUIRED!)
  */
 global $wgServer, $wgScriptPath, $wgDBname;
 $wgServer = "http://wimawiki.local";
 $wgScriptPath = "/mediawiki";
 $wgDBname = 'wima_wiki';
+
+/**
+ * From here it is OPTIONAL!
+ */
 
 /**
  * Specifies the visible namespace for groups.

@@ -122,7 +122,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		$pt  = $t->getDBkey();
 		
 		$parserOptions = new ParserOptions();
-		
+		$parserOptions->setOption('stubthreshold', 1);
 		global $egApprovedRevsBlankIfUnapproved, $egApprovedRevsNamespaces;
 		if (defined('APPROVED_REVS_VERSION') 
 			&& $egApprovedRevsBlankIfUnapproved 
@@ -156,7 +156,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
 		$options = array();
 		global $fsgDefaultBoost;
-		$options['smwh_boost_dummy']['boost'] = $fsgDefaultBoost;
+		$options['smwh_boost_dummy']['boost'] = intval($fsgDefaultBoost);
 		
 		global $fsgNamespaceBoosts;
 		if (array_key_exists($pns, $fsgNamespaceBoosts)) {
@@ -280,7 +280,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * @param float $value
 	 */
 	private function calculateBoostFactors(array &$options, $value) {
-		$options['smwh_boost_dummy']['boost'] += $value;
+		$options['smwh_boost_dummy']['boost'] += intval($value);
 		
 	}
 	/**

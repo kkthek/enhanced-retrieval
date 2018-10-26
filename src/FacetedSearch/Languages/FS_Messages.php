@@ -58,7 +58,9 @@ $messages['en'] = array(
     
     /* Javascript messages */
     'solrConnectionError' => 'CONNECTION ERROR. Please check browser log.',
-    'solrNotFound'		=> 'Could not connect to SOLR Server yet. Faceted Search will not work yet. Expecting to find SOLR Server at $1. Possibly your firewall is blocking the SOLR port.',
+    'solrNotFound'		=> 'Could not connect to SOLR Server yet. Faceted Search will not work yet. Expecting to find SOLR Server at $1. '.
+                            'Possibly your firewall is blocking the SOLR port.'.
+                            'Please make sure that proxy/env.php is configured. You\'ll find an example at proxy/env.sample.php',
     'tryConnectSOLR'	=> 'Trying to connect to the search engine...',
     'more' 				=> 'more',
     'less' 				=> 'less',
@@ -139,7 +141,9 @@ $messages['de'] = array(
     
     /* Javascript messages */
     'solrConnectionError' => 'VERBINDUNGSFEHLER. Bitte Browser-Log untersuchen.',
-    'solrNotFound'		=> 'Es konnte noch keine Verbindung zum SOLR Server hergestellt werden. Die facettierte Suche wird noch nicht funktionieren.Der SOLR Server wird hier gesucht $1. Möglicherweise blockiert die lokale Firewall den Port des SOLR Servers.',
+    'solrNotFound'		=> 'Es konnte noch keine Verbindung zum SOLR Server hergestellt werden. Die facettierte Suche wird noch nicht funktionieren.'.
+                            'Der SOLR Server wird hier: "$1" gesucht. Möglicherweise blockiert die lokale Firewall den Port des SOLR Servers. '.
+                            'Bitte prüfen Sie ob proxy/env.php korrekt konfiguriert ist. Sie finden ein Beispiel unter proxy/env.sample.php',
     'tryConnectSOLR'	=> 'Verbindung mit der Suchmaschine wird aufgebaut ...',
     'more' 				=> 'mehr',
     'less' 				=> 'weniger',

@@ -27,7 +27,6 @@
  *         Date: 22.11.2011
  *
  */
-
 // Used to control a valid entry point for
 // some classes that are only used by the
 // solrproxy.

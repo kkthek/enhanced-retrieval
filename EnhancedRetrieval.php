@@ -69,7 +69,7 @@ $wgHooks['UserLogout'][] = 'wfUSLogout';
 global $wgAPIModules;
 $wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Dialogs\DialogAjaxAPI';
 
-require_once 'src/FacetedSearch/FS_DefaultSettings.php';
+require_once 'DefaultSettings.php';
 /**
  * Initializes PermissionACL extension
  *
@@ -104,8 +104,8 @@ function wfUSSetupExtension() {
 	##
 	
 	require_once __DIR__ . '/proxy/src/SolrProxy/ConfigLoader.php';
-    if (file_exists(__DIR__ . '/env.php')) {
-        require_once __DIR__ . '/env.php';
+    if (file_exists(__DIR__ . '/proxy/env.php')) {
+        require_once __DIR__ . '/proxy/env.php';
     } else {
         ConfigLoader::loadConfig();
     }

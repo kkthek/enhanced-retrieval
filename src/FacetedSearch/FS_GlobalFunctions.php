@@ -68,10 +68,11 @@ class FSGlobalFunctions {
 		$wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
 		
 		// Register configuration used in Javascript
-		global $wgOut, $fsgShownFacets, $fsgFacetsWithOR, $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay;
+		global $wgOut, $fsgShownFacets, $fsgFacetsWithOR, $fsgShownCategoryFacets, $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay;
 		$script = "";
 		$script .= "\nvar XFS = XFS || {};";
 		$script .= "\nXFS.SHOWNFACETS = ".json_encode($fsgShownFacets).";";
+		$script .= "\nXFS.SHOWN_CATEGORY_FACETS = ".json_encode($fsgShownCategoryFacets).";";
 		$script .= "\nXFS.OREDFACETS = ".json_encode($fsgFacetsWithOR).";";
 		$script .= "\nXFS.CATEGORIES_TO_SHOW_IN_TITLE = ".json_encode($fsgCategoriesToShowInTitle).";";
 		$script .= "\nXFS.SHOW_FILE_IN_OVERLAY = ".json_encode($fsgShowFileInOverlay).";";
@@ -203,6 +204,7 @@ class FSGlobalFunctions {
 				'scripts' => array(
 						'scripts/FacetedSearch/Enhancements/fs_categoryFilter.js',
 						'scripts/FacetedSearch/Enhancements/fs_propertySelector.js',
+				        'scripts/FacetedSearch/Enhancements/fs_categorySelector.js',
 						'scripts/FacetedSearch/Enhancements/fs_facetValueDialog.js',
 						'scripts/FacetedSearch/Enhancements/fs_enhancements.js'
 				),
