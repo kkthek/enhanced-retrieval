@@ -102,11 +102,9 @@ function wfUSSetupExtension() {
 	#          If the solrproxy is used and the port of the indexer host (SOLR) is
 	#          different from 8983, the variable $SOLRport must be set in solrproxy.php.
 	##
-	
 	require_once __DIR__ . '/proxy/src/SolrProxy/ConfigLoader.php';
-    if (file_exists(__DIR__ . '/proxy/env.php')) {
-        require_once __DIR__ . '/proxy/env.php';
-    } else {
+    if (!file_exists(__DIR__ . '/proxy/env.php')
+        && !file_exists(__DIR__ . '/../../env.php')) {
         ConfigLoader::loadConfig();
     }
 	
@@ -127,7 +125,6 @@ function wfUSSetupExtension() {
 	}
 	
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
-	global $fsgCustomConstraint;
 	global $wgServerHTTP, $wgScriptPath, $wgDBname;
 	
 	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;

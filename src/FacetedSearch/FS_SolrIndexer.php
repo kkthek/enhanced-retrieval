@@ -174,7 +174,11 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		
 		// this is a dummy boost for the sole purpose of being requested even if no filter is applied
 		// it assures that boosting is actually effective. it always has the value "1"
-		$xml .= "\t\t<field name=\"smwh_boost_dummy\" boost=\"".$options['smwh_boost_dummy']['boost']."\"><![CDATA[1]]></field>\n";
+		global $fsgSwitchOfBoost;
+		if (isset($fsgSwitchOfBoost) && $fsgSwitchOfBoost === false) {
+		    $xml .= "\t\t<field name=\"smwh_boost_dummy\" boost=\"".$options['smwh_boost_dummy']['boost']."\"><![CDATA[1]]></field>\n";
+		} 
+		
 		
 		foreach ($document as $field => $value) {
 			if (is_array($value)) {
@@ -256,8 +260,8 @@ abstract class FSSolrIndexer implements IFSIndexer {
 			$contentType = "application/octet-stream";
 		}
 		
-		// do not index images
-		if ($ext == 'png' || $ext == 'gif' || $ext == 'jpg' || $ext == 'jpeg' || $ext == 'bmp') {
+		// do not index unknown formats
+		if ($contentType == "application/octet-stream") {
 		    return;
 		}
 
@@ -274,7 +278,10 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		    throw new \Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
 		}
 		
-		$xml =    simplexml_load_string($result);
+		$xml = simplexml_load_string($result);
+		if (!isset($xml->str)) {
+		    throw new \Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
+		}
 		$text = $xml->str;
 		// strip tags and line feeds
 		$text = str_replace(array("\n","\t"), " ", strip_tags(str_replace('<', ' <', $text)));
@@ -429,8 +436,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		
 		$HTTPCode = $info['http_code']; 
 		if ($HTTPCode != 200) {
-		    $header = @explode("\r\n\r\n", $result)[1];
-		    throw new \Exception("\n[Payload]:\n$data\n[HTTP header]:\n$header", $HTTPCode);
+		    throw new \Exception("\n[Payload]:\n$data\n[HTTP response]:\n$result", $HTTPCode);
 		}
 		return $HTTPCode;
 		

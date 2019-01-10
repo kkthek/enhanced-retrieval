@@ -322,7 +322,10 @@
 		} else {
 			// Attribute values are rendered as normal text
 			$.each(plainNames, function() {
-            	vals.push(this);
+				var nicename = window.XFS.translateName ? window.XFS.translateName(this.toString()) : this.toString();
+				var valueStr = this.toString();
+				nicename = valueStr.split('|').length > 1 ? valueStr.split('|')[1] : nicename;
+				vals.push(noUnderscore(nicename));
             });
             
 		}

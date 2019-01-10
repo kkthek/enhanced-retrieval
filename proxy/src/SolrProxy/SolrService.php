@@ -29,6 +29,7 @@ class SolrService extends \Apache_Solr_Service {
         parent::__construct($host, $port, $path, $httpTransport, $userpass);
         
         try {
+            
             $this->groups = Auth::session();
         } catch (\Exception $e) {
             throw new \Apache_Solr_InvalidArgumentException($e->getMessage());
@@ -85,8 +86,12 @@ class SolrService extends \Apache_Solr_Service {
      * @return string
      */
     function applyConstraints($query) {
-        global $userid, $userName;
+        
         global $fsgNamespaceConstraint, $fsgCustomConstraint;
+        
+        global $wgDBname;
+        $userid = self::getCookie($wgDBname . 'UserID');
+        $userName = self::getCookie($wgDBname . 'UserName');
         
         $userGroups = $this->groups;
         
@@ -117,11 +122,18 @@ class SolrService extends \Apache_Solr_Service {
             $fsgCustomConstraint = [];
         }
         foreach ($fsgCustomConstraint as $operation) {
-            $query = $operation($query, $userGroups, $userName);
+            $query = $operation($query, $userGroups, $userName, $userid);
         }
         return $query;
     }
 
+    private static function getCookie($var) {
+        if (isset($_COOKIE[$var])) {
+            return $_COOKIE[$var];
+        }
+        return '';
+    }
+    
     /**
      * Adds filter query parameters to main query parameters.
      * This is required for boosting.
@@ -147,7 +159,10 @@ class SolrService extends \Apache_Solr_Service {
         }
         
         // add boost dummy
-        $parsedResults['q'][] = 'smwh_boost_dummy%3A1';
+        global $fsgSwitchOfBoost;
+        if (isset($fsgSwitchOfBoost) && $fsgSwitchOfBoost === false) {
+            $parsedResults['q'][] = 'smwh_boost_dummy%3A1';
+        }
         
         // serialize query string
         $url = '';

@@ -8,8 +8,9 @@ class Auth {
      * @return a list of groups for the currently logged-in user
      */
     public static function session() {
+        
         session_start();
-
+        
         if (Auth::checkLogout()) {
             @session_destroy();
             exit();
@@ -33,6 +34,7 @@ class Auth {
             global $wgHTTPAuthForLocalProxies;
             global $wgServer, $wgServerHTTP, $wgScriptPath;
             $server = isset($wgHTTPAuthForLocalProxies) && $wgHTTPAuthForLocalProxies === true ? $wgServerHTTP : $wgServer;
+            
             $res = self::http("$server$wgScriptPath/api.php?action=diqa_util_userdataapi&format=json", $cookies);
            
             $o = json_decode($res[2]);
@@ -49,7 +51,7 @@ class Auth {
 
         return $_SESSION['user_groups' . $userid];
     }
-
+    
     /**
      *
      * @return true iff the user is logged in

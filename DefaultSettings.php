@@ -272,3 +272,20 @@ $fsgFacetsWithOR=[];
 # Categories which should be shown in title of search hit
 global $fsgCategoriesToShowInTitle;
 $fsgCategoriesToShowInTitle=[];
+
+####
+#
+# Switches off boosting
+global $fsgSwitchOfBoost;
+$fsgSwitchOfBoost=true;
+
+####
+#
+# Use direct categories
+global $fsgUseDirectCategories;
+
+####
+#
+# Shown category facets (if empty all are shown)
+global $fsgShownCategoryFacets;
+$fsgShownCategoryFacets = [];

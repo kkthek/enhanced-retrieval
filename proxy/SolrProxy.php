@@ -16,9 +16,16 @@ global $fsgUseStatistics;
 
 if (file_exists(__DIR__ . '/env.php')) {
     require_once __DIR__ . '/env.php';
+} else if (file_exists(__DIR__ . '/../../../env.php')) {
+    require_once __DIR__ . '/../../../env.php';
 } else {
     ConfigLoader::loadConfig();
 }
+
+if (file_exists(__DIR__ . '/custom.php')) {
+    require_once(__DIR__ . '/custom.php');
+}
+
 if (!isset($SOLRhost)) {
    $SOLRhost = 'localhost';
 }
@@ -46,12 +53,12 @@ $core = $SOLRcore == '' ? '/solr/' : '/solr/' . $SOLRcore . '/';
 try {
     
     $solr = new SolrService($SOLRhost, $SOLRport, $core, false, "$SOLRuser:$SOLRpass");
-    
+   
     // if magic quotes is enabled then stripslashes will be needed
     if (get_magic_quotes_gpc() == 1) {
     	$query = stripslashes($query);
     }
-	
+    
  
 	$query = $solr->applyConstraints($query);
 	$query = $solr->putFilterParamsToMainParams($query);

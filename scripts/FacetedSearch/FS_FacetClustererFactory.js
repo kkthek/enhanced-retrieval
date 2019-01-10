@@ -69,8 +69,6 @@ FacetedSearch.factories.FacetClustererFactory = function (facetName) {
 		case 'dt':
 			// date
 			return FacetedSearch.classes.DateFacetClusterer(facetName, name);
-		case 't':
-			return FacetedSearch.classes.StringFacetClusterer(facetName, name);
 		case 'b':
 			return FacetedSearch.classes.BooleanFacetClusterer(facetName, name);
 		default:

@@ -130,6 +130,7 @@ class FSGlobalFunctions {
 						"scripts/FacetedSearch/FS_FacetClusterer.js",
 						"scripts/FacetedSearch/FS_NumericFacetClusterer.js",
 						"scripts/FacetedSearch/FS_StringFacetClusterer.js",
+				        "scripts/FacetedSearch/FS_BooleanFacetClusterer.js",
 						"scripts/FacetedSearch/FS_DateFacetClusterer.js",
 						"scripts/FacetedSearch/FS_ClusterWidget.js",
 						"scripts/FacetedSearch/FS_FacetClustererFactory.js",

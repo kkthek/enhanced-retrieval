@@ -249,12 +249,12 @@ class Apache_Solr_Service
 		}
 		
 		$this->_initUrls();
-
+		
 		if ($httpTransport)
 		{
 			$this->setHttpTransport($httpTransport);
 		}
-
+		
 		// check that our php version is >= 5.1.3 so we can correct for http_build_query behavior later
 		$this->_queryBracketsEscaped = version_compare(phpversion(), '5.1.3', '>=');
 	}
@@ -371,7 +371,8 @@ class Apache_Solr_Service
 
 		if ($solrResponse->getHttpStatus() != 200)
 		{
-			throw new Apache_Solr_HttpTransportException($solrResponse, "Can not access: $url");
+			throw new Apache_Solr_HttpTransportException($solrResponse, "Can not access: $url. Reason: ".
+			    print_r($solrResponse,true));
 		}
 
 		return $solrResponse;

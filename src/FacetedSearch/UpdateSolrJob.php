@@ -42,7 +42,7 @@ class UpdateSolrJob extends Job {
 		try {
 		    $messages = [];
 			$indexer->updateIndexForArticle($wp, null, null, $messages );
-			if ($consoleMode && count($messages > 0)) {
+			if ($consoleMode && count($messages) > 0) {
 			    print implode("\t\n", $messages);
 			}
 		} catch(\Exception $e) {

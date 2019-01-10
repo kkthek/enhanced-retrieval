@@ -12,6 +12,7 @@ use SMW\DIWikiPage as SMWDIWikiPage;
 use SMWDataItem;
 use JobQueueGroup;
 use SMW\DataTypeRegistry;
+use SMW\PropertyRegistry;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -99,9 +100,17 @@ class FSSolrSMWDB extends FSSolrIndexer {
 	 * @param string $text
 	 *		Optional content of the article. If NULL, the content of $wikiPage is
 	 *		retrieved in this method.
-	 * @param array $messages User readible messages
+	 * @param array $messages User readible messages (out)
+	 * @param bool force Force update on command-line
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL, & $messages = [] ) {
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL, & $messages = [], $force = false ) {
+	    
+	    if (PHP_SAPI == 'cli' && !$force) {
+	        // do not update from job, unless it's forced
+	        $pageTitle = $wikiPage->getTitle()->getPrefixedText();
+	        echo "\nskipping SOLR.updateIndexForArticle( $pageTitle ) cli=TRUE, force=FALSE";
+	        return;
+	    }
 	    
 		$doc = array();
 		$this->dependant = [];
@@ -173,14 +182,11 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			$this->retrievePropertyValues($db, $pns, $pt, $doc, $options);
 		}
 		
-		if ($t->getNamespace() == NS_FILE) {
-			$this->retrieveFileSystemPath($db, $pns, $pt, $doc);
-		}
-
 		// extract document if a file was uploaded
 		if ($pns == NS_FILE) {
 		    try {
-			   $docData = $this->extractDocument($t);
+		        $this->retrieveFileSystemPath($db, $pns, $pt, $doc);
+			    $docData = $this->extractDocument($t);
 		    } catch(\Exception $e) {
 		        $messages[] = $e->getMessage();
 			   $doc['smwh_full_text'] .= " " . $e->getMessage();
@@ -390,7 +396,7 @@ SQL;
 				return "smwh_{$prop}_xsdvalue_b";
 			case SMWDataItem::TYPE_NUMBER:
 				return "smwh_{$prop}_numvalue_d";
-			case SMWDataItem::TYPE_STRING:
+			case SMWDataItem::TYPE_BLOB:
 				return "smwh_{$prop}_xsdvalue_t";
 			case SMWDataItem::TYPE_WIKIPAGE:
 				return "smwh_{$prop}_t";
@@ -507,7 +513,7 @@ SQL;
             }
 		    
             // check if particular pre-defined property should be indexed
-		    $predefPropType = SMWDIProperty::getPredefinedPropertyTypeId($property->getKey());
+		    $predefPropType = PropertyRegistry::getInstance()->getPropertyValueTypeById($property->getKey());
 		    $p = $property; //SMWDIProperty::newFromUserLabel($prop);
 		    if (!empty($predefPropType)) {
 		        // This is a predefined property
@@ -553,6 +559,9 @@ SQL;
 		                            $relations[] = $enc_prop;
 		                        } else {
     		                        $enc_prop = $this->serializeDataItem($rp, $record_value, $doc);
+    		                        if (is_null($enc_prop)) {
+    		                            continue;
+    		                        }
     		                        $attributes[] = $enc_prop;
 		                        }
 		                    }
@@ -566,6 +575,9 @@ SQL;
 		        } else {
 		            // handle attribute properties
 		            $enc_prop = $this->serializeDataItem($property, $value, $doc);
+		            if (is_null($enc_prop)) {
+		                continue;
+		            }
 		            $attributes[] = $enc_prop;
 		        }
 		    }
@@ -713,7 +725,7 @@ SQL;
 	 * @param SMWDataItem $dataItem
 	 * @param array $doc
 	 * 
-	 * @return encoded property name 
+	 * @return encoded property name or null
 	 */
 	private function serializeDataItem($property, $dataItem, array &$doc) {
 	  	    
@@ -767,6 +779,9 @@ SQL;
 
 	    } else if ($type == SMWDataItem::TYPE_BOOLEAN) {
 	        $typeSuffix = 'b';
+
+	    } else if ($type == SMWDataItem::TYPE_CONCEPT) {
+	        return null;
 
 	    } else {
 	        $typeSuffix = 't';
