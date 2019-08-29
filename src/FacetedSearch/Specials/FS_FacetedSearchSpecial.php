@@ -242,14 +242,14 @@ class FSFacetedSearchSpecial extends SpecialPage {
     			$extp = $extensionPoint[0];
     			$hook = 'FacetedSearchExtension'.$extensionPoint[1];
     			$html = '';
-    			wfRunHooks($hook, array(&$html));
+    			Hooks::run($hook, array(&$html));
     			
     			// Do the replacement in the HTML structure
     			$pageHTML = str_replace($extp, $html, $pageHTML);
     		}
     		
     		// Let the extensions add their resources
-    		wfRunHooks('FacetedSearchExtensionAddResources', array());
+    		Hooks::run('FacetedSearchExtensionAddResources', array());
     		
     	}
     	return $pageHTML;

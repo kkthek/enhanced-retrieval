@@ -1,6 +1,7 @@
 <?php
 use DIQA\FacetedSearch\FSGlobalFunctions;
 use DIQA\SolrProxy\ConfigLoader;
+use DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -162,7 +163,9 @@ function wfUSSetupExtension() {
 	$fsgIP = $IP.'/extensions/EnhancedRetrieval';
 	
 	global $wgSpecialPages;
-	$wgSpecialPages['Search'] = array('DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
+	$wgSpecialPages['Search'] = function() { 
+	    return new FSFacetedSearchSpecial();
+	};
 	
 	// Set up Faceted Search
 	FSGlobalFunctions::setupFacetedSearch();
