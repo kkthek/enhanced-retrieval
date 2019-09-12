@@ -25,7 +25,8 @@ $wgScriptPath = "/mediawiki";
 $wgDBname = 'wima_wiki';
 
 /**
- * From here it is OPTIONAL!
+ * From here it is OPTIONAL! The following configuration are EXAMPLES. Please delete them if you
+ * don't need it.
  */
 
 /**

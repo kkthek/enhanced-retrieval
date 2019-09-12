@@ -18,7 +18,7 @@
 }
 @media (min-width: 1921px) {
     div.facets { width:15%; }
-    div#results { width:85%; }  
+    div#results { width:80%; }  
 }
 
 #fs_query_button, .xfsCategoryFilter, .xfsSortOrder {

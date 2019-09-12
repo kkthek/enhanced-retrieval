@@ -1,5 +1,11 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+VERSION 2.1
+
+	- Compatibility with PHP 7
+	- Compatibility with MW 1.31 - 1.33
+	- Compatibility with SMW 3.0
+
 VERSION 1.9.3
 
 	- Refactoring extension structure. Basically using composer autoload.

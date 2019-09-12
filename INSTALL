@@ -1,10 +1,10 @@
-== Enhanced Retrieval Extension 2.0 ==
+== Enhanced Retrieval Extension 2.1 ==
 
 === Requirements ===
-* PHP 7
-* MediaWiki 1.31.x 
-* SMW 2.5.x
-* Apache SOLR server v6.6+ 
+* PHP 7.x
+* MediaWiki 1.31.x - 1.33.x
+* SMW 3.0.x
+* Apache SOLR server v4.4 - 6.6+  
 
 	You can setup your own Solr server. Please use the SOLR-schema given in:
 		core-name.zip (tested with Solr 6.6)
@@ -23,7 +23,7 @@
 
 * Start the SOLR server 
 
-* Create a file proxy/env.php with the following content:
+* Create a file proxy/env.php with the following content: (adjust the values of course)
 
 -----------------------------------------------------------------------------------
 <?php
