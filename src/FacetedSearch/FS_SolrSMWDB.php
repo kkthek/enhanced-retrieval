@@ -229,11 +229,11 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		
 		// get approved rev_id
 		$db = wfGetDB( DB_MASTER );
-		
+		$approved_revs_table = $db->tableName("approved_revs");
 		$queryString = sprintf(
-				'SELECT rev_id' .
-				' FROM approved_revs' .
-				' WHERE page_id = %s',
+				"SELECT rev_id" .
+				" FROM $approved_revs_table" .
+				" WHERE page_id = %s",
 				$wikiPage->getTitle()->getArticleID());
 		$res = $db->query($queryString);
 		$rev_id = null;

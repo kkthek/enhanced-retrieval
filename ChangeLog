@@ -1,5 +1,8 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+VERSION 2.1.3
+	- Bugfix: table prefix used by MW was not used by ER on some queries
+
 VERSION 2.1
 
 	- Compatibility with PHP 7
