@@ -275,18 +275,16 @@ abstract class FSSolrIndexer implements IFSIndexer {
 		$result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);
 		
 		if ($rc != 200) {
-		    throw new \Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
+		    throw new \Exception(sprintf('Keine Extraktion möglich: %s HTTP code: [%s] ', $title->getPrefixedText(), $rc));
 		}
-		
-		$xml = simplexml_load_string($result);
-		if (!isset($xml->str)) {
-		    throw new \Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
-		}
-		$text = $xml->str;
-		// strip tags and line feeds
+		$obj = json_decode($result);
+		$xml = $obj->{""};
+		$text = strip_tags($xml);
 		$text = str_replace(array("\n","\t"), " ", strip_tags(str_replace('<', ' <', $text)));
 		
-		
+		if ($text == "") {
+		    throw new \Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
+		}
 		return [ 'xml' => $xml, 'text' => $text ];
 		
 	}

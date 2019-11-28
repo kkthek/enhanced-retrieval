@@ -187,6 +187,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		    try {
 		        $this->retrieveFileSystemPath($db, $pns, $pt, $doc);
 			    $docData = $this->extractDocument($t);
+			    $doc['smwh_full_text'] = $docData['text'];
 		    } catch(\Exception $e) {
 		        $messages[] = $e->getMessage();
 			   $doc['smwh_full_text'] .= " " . $e->getMessage();
@@ -613,7 +614,7 @@ SQL;
 			}
 			 
 			// index this category
-			$categoryAsText = $category->getTitle()->getText();
+			$categoryAsText = $category->getTitle()->getDbkey();
 			$doc['smwh_categories'][] = $categoryAsText;
 			$doc['smwh_directcategories'][] = $categoryAsText;
 			$categories[] = str_replace("_", " ", $categoryAsText);

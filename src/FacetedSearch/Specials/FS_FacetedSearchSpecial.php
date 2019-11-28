@@ -57,11 +57,11 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	            <div class="xfsSortOrder col-md-6 col-lg-3" style="{{fs_show_sortorder}}">
     				{{fs_sort_by}}
     				<select id="search_order" name="search_order" size="1">
-    					<option value="relevance" selected="selected">{{fs_relevance}}</option>
-    					<option value="newest">{{fs_newest_date_first}}</option>
-    					<option value="oldest">{{fs_oldest_date_first}}</option>
-    					<option value="ascending">{{fs_title_ascending}}</option>
-    					<option value="descending">{{fs_title_descending}}</option>
+    					<option value="relevance" {{fs_score_order_selected}}>{{fs_relevance}}</option>
+    					<option value="newest" {{fs_newest_order_selected}}>{{fs_newest_date_first}}</option>
+    					<option value="oldest" {{fs_oldest_order_selected}}>{{fs_oldest_date_first}}</option>
+    					<option value="ascending" {{fs_ascending_order_selected}}>{{fs_title_ascending}}</option>
+    					<option value="descending" {{fs_descending_order_selected}}>{{fs_title_descending}}</option>
     				</select>
     			</div>
 	            <div class="xfsCategoryFilter col-md-6 col-lg-3">
@@ -183,11 +183,17 @@ class FSFacetedSearchSpecial extends SpecialPage {
 			$prefixParam = $wgRequest->getVal( 'prefix', '' );
 			$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&quot;", $prefixParam), $html);
 			
-			global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText;
+			global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText, $fsgDefaultSortOrder;
 			$html = str_replace('{{placeholderText}}', htmlspecialchars($fsgPlaceholderText), $html);
 			$html = str_replace('{{fs_show_sortorder}}', $fsgShowSortOrder === true ? '' : 'display:none;', $html);
 			$html = str_replace('{{fs_show_categories}}', $fsgShowCategories === true ? '' : 'display:none;', $html);
 			$html = str_replace('{{fs_show_namespaces}}', $fsgShowNamespaces === true ? '' : 'display:none;', $html);
+			
+			$html = str_replace('{{fs_score_order_selected}}', $fsgDefaultSortOrder === "score" ? 'selected="selected"' : '', $html);
+			$html = str_replace('{{fs_newest_order_selected}}', $fsgDefaultSortOrder === "newest" ? 'selected="selected"' : '', $html);
+			$html = str_replace('{{fs_oldest_order_selected}}', $fsgDefaultSortOrder === "oldest" ? 'selected="selected"' : '', $html);
+			$html = str_replace('{{fs_ascending_order_selected}}', $fsgDefaultSortOrder === "ascending" ? 'selected="selected"' : '', $html);
+			$html = str_replace('{{fs_descending_order_selected}}', $fsgDefaultSortOrder === "descending" ? 'selected="selected"' : '', $html);
 			
 			$extendedFacets = '';
 			Hooks::run('fs_extendedFacets', array( & $extendedFacets));

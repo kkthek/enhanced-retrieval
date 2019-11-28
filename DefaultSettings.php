@@ -289,3 +289,15 @@ global $fsgUseDirectCategories;
 # Shown category facets (if empty all are shown)
 global $fsgShownCategoryFacets;
 $fsgShownCategoryFacets = [];
+
+####
+#
+# max. number of hits per page
+global $fsgHitsPerPage;
+$fsgHitsPerPage = 10;
+
+####
+#
+# Sort order default. Possible values: relevance, newest, oldest, ascending, descending
+global $fsgDefaultSortOrder;
+$fsgDefaultSortOrder = "relevance";

@@ -69,6 +69,7 @@ class FSGlobalFunctions {
 		
 		// Register configuration used in Javascript
 		global $wgOut, $fsgShownFacets, $fsgFacetsWithOR, $fsgShownCategoryFacets, $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay;
+		global $fsgHitsPerPage, $fsgDefaultSortOrder; 
 		$script = "";
 		$script .= "\nvar XFS = XFS || {};";
 		$script .= "\nXFS.SHOWNFACETS = ".json_encode($fsgShownFacets).";";
@@ -76,6 +77,8 @@ class FSGlobalFunctions {
 		$script .= "\nXFS.OREDFACETS = ".json_encode($fsgFacetsWithOR).";";
 		$script .= "\nXFS.CATEGORIES_TO_SHOW_IN_TITLE = ".json_encode($fsgCategoriesToShowInTitle).";";
 		$script .= "\nXFS.SHOW_FILE_IN_OVERLAY = ".json_encode($fsgShowFileInOverlay).";";
+		$script .= "\nXFS.HITS_PER_PAGE = ".json_encode($fsgHitsPerPage).";";
+		$script .= "\nXFS.DEFAULT_SORT_ORDER = ".json_encode($fsgDefaultSortOrder).";";
 		$wgOut->addScript(
 				'<script type="text/javascript">'.$script.'</script>'
 		);

@@ -243,24 +243,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 	
 		var selected =  $("#search_order option:selected");
 		var order = selected[0].value;
-		var sort = MODIFICATION_DATE_FIELD + ' desc';
-		switch (order) {
-			case "relevance":
-				sort = 'score desc';
-				break;
-			case "newest":
-				sort = MODIFICATION_DATE_FIELD + ' desc, score desc';
-				break;
-			case "oldest":
-				sort = MODIFICATION_DATE_FIELD + ' asc, score desc';
-				break;
-			case "ascending":
-				sort = TITLE_STRING_FIELD + ' asc, score desc';
-				break;
-			case "descending":
-				sort = TITLE_STRING_FIELD + ' desc, score desc';
-				break;
-		}
+		var sort = getSortOrderModifier(order);
+		
 		mAjaxSolrManager.store.addByValue('sort', sort);
 		mAjaxSolrManager.doRequest(0);
 		return false;
@@ -306,13 +290,16 @@ FacetedSearch.classes.FacetedSearch = function () {
 		// to lowercase.
 		mExpertQuery = qs.charAt(0) === '(' 
 					   && qs.charAt(mSearch.length-1) === ')';
+		
 		if (!mExpertQuery) {
-			qs = prepareQueryString(qs);
+			qs = prepareQueryString(mSearch);
+			qs += prepareTitleQuery(mSearch);
 		} else {
 			// A colon in the search term must be escaped otherwise SOLR will throw
 			// a parser exception
 			qs = qs.replace(/(:)/g,"\\$1");
 		}
+		
 		mAjaxSolrManager.store.addByValue('q', QUERY_FIELD+':'+qs);
 		readPrefixParameter();
 		mAjaxSolrManager.doRequest(0);
@@ -320,6 +307,20 @@ FacetedSearch.classes.FacetedSearch = function () {
 	}
 	that.updateSearchResults = updateSearchResults;
 	
+	/**
+	 * Prepare query for exact title matches
+	 */
+	function prepareTitleQuery(mSearch) {
+		var exactMatchQuery = '';
+		if (mSearch != '') {
+			var escapedmSearch = mSearch.toLowerCase()
+            	.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
+            	.replace(/(&&|\|\|)/g,'\\$1');
+			escapedmSearch = escapedmSearch.replace(/\s*/g, '');
+			exactMatchQuery = ' OR ' + QUERY_FIELD+':('+escapedmSearch+')';
+		}
+		return exactMatchQuery;
+	}
 	/**
 	 * Translates a query string that is not an expert query (i.e. not enclosed in
 	 * braces) to a SOLR query string:
@@ -412,26 +413,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 */
 	function initializeGUIElements() {
 		// initalize sort order GUI element
-		var sort = mAjaxSolrManager.store.values('sort');
-		if (!sort || sort.length == 0 || sort[0].length == 0) {
-			return;
-		}
-		var val='score';
-		switch(sort[0][0]) {
-			case MODIFICATION_DATE_FIELD+' desc':
-				val = 'newest';
-				break;
-			case MODIFICATION_DATE_FIELD+' asc':
-				val = 'oldest';
-				break;
-			case TITLE_STRING_FIELD+' asc':
-				val = 'ascending';
-				break;
-			case TITLE_STRING_FIELD+' desc':
-				val = 'descending';
-				break;
-		}
-		$("#search_order option[value="+val+"]").prop('selected', true);
+		
 	}
 	
 	/**
@@ -648,11 +630,37 @@ FacetedSearch.classes.FacetedSearch = function () {
 		return false;
 	}
 	
+	function getSortOrderModifier(order) {
+		var sort;
+		switch (order) {
+		case "relevance":
+			sort = 'score desc';
+			break;
+		case "newest":
+			sort = MODIFICATION_DATE_FIELD + ' desc, score desc';
+			break;
+		case "oldest":
+			sort = MODIFICATION_DATE_FIELD + ' asc, score desc';
+			break;
+		case "ascending":
+			sort = TITLE_STRING_FIELD + ' asc, score desc';
+			break;
+		case "descending":
+			sort = TITLE_STRING_FIELD + ' desc, score desc';
+			break;
+		default:
+			sort = 'score desc';
+			break;
+		}
+		return sort;
+	}
+	
 	/**
 	 * Initializes the parameter store of the main ajax solr manager with default
 	 * values.
 	 */
 	function initParameterStoreDefault() {
+		
 		var params = {
 			facet: true,
 			'facet.field': FACET_FIELDS,
@@ -664,7 +672,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			'hl.simple.pre' : '<b>',
 			'hl.simple.post': '</b>',
 			'hl.fragsize': '250',
-			'sort' : 'score desc'
+			'sort' : getSortOrderModifier(XFS.DEFAULT_SORT_ORDER)
 		};
 
 		mAjaxSolrManager.store.addByValue('q', '*:*');
