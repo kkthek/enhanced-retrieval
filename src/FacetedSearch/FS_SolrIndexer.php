@@ -416,6 +416,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
 	private function postCommand($command, $data, &$resultCode) {
 		$command = str_replace("<CORE>/", $this->indexCore == '' ? $this->indexCore : $this->indexCore . '/', $command);
 		$url = $this->mBaseURL.$command;
+		
 		$curl = curl_init($url);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: text/xml', "Authorization: Basic {$this->authBase64}"));
 		curl_setopt($curl, CURLOPT_HEADER, 1);
@@ -477,7 +478,6 @@ abstract class FSSolrIndexer implements IFSIndexer {
 
 		$resultCode = $info['http_code']; # ????
 		return $result;
-
 	}
 	
 }

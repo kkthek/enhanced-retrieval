@@ -60,7 +60,7 @@
 
 .results {
 	float: right;
-	padding: 10px 20px 10px 40px;
+	padding: 0 0 0 10px;
 	border-left: 1px solid #aaa;
 	text-align: left;
 	line-height: 1.3em;

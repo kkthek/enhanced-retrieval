@@ -317,8 +317,8 @@ FacetedSearch.classes.FacetedSearch = function () {
             	.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
             	.replace(/(&&|\|\|)/g,'\\$1');
 			escapedmSearch = escapedmSearch.replace(/\s*/g, '');
-			exactMatchQuery = ' OR ' + QUERY_FIELD+':('+escapedmSearch+')';
-			exactMatchQuery = ' OR ' + TITLE_FIELD+':('+escapedmSearch+')';
+			exactMatchQuery = ' OR ' + QUERY_FIELD + ':(' + escapedmSearch + ')';
+			exactMatchQuery += ' OR ' + TITLE_FIELD + ':(' + escapedmSearch + ')';
 		}
 		return exactMatchQuery;
 	}
