@@ -429,7 +429,7 @@ SQL;
 	private function retrieveSMWID($db, $namespaceID, $title, array &$doc) {
 		// Get the SMW ID for the page
 		//        $title = str_replace("'", "\'", $title);
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA  );
 		$title = $db->strencode($title);
 		$smw_ids = $db->tableName('smw_object_ids');
 		$sql = <<<SQL

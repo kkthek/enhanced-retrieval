@@ -201,7 +201,7 @@ class UpdateSolr extends Maintenance
             $start = $title->getArticleID();
             $end = $title->getArticleID();
         } else {
-            $db = wfGetDB(DB_SLAVE);
+            $db = wfGetDB(DB_REPLICA);
             $page_table = $db->tableName("page");
             $query = "SELECT MAX(page_id) as maxid FROM $page_table";
             $res = $db->query($query);

@@ -1,8 +1,9 @@
 <?php
 namespace DIQA\FacetedSearch\Specials;
 
-use SMW\SpecialPage;
 use Hooks;
+use MediaWiki\MediaWikiServices;
+use SMW\SpecialPage;
 use Title;
 
 /*
@@ -39,9 +40,9 @@ if (!defined('MEDIAWIKI')) die();
  * Standard class that is responsible for the creation of the Special Page
  */
 class FSFacetedSearchSpecial extends SpecialPage {
-	
+
 	//--- Constants ---
-	
+
 	const SPECIAL_PAGE_HTML = '
 {{fs_ext_Top}}
 <div id="wrapper">
@@ -76,7 +77,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
     	       <hr class="xfsSeparatorLine col-md-12">
 	       </div>
 	   </div>
-			
+
 	<div class="facets">
 		<div>
 			<span class="xfsComponentHeader">{{fs_selected}}</span>
@@ -97,7 +98,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 			{{extendedFacets}}
 		</div>
 	</div>
-	
+
 	<div class="results" id="results">
 		<div id="navigation">
 			<div id="pager-header"></div>
@@ -132,41 +133,41 @@ class FSFacetedSearchSpecial extends SpecialPage {
      * Overloaded function that is responsible for the creation of the Special Page
      */
     public function execute($par) {
-	
+
 		global $wgOut, $wgRequest;
-		
+
 		try {
 			$wgOut->setPageTitle(wfMessage('fs_title')->text());
 			$wgOut->addModules('ext.facetedSearch.special');
 			$wgOut->addModules('ext.facetedSearch.enhancements');
-			
+
 			$search = str_replace( "\n", " ", $wgRequest->getText( 'search', '' ) );
 			if ($search === wfMessage('smw_search_this_wiki')->text()) {
 				// If the help text of the search field is passed, assume an empty
 				// search string
 				$search = '';
 			}
-			
+
 			Hooks::run( 'fs_searchRedirect', array( &$wgOut, &$search ) );
-			
+
 			$restrict = $wgRequest->getText( 'restrict', '' );
 			$specialPageTitle = $wgRequest->getText( 'title', '' );
 			$t = Title::newFromText( $search );
-	
+
 			$fulltext = $wgRequest->getVal( 'fulltext', '' );
 			$fulltext_x = $wgRequest->getVal( 'fulltext_x', '' );
 			if ($fulltext == NULL && $fulltext_x == NULL) {
-				
+
 				# If the string cannot be used to create a title
 				if(!is_null( $t ) ){
-	
+
 					# If there's an exact or very near match, jump right there.
-					$t = \SearchEngine::getNearMatch( $search );
+					$t = static::defaultNearMatcher()->getNearMatch( $search );
 					if( !is_null( $t ) ) {
 						$wgOut->redirect( $t->getFullURL() );
 						return;
 					}
-	
+
 					# If just the case is wrong, jump right there.
 	//				$t = USStore::getStore()->getSingleTitle($search);
 	//				if (!is_null( $t ) ) {
@@ -175,44 +176,49 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	//				}
 				}
 			}
-	        
+
 			// Insert the search term into the input field of the UI
 			$html = self::SPECIAL_PAGE_HTML;
 			$html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
-			
+
 			$prefixParam = $wgRequest->getVal( 'prefix', '' );
 			$html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&quot;", $prefixParam), $html);
-			
+
 			global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText, $fsgDefaultSortOrder;
 			$html = str_replace('{{placeholderText}}', htmlspecialchars($fsgPlaceholderText), $html);
 			$html = str_replace('{{fs_show_sortorder}}', $fsgShowSortOrder === true ? '' : 'display:none;', $html);
 			$html = str_replace('{{fs_show_categories}}', $fsgShowCategories === true ? '' : 'display:none;', $html);
 			$html = str_replace('{{fs_show_namespaces}}', $fsgShowNamespaces === true ? '' : 'display:none;', $html);
-			
+
 			$html = str_replace('{{fs_score_order_selected}}', $fsgDefaultSortOrder === "score" ? 'selected="selected"' : '', $html);
 			$html = str_replace('{{fs_newest_order_selected}}', $fsgDefaultSortOrder === "newest" ? 'selected="selected"' : '', $html);
 			$html = str_replace('{{fs_oldest_order_selected}}', $fsgDefaultSortOrder === "oldest" ? 'selected="selected"' : '', $html);
 			$html = str_replace('{{fs_ascending_order_selected}}', $fsgDefaultSortOrder === "ascending" ? 'selected="selected"' : '', $html);
 			$html = str_replace('{{fs_descending_order_selected}}', $fsgDefaultSortOrder === "descending" ? 'selected="selected"' : '', $html);
-			
+
 			$extendedFacets = '';
 			Hooks::run('fs_extendedFacets', array( & $extendedFacets));
 			$html = str_replace('{{extendedFacets}}', $extendedFacets, $html);
-			
+
 			$extendedFilters = '';
 			Hooks::run('fs_extendedFilters', array( & $extendedFilters));
 			$html = str_replace('{{extendedFilters}}', $extendedFilters, $html);
-			
+
 			$html = $this->addExtensions($html);
-			
+
 			$wgOut->addHTML($this->replaceLanguageStrings($html));
-			
-			
+
+
 		} catch(\Exception $e) {
 			$wgOut->addHTML(sprintf('<div class="fs_error_hint">%s</div>', $e->getMessage()));
 		}
     }
-    
+
+	protected static function defaultNearMatcher() {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		return MediaWikiServices::getInstance()->newSearchEngine()->getNearMatcher( $config );
+	}
+
     /**
      * The HTML structure of Faceted Search offers sections for other extensions
      * that can inject their HTML.
@@ -249,18 +255,18 @@ class FSFacetedSearchSpecial extends SpecialPage {
     			$hook = 'FacetedSearchExtension'.$extensionPoint[1];
     			$html = '';
     			Hooks::run($hook, array(&$html));
-    			
+
     			// Do the replacement in the HTML structure
     			$pageHTML = str_replace($extp, $html, $pageHTML);
     		}
-    		
+
     		// Let the extensions add their resources
     		Hooks::run('FacetedSearchExtensionAddResources', array());
-    		
+
     	}
     	return $pageHTML;
     }
-    
+
 	/**
 	 * Add a global JavaScript variable for the SOLR URL.
 	 * @param $vars
@@ -269,26 +275,26 @@ class FSFacetedSearchSpecial extends SpecialPage {
 	 */
 	public static function addJavaScriptVariables(&$vars) {
 		global $fsgFacetedSearchConfig, $fsgCreateNewPageLink;
-		
+
 		$servlet = array_key_exists('proxyServlet', $fsgFacetedSearchConfig)
 					? $fsgFacetedSearchConfig['proxyServlet']
 					: '/solr/select';
 		$port = array_key_exists('proxyPort', $fsgFacetedSearchConfig)
 					? $fsgFacetedSearchConfig['proxyPort']
 					: false;
-					
+
 		$solrURL = $fsgFacetedSearchConfig['proxyHost'];
 		if ($port) {
 			$solrURL .= ':' . $port;
 		}
-		
+
 		$vars['wgFSSolrURL'] = $solrURL;
 		$vars['wgFSSolrServlet'] = $servlet;
 		$vars['wgFSCreateNewPageLink'] = $fsgCreateNewPageLink;
-		
+
 		return true;
 	}
-    
+
 	/**
 	 * Language dependent identifiers in $text that have the format {{identifier}}
 	 * are replaced by the string that corresponds to the identifier.
@@ -310,10 +316,10 @@ class FSFacetedSearchSpecial extends SpecialPage {
 		foreach ($identifiers[2] as $id) {
 			$langStrings[] = wfMessage($id)->text();
 		}
-		
+
 		// Replace all language identifiers
 		$text = str_replace($identifiers[1], $langStrings, $text);
 		return $text;
 	}
-    
+
 }

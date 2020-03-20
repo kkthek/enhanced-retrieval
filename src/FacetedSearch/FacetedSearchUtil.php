@@ -3,41 +3,41 @@ namespace DIQA\FacetedSearch;
 
 use SMW\ApplicationFactory;
 class FacetedSearchUtil {
-	
+
 	/**
 	 * Returns all *distinct* values of a given property.
 	 * @param string $property
-	 * 
+	 *
 	 * @return array of string
 	 */
 	public static function getDistinctPropertyValues($property) {
-		$db = wfGetDB ( DB_SLAVE );
-		
+		$db = wfGetDB ( DB_REPLICA  );
+
 		$p_id = smwfGetStore ()->smwIds->getSMWPageID ( $property, SMW_NS_PROPERTY, "", "" );
-		
-		
+
+
 		$smw_ids = $db->tableName ( 'smw_object_ids' );
 		$smw_atts2 = $db->tableName ( 'smw_di_blob' );
 		$smw_inst2 = $db->tableName ( 'smw_fpt_inst' );
 		$smw_rels2 = $db->tableName ( 'smw_di_wikipage' );
-		
+
 		// get attribute and relations values
 		$att_query = "SELECT DISTINCT a.o_hash AS p_value, a.o_blob AS blob_value, -1 AS ns_value
-		FROM $smw_atts2 a 
-		JOIN $smw_ids s ON a.s_id = s.smw_id 
+		FROM $smw_atts2 a
+		JOIN $smw_ids s ON a.s_id = s.smw_id
 		WHERE a.p_id = $p_id";
-		
+
 		$rel_query = "SELECT DISTINCT o.smw_title AS p_value, '' AS blob_value, o.smw_namespace AS ns_value
-		FROM $smw_rels2 r 
-		JOIN $smw_ids s ON r.s_id = s.smw_id 
-		JOIN $smw_ids o ON r.o_id = o.smw_id 
-		
+		FROM $smw_rels2 r
+		JOIN $smw_ids s ON r.s_id = s.smw_id
+		JOIN $smw_ids o ON r.o_id = o.smw_id
+
 		WHERE r.p_id = $p_id";
-		
+
 		$res = $db->query ( "($att_query) UNION ($rel_query) LIMIT 500" );
 		// rewrite result as array
 		$results = array ();
-		
+
 		$titleProperty = \SMWDIProperty::newFromUserLabel("Titel");
 		if ($db->numRows ( $res ) > 0) {
 			while ( $row = $db->fetchObject ( $res ) ) {
@@ -61,8 +61,8 @@ class FacetedSearchUtil {
 			}
 		}
 		$db->freeResult ( $res );
-		
+
 		return $results;
 	}
-	
+
 }
