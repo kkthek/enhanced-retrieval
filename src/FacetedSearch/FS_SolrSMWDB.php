@@ -172,7 +172,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 			$this->calculateBoostFactors($options, $fsgNamespaceBoosts[$pns]);
 		}
 		
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA );
 		
 		// retrieve templates (currently only needed for boosts)
 		$this->retrieveTemplates($db, $pid, $doc, $options);
