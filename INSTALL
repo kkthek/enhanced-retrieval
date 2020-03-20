@@ -1,16 +1,14 @@
-== Enhanced Retrieval Extension 2.1.3 ==
+== Enhanced Retrieval Extension 2.1.4 ==
 
 === Requirements ===
 * PHP 7.x
+* Composer
 * MediaWiki 1.31.x - 1.33.x
-* SMW 3.0.x
-* Apache SOLR server v4.4 - 6.6+  
+* SMW 3.1.x
+* Apache SOLR server v8.30+  
 
 	You can setup your own Solr server. Please use the SOLR-schema given in:
-		core-name.zip (tested with Solr 6.6)
-	
-	We recommend using Tomcat as an application server for SOLR. 
-	Installation instructions are contained.
+		solr-config.zip (tested with Solr 8.30)
 		
 === Installation Instructions ===
 
@@ -28,11 +26,11 @@
 -----------------------------------------------------------------------------------
 <?php
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
-	$SOLRhost = '10.0.08';
-	$SOLRport = 80;
-	$SOLRuser = 'user';
-	$SOLRpass = 'geheim';
-	$SOLRcore = 'my_index';
+	$SOLRhost = 'localhost';
+	$SOLRport = 8983;
+	$SOLRuser = '';
+	$SOLRpass = '';
+	$SOLRcore = 'mw';
 
 	global $wgServer, $wgScriptPath, $wgDBname;
 	$wgServer = "http://wimawiki.local";
@@ -49,7 +47,7 @@
 	
 	OR via composer:
 	
-	cd php {wiki-path}/extensions/EnhancedRetrieval
+	cd {wiki-path}/extensions/EnhancedRetrieval
 	composer run-script update
 
 That's it.
