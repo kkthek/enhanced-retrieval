@@ -140,6 +140,7 @@ AjaxSolr.AbstractManager = AjaxSolr.Class.extend(
     if (start !== undefined) {
       this.store.get('start').val(start);
     }
+    this.store.get('rows').val(XFS.HITS_PER_PAGE);
     if (servlet === undefined) {
       servlet = this.servlet;
     }

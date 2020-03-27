@@ -199,7 +199,11 @@ class Apache_Solr_HttpTransport_Curl extends Apache_Solr_HttpTransport_Abstract
 		// get info from the transfer
 		$statusCode = curl_getinfo($this->_curl, CURLINFO_HTTP_CODE);
 		$contentType = curl_getinfo($this->_curl, CURLINFO_CONTENT_TYPE);
-
-		return new Apache_Solr_HttpTransport_Response($statusCode, $contentType, $responseBody);
+        
+		$error_msg = '';
+	    if (curl_errno($this->_curl)) {
+            $error_msg = curl_error($this->_curl);
+        }
+		return new Apache_Solr_HttpTransport_Response($statusCode, $contentType, $responseBody, $error_msg);
 	}
 }

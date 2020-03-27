@@ -25,6 +25,11 @@ $wgServer = "http://localhost";
 $wgScriptPath = "/mediawiki";
 $wgDBname = 'wikidb';
 
+/**
+ * If something does not work, set this to true
+ */
+global $SOLRProxyDebug;
+$SOLRProxyDebug=false;
 
 /**
  * The following configurations are optional.

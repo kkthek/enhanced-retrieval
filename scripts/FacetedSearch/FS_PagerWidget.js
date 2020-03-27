@@ -184,6 +184,7 @@ FacetedSearch.classes.PagerWidget = AjaxSolr.PagerWidget.extend({
 				}
 			}
 			self.manager.store.get('start').val(next);
+			self.manager.store.get('rows').val(XFS.HITS_PER_PAGE);
 			self.mDoResetRanges = false;
 			self.manager.doRequest();
 			return false;

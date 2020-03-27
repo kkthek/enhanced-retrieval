@@ -163,7 +163,7 @@ class Apache_Solr_HttpTransport_Response
 	 * @param string $contentType The VALUE of the Content-Type HTTP header
 	 * @param string $responseBody The body of the HTTP response
 	 */
-	public function __construct($statusCode, $contentType, $responseBody)
+	public function __construct($statusCode, $contentType, $responseBody, $error_msg = '')
 	{
 		// set the status code, make sure its an integer
 		$this->_statusCode = (int) $statusCode;
@@ -173,6 +173,8 @@ class Apache_Solr_HttpTransport_Response
 		
 		// set the response body, it should always be a string
 		$this->_responseBody = (string) $responseBody;
+		
+		$this->_error_msg = $error_msg;
 		
 		// parse the content type header value for mimetype and encoding
 		// first set default values that will remain if we can't find
