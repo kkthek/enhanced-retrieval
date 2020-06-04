@@ -7,6 +7,7 @@ use Article;
 use ParserOptions;
 use Sanitizer;
 use Title;
+use Revision;
 use SMW\DIProperty as SMWDIProperty;
 use SMW\DIWikiPage as SMWDIWikiPage;
 use SMWDataItem;
@@ -173,6 +174,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
 		}
 		
 		$db = wfGetDB( DB_REPLICA );
+		
+		$this->updateModificationDate($wikiPage->getTitle(), $doc);
 		
 		// retrieve templates (currently only needed for boosts)
 		$this->retrieveTemplates($db, $pid, $doc, $options);
@@ -355,6 +358,7 @@ SQL;
 		if ($str == '') { 
 			return '';
 		}
+		$str = utf8_decode($str);
 		$hex = "";
 		$i = 0;
 		$str = str_replace("_", "__", $str);
@@ -362,10 +366,6 @@ SQL;
 			$ord = ord($str{$i});
 			if (($ord >= 65 && $ord <= 90) || ($ord >= 97 && $ord <= 122) || ($ord >= 48 && $ord <= 57) || $ord == 95) {
 				// do not encode alphnumeric chars or underscore
-				$hex .= $str{$i};
-			} else if (ord($str{$i}) > 127 ) {
-				// do not encode all chars above 127
-				// NOTE: this is not compliant to the SOLR spec but it is neither harmful (SOLR4.4)
 				$hex .= $str{$i};
 			} else {
 				// encode all others
@@ -793,33 +793,15 @@ SQL;
 	        $doc[$propXSD] = array();
 	    }
 	    $doc[$propXSD][] = $valueXSD;
-	    
-	    $this->handleSpecialWikiProperties($property, $dataItem, $doc);
-
+	
 	    return $propXSD;
 	}
 	
-	/**
-	 * Special handling for special SMW properties.
-	 * 
-	 * @param SMWDIProperty $property
-	 * @param SMWDataItem $dataItem
-	 * @param array $doc
-	 */
-	private function handleSpecialWikiProperties($property, $dataItem, array &$doc) {
-		
-		if ($property->isUserDefined()) {
-			return; // not special
-		}
-		
-		switch ($property->getKey()) {
-			case '_MDAT':
-				// used for sorting
-				$doc['smwh__MDAT_datevalue_l'] = $dataItem->getMwTimestamp();
-				break;
-				
-		}
-		
+	private function updateModificationDate($title, array &$doc) {
+	
+	   $rev = Revision::newFromTitle($title);
+	   $doc['smwh__MDAT_datevalue_l'] = $rev->getTimestamp();
+	
 	}
 	
 	/**

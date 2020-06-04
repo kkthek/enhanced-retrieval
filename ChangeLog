@@ -1,5 +1,20 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+VERSION 2.1.6
+	- Modification date was not properly updated when article does not have annotations
+	- Encoding issue with special characters in property names
+	
+VERSION 2.1.5
+	- Hits per page did not work properly
+	- Better debugging capabilities
+	
+VERSION 2.1.4
+	- compatibility with SOLR 8.3
+	- improved relevance ranking if search term appears in page title
+	- compatibility changes to MW 1.33
+	- max. number of hits per page is now configurable
+	- sort order default is now configurable
+	
 VERSION 2.1.3
 	- Bugfix: table prefix used by MW was not used by ER on some queries
 
