@@ -35,7 +35,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 }
 
 
-define('US_SEARCH_EXTENSION_VERSION', '2.1.6');
+define('US_SEARCH_EXTENSION_VERSION', '2.1.7');
 
 define('US_HIGH_TOLERANCE', 0);
 define('US_LOWTOLERANCE', 1);

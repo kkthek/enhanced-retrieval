@@ -1,5 +1,8 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+VERSION 2.1.7
+	- Error on article that has no revision
+	
 VERSION 2.1.6
 	- Modification date was not properly updated when article does not have annotations
 	- Encoding issue with special characters in property names

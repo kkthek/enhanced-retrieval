@@ -800,7 +800,7 @@ SQL;
 	private function updateModificationDate($title, array &$doc) {
 	
 	   $rev = Revision::newFromTitle($title);
-	   $doc['smwh__MDAT_datevalue_l'] = $rev->getTimestamp();
+	   $doc['smwh__MDAT_datevalue_l'] = is_null($rev) ? 0 : $rev->getTimestamp();
 	
 	}
 	
