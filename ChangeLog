@@ -1,5 +1,7 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+VERSION 2.1.8
+	- Fix: Race condition on loading of search page
 VERSION 2.1.7
 	- Error on article that has no revision
 	

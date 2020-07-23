@@ -81,9 +81,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 							TITLE_FIELD,
 							NAMESPACE_FIELD];
 	
-	for (var i = 0; i < XFS.extraPropertiesToRequest.length; i++) {
-		QUERY_FIELD_LIST.push(XFS.extraPropertiesToRequest[i]);
-	}
+	
 						
 	var RELATION_REGEX = /^smwh_(.*)_(.*)$/;
 	var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
@@ -661,6 +659,10 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * values.
 	 */
 	function initParameterStoreDefault() {
+		
+		for (var i = 0; i < XFS.extraPropertiesToRequest.length; i++) {
+			QUERY_FIELD_LIST.push(XFS.extraPropertiesToRequest[i]);
+		}
 		
 		var params = {
 			facet: true,
