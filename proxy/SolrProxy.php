@@ -4,7 +4,7 @@ use DIQA\SolrProxy\SolrService;
 use DIQA\SolrProxy\ConfigLoader;
 
 if ( !defined('SOLRPROXY')) {
-	die('Not an valid entry point.');
+    die('Not an valid entry point.');
 }
 
 global $SOLRcore;
@@ -59,33 +59,30 @@ $query = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : false;
 // create a new solr service instance with the configured settings
 $core = $SOLRcore == '' ? '/solr/' : '/solr/' . $SOLRcore . '/';
 try {
-    
     $solr = new SolrService($SOLRhost, $SOLRport, $core, false, "$SOLRuser:$SOLRpass");
-   
+
     // if magic quotes is enabled then stripslashes will be needed
     if (get_magic_quotes_gpc() == 1) {
-    	$query = stripslashes($query);
+        $query = stripslashes($query);
     }
-    
- 
-	$query = $solr->applyConstraints($query);
-	$query = $solr->putFilterParamsToMainParams($query);
 
-	$results = $solr->rawsearch($query, SolrService::METHOD_POST);
-	$response = $results->getRawResponse();
-	if (isset($fsgUseStatistics) && $fsgUseStatistics === true) {
-		$solr->updateSearchStats($response);
-	}
+    $results = $solr->rawsearch($query, SolrService::METHOD_POST);
+    $response = $results->getRawResponse();
+    if (isset($fsgUseStatistics) && $fsgUseStatistics === true) {
+        $solr->updateSearchStats($response);
+    }
 } catch (Exception $e) {
     $res = new stdClass();
     $res->error = true;
     $res->msg = $e->getMessage();
     header("HTTP/1.0 500 Internal error");
     header('Content-Type: text/html');
-    echo '<h1 style="color:red;">ERROR</h1>';
-    echo "<br>Error message from SOLR-proxy: " . $e->getMessage();
-    echo "<br>Please make sure that proxy/env.php is configured. You'll find an example at proxy/env.sample.php";
-	die();
+    echo "<h1 style='color:red;'>ERROR</h1>\n";
+    echo "<br>Error message from SOLR-proxy: " . $e->getMessage() . "\n";
+    echo "<br>Please make sure that proxy/env.php is configured. You'll find an example at proxy/env.sample.php\n";
+    echo "<br>$SOLRhost, $SOLRport, $core, false, $SOLRuser:$SOLRpass\n";
+    echo "$SOLRhost, $SOLRport, $core, false, $SOLRuser:$SOLRpass";
+    die();
 }
 
 echo $response;

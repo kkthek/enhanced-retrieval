@@ -157,30 +157,30 @@
 		}
 		return f;
 	}
-        
-        /**
-         * Decodes encoded characters.
-         * 
-         *  _<hex number> to character
-         *  
-         * @param {String} title
-         *          Name of title
-         * @returns {String}
-         *          Decoded name
-         */
-        function decodeTitle(title) {
-             title = title.replace(/\s/g, "_");
-             title = title.replace(/__/g, "_0x5f");
-             var encChars = new RegExp("_0x[a-f0-9]{2}", "g");
-             var matches = title.match(encChars);
-             if (matches === null) return title;
-             for(var i = 0; i < matches.length; i++) {
-                 var hex = matches[i].substr(1);
-                 var dec = parseInt(hex, 16);
-                 var char = String.fromCharCode(dec);
-                 title = title.replace("_"+hex, char);
-             }
-             return title.replace(/_/g, " ");
+
+    /**
+     * Decodes encoded characters.
+     * 
+     *  _<hex number> to character
+     *  
+     * @param {String} title
+     *          Name of title
+     * @returns {String}
+     *          Decoded name
+     */
+    function decodeTitle(title) {
+         title = title.replace(/\s/g, "_");
+         title = title.replace(/__/g, "_0x5f");
+         var encChars = new RegExp("_0x[a-f0-9]{2}", "g");
+         var matches = title.match(encChars);
+         if (matches === null) return title;
+         for(var i = 0; i < matches.length; i++) {
+             var hex = matches[i].substr(1);
+             var dec = parseInt(hex, 16);
+             var char = String.fromCharCode(dec);
+             title = title.replace("_"+hex, char);
+         }
+         return title.replace(/_/g, " ");
 	};
 	
 	/**
@@ -193,13 +193,13 @@
 	 * 		"false" is returned.
 	 */
 	function makeShortName(longName, width, className) {
+		// Fast version that does not consider the actual rendered width of the text
+		//		var maxLength = 25;
+		//		if (longName.length > maxLength) {
+		//			return longName.substr(0, maxLength-3) + '&hellip;';
+		//		}
+		//		return false;
 		
-// Fast version that does not consider the actual rendered width of the text
-//		var maxLength = 25;
-//		if (longName.length > maxLength) {
-//			return longName.substr(0, maxLength-3) + '&hellip;';
-//		}
-//		return false;
 		var className = className ? ' class="' + className + '" ' : "";
 		var tempItem = '<span id="textWidthTempItem" ' + className + 'style="display:none;">'+ longName +'</span>';
 	    $(tempItem).appendTo('body');
@@ -278,7 +278,6 @@
 	 * @return array Display names (can contain HTML)
 	 */
 	function retrieveDisplayName(plainNames, property, returnLinks) {
-		
 		var vals = [];
 		
 		// make sure plainNames is always an array
@@ -287,7 +286,6 @@
 		}
 		
 		if (property == null) {
-			
 			// if no property given, just extract the nicename
 			$.each(plainNames, function() {
 				
@@ -297,7 +295,6 @@
 			});
 
 		} else if (isRelation(property)) {
-			
 			// Relation values are rendered as link
 			$.each(plainNames, function() {
 				
@@ -327,11 +324,9 @@
 				nicename = valueStr.split('|').length > 1 ? valueStr.split('|')[1] : nicename;
 				vals.push(noUnderscore(nicename));
             });
-            
 		}
 		
 		return vals;
-		
 	}
 	
 	/**
@@ -350,22 +345,34 @@
 	};
 	
 	/**
-	 * Returns css class for files that have an extension defined
-	 * in $fsgShowFileInOverlay
+	 * Returns CSS class for files that have an extension defined
+	 * in $fsgShowFileInOverlay resp. XFS.SHOW_FILE_IN_OVERLAY
 	 */
 	function cssClassForFileType(doc) {
 		if (doc.smwh_namespace_id != 6) {
 			return '';
 		}
-		var cssClass = ""; 
-		var fileParts = doc.smwh_title.split(".");
+		var fileParts = doc.smwh_title.split('.');
 		var fileExtension = fileParts[fileParts.length-1].toLowerCase();
 		if (XFS.SHOW_FILE_IN_OVERLAY.indexOf(fileExtension) > -1) {
-			cssClass = "imageOverlay";
+			return ' imageOverlay';
+		}
+		return '';
+	};
+
+	/**
+	 * Returns CSS class result pages that should be promoted or demoted in the search UI
+	 */
+	function cssClassForPromotionOrDemotion(doc) {
+		var cssClass = '';
+		if(typeof XFS.PROMOTION_PROPERTY !== 'undefined' && XFS.PROMOTION_PROPERTY != '' && doc[XFS.PROMOTION_PROPERTY] == 'true') { 
+			cssClass += ' xfsPromotedResult';
+		} else if(typeof XFS.DEMOTION_PROPERTY !== 'undefined' && XFS.DEMOTION_PROPERTY != '' && doc[XFS.DEMOTION_PROPERTY] == 'true') { 
+			cssClass += ' xfsDemotedResult';
 		}
 		return cssClass;
 	};
-	
+
 	/**
 	 * Adds annotations directly displayed in the snippets without
 	 * opening the 'properties'-view
@@ -382,9 +389,9 @@
 		    	  if (!isInCategory(doc, category)) {
 		    		  continue;
 		    	  }
-		    	  output += "<div class=\"xfs_additional_property_table_row\">";
+		    	  output += '<div class="xfs_additional_property_table_row">';
 		    	  output += '<span class="xfs_additional_property_label">' + snippets[s]['label'] +':&nbsp;</span>';
-		    	  output += '<span class="xfs_additional_property_value">' + retrieveDisplayName(doc[s], s, true) + "</span>";
+		    	  output += '<span class="xfs_additional_property_value">' + retrieveDisplayName(doc[s], s, true) + '</span>';
 		    	  output += '<span class="xfs_additional_property_separator">&nbsp;|&nbsp;</span>';
 		    	  output += '</div>';
 		    	  atLeastOne = true;
@@ -404,7 +411,7 @@
 	 * 		HTML ID for the given facet.
 	 */
 	AjaxSolr.theme.prototype.getPropertyValueHTMLID = function (facet) {
-		return 'property_' + facet2HTMLID(facet) + "_value";	
+		return 'property_' + facet2HTMLID(facet) + '_value';	
 	};
 	
 	/**
@@ -415,7 +422,7 @@
 	 * @param data
 	 * 		HTML representation of the semantic data
 	 * @param highlight
-	 * 		HTML representation of the semantic data
+	 * 		HTML representation of the highlighed text
 	 */
 	AjaxSolr.theme.prototype.article = function (doc, data, highlight, showDataHandler) {
 		
@@ -424,22 +431,28 @@
 			link = doc.smwh_diqa_import_fullpath_xsdvalue_t;
 		}
 		
-		var cssClass = cssClassForFileType(doc);
-		var output = '<div class="xfsResult"><a class="xfsResultTitle '+cssClass+'" href="' + link + '">';
+		var promoteOrDemoteResult = cssClassForPromotionOrDemotion(doc);
+		var output = '<div class="xfsResult' + promoteOrDemoteResult +'">';
 		
-		// get page title
+		// page title with link
+		var cssClass = cssClassForFileType(doc);
+		output += '<a class="xfsResultTitle' + promoteOrDemoteResult + cssClass + '" href="' + link + '">';
 	    if (window.XFS.getPageTitle) {
 	       var titleObj = window.XFS.getPageTitle(doc);
 	       output += noUnderscore(titleObj.title) + '</a> -- ' + titleObj.appendix;
-	    } else if(XFS.titleProperty != '' && doc['smwh_'+XFS.titleProperty+"_xsdvalue_t"]) { 
-	    	  output += noUnderscore(doc['smwh_'+XFS.titleProperty+"_xsdvalue_t"][0]) + '</a>';
+	    } else if(XFS.titleProperty != '' && doc['smwh_'+XFS.titleProperty+'_xsdvalue_t']) { 
+	    	  output += noUnderscore(doc['smwh_'+XFS.titleProperty+'_xsdvalue_t'][0]) + '</a>';
 	    } else {
 			  output += noUnderscore(doc.smwh_title) + '</a>';
 	    }
+		
 		output += getIconForNSID(doc.smwh_namespace_id);
 		// output += '<p id="links_' + doc.id + '" class="links"></p>';
+		
 		output += '<div class="xfsHighlightSearch">' + highlight + '</div>';
+		
 		output += '<div>' + data + '</div>';
+		
 		// Add the modification date
 		if (doc[MOD_ATT]) {
 			var lang = FacetedSearch.singleton.Language;
@@ -452,6 +465,8 @@
 					'</p>' + 
 				'</div>';
 		}
+		
+		// close xfsResult-DIV
 		output += '</div>';
 		
 		output = $(output);
@@ -568,7 +583,7 @@
 			row += 1;
 			
 			// check if it is a pre-defined property
-			var key = plainName.replace(/\s/, "_");
+			var key = plainName.replace(/\s/, '_');
 			if (mw.messages[key]) {
 				output += '<td>' + mw.messages[key] + '</td>';
 			} else {
@@ -618,12 +633,12 @@
 		}
 		var tooltip = 'title="' + mw.msg('namespaceTooltip', count) + '" ';
 		name = name.replace(/ /g, '&nbsp;');
-		var emptyNamespace = count === 0 ? " xfsEmptyNamespace" : "";
+		var emptyNamespace = count === 0 ? " xfsEmptyNamespace" : '';
 		html = $('<span namespace="' + facet + '" class="xfsNamespace' + emptyNamespace + '"/>')
 				.append('&nbsp;')
 				.append($('<span ' + tooltip + '>' + name + '</span>'))
 				.append(' ');
-		html.find("span").click(handler);
+		html.find('span').click(handler);
 		return html;				
 	};
 	
@@ -658,7 +673,7 @@
 		var plainName = extractPlainName(facet);
                 
         // check if it is a pre-defined property
-        var key = plainName.replace(/\s{2}/g, "_");
+        var key = plainName.replace(/\s{2}/g, '_');
                
         if (mw.messages[key]) {
         	plainName = mw.messages[key];
@@ -668,9 +683,9 @@
                 
 		var maxWidth = $('.facets').width() * 0.7;
 		var shortName = makeShortName(plainName, maxWidth);
-		var tooltip = shortName === false ? "" : ' title="' + plainName + '" ';
+		var tooltip = shortName === false ? '' : ' title="' + plainName + '" ';
 		
-        var cssClass = isProperty(facet) ? "fs_propertyFacet" : "fs_categoryFacet";
+        var cssClass = isProperty(facet) ? 'fs_propertyFacet' : 'fs_categoryFacet';
         var nicename = retrieveDisplayName(plainName, handlerData ? handlerData.field : null, false);
         
 		if (isRemove) {
@@ -820,7 +835,7 @@
 	};
 		
 	AjaxSolr.theme.prototype.filter_debug = function(filters) {
-		var list = $('<ul id="xfsFilterDebug>');
+		var list = $('<ul id="xfsFilterDebug">');
 		$.each(filters, function(index, value) {
 			$(list).append($('<li>').text(value));
 		});
@@ -875,7 +890,7 @@
 			var removeIcon = isRangeRestricted 
 				? '<img class="xfsRemoveRange" src="' + REMOVE_ICON +'" ' +
 					    'title="'+ mw.msg('removeRestriction') +'"/>'
-				: "";
+				: '';
 			html = 
 				$('<div>' +
 						'<span class="xfsClusterTitle">' +

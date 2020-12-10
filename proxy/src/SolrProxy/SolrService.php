@@ -27,9 +27,8 @@ class SolrService extends \Apache_Solr_Service {
      */
     public function __construct($host = 'localhost', $port = 8983, $path = '/solr/', $httpTransport = false, $userpass) {
         parent::__construct($host, $port, $path, $httpTransport, $userpass);
-        
+
         try {
-            
             $this->groups = Auth::session();
         } catch (\Exception $e) {
             throw new \Apache_Solr_InvalidArgumentException($e->getMessage());
@@ -38,8 +37,7 @@ class SolrService extends \Apache_Solr_Service {
 
     /**
      * Does a raw search on the SOLR server.
-     * The $queryString should have the
-     * Lucene query format
+     * The $queryString should have the Lucene query syntax.
      *
      * @param string $queryString
      *            The raw query string
@@ -51,6 +49,10 @@ class SolrService extends \Apache_Solr_Service {
      * @throws Apache_Solr_InvalidArgumentException If an invalid HTTP method is used
      */
     public function rawsearch($queryString, $method = self::METHOD_GET) {
+
+        $queryString = $this->applyConstraints($queryString);
+        $queryString = $this->putFilterParamsToMainParams($queryString);
+
         if ($method == self::METHOD_GET) {
             return $this->_sendRawGet($this->_searchUrl . $this->_queryDelimiter . $queryString);
         } else if ($method == self::METHOD_POST) {
@@ -66,17 +68,26 @@ class SolrService extends \Apache_Solr_Service {
      * @param string $response
      *            SOLR response (JSONp)
      */
-    function updateSearchStats($response) {
+    public function updateSearchStats($response) {
         $response = substr($response, strlen('_jqjsp('), - 2);
         $jsonResponse = json_decode($response);
-        
+
         $numFound = $jsonResponse->response->numFound;
         $params = '--searches';
         if ($numFound > 0) {
             $params .= ' --searchHits';
         }
-        
+
         BackgroundProcess::open("php " . __DIR__ . "/../../maintenance/updateSearchStats.php $params");
+    }
+
+    private function getUserGroups() {
+        $userGroups = $this->groups;
+        // every users is treated as being a member of "user"
+        if (! in_array('user', $userGroups)) {
+            $userGroups[] = 'user';
+        }
+        return $userGroups;
     }
 
     /**
@@ -85,25 +96,20 @@ class SolrService extends \Apache_Solr_Service {
      * @param string $query
      * @return string
      */
-    function applyConstraints($query) {
-        
-        global $fsgNamespaceConstraint, $fsgCustomConstraint;
-        
-        global $wgDBname;
-        $userid = self::getCookie($wgDBname . 'UserID');
-        $userName = self::getCookie($wgDBname . 'UserName');
-        
-        $userGroups = $this->groups;
-        
-        // treat him always as member of "user"
-        if (! in_array('user', $userGroups)) {
-        	$userGroups[] = 'user';
-        }
-        
-        // namespace constraints
+    private function applyConstraints($query) {
+        $modifiedQuery = $this->applyNamespaceConstraints($query);
+        $modifiedQuery = $this->applyCustomConstraints($modifiedQuery);
+        return $modifiedQuery;
+    }
+
+    private function applyNamespaceConstraints($query) {
+        global $fsgNamespaceConstraint;
         if (! isset($fsgNamespaceConstraint)) {
-            $fsgNamespaceConstraint = [];
+            return $query;
         }
+
+        $userGroups = $this->getUserGroups();
+
         $constraints = [];
         foreach ($fsgNamespaceConstraint as $group => $namespaces) {
             if (in_array($group, $userGroups)) {
@@ -114,17 +120,30 @@ class SolrService extends \Apache_Solr_Service {
         }
         $constraints = array_unique($constraints);
         if (count($constraints) > 0) {
-            $query = $query . "&fq=" . urlencode(implode(' OR ', $constraints));
+            return $query . "&fq=" . urlencode(implode(' OR ', $constraints));
         }
-        
-        // custom constraints
-        if (! isset($fsgCustomConstraint)) {
-            $fsgCustomConstraint = [];
-        }
-        foreach ($fsgCustomConstraint as $operation) {
-            $query = $operation($query, $userGroups, $userName, $userid);
-        }
+
         return $query;
+    }
+
+    private function applyCustomConstraints($query) {
+        global $fsgCustomConstraint;
+        if (! isset($fsgCustomConstraint)) {
+            return $query;
+        }
+
+        $userGroups = $this->getUserGroups();
+
+        global $wgDBname;
+        $userid = self::getCookie($wgDBname . 'UserID');
+        $userName = self::getCookie($wgDBname . 'UserName');
+
+        $modifiedQuery = $query;
+        foreach ($fsgCustomConstraint as $operation) {
+            $modifiedQuery = $operation($modifiedQuery, $userGroups, $userName, $userid);
+        }
+
+        return $modifiedQuery;
     }
 
     private static function getCookie($var) {
@@ -133,7 +152,7 @@ class SolrService extends \Apache_Solr_Service {
         }
         return '';
     }
-    
+
     /**
      * Adds filter query parameters to main query parameters.
      * This is required for boosting.
@@ -141,8 +160,7 @@ class SolrService extends \Apache_Solr_Service {
      * @param string $query
      * @return string
      */
-    function putFilterParamsToMainParams($query) {
-        
+    private function putFilterParamsToMainParams($query) {
         // parse query string
         $parsedResults = [];
         $params = explode("&", $query);
@@ -150,25 +168,25 @@ class SolrService extends \Apache_Solr_Service {
             $keyValue = explode("=", $p);
             $parsedResults[$keyValue[0]][] = $keyValue[1];
         }
-        
+
         // add fq-params to q-params
         if (isset($parsedResults['fq'])) {
             foreach ($parsedResults['fq'] as $fq) {
                 $parsedResults['q'][] = $fq;
             }
         }
-        
+
         // add boost dummy
         global $fsgSwitchOfBoost;
         if (isset($fsgSwitchOfBoost) && $fsgSwitchOfBoost === false) {
             $parsedResults['q'][] = 'smwh_boost_dummy%3A1';
         }
-        
+
         // serialize query string
         $url = '';
         $first = true;
         foreach ($parsedResults as $key => $values) {
-            
+
             if ($key == 'q') {
                 if (! $first) {
                     $url .= '&';
@@ -187,7 +205,7 @@ class SolrService extends \Apache_Solr_Service {
                 }
             }
         }
-        
+
         return $url;
     }
 }

@@ -3,7 +3,9 @@
  * To use this configuration file copy or rename it to:
  *     env.php
  * 
- * Make sure to set the followint properties to the same values
+ * For a complete list of configuration settings, check the DefaultSetting.php file.
+ *
+ * Make sure to set the following properties to the same values
  * as in LocalSettings.php. 
  */
 
@@ -25,11 +27,13 @@ $wgServer = "http://localhost";
 $wgScriptPath = "/mediawiki";
 $wgDBname = 'wikidb';
 
+
 /**
  * If something does not work, set this to true
  */
 global $SOLRProxyDebug;
 $SOLRProxyDebug=false;
+
 
 /**
  * The following configurations are optional.
@@ -40,6 +44,12 @@ $SOLRProxyDebug=false;
  * 
  * group => array of namespaces-IDs
  * 
+ * group => array of namespaces-IDs, e.g.
+ *
+ * $fsgNamespaceConstraint = [
+ * 	'sysop' => [ 0, 10, 14 ] // sysop users may only see Main, Template and Category pages
+ * ];
+ *
  * Please note: You CANNOT use Mediawiki constants like NS_MAIN here.
  * 'user' is default group if a user is in no other group.
  */

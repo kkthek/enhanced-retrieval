@@ -49,7 +49,6 @@
 		],
 		"psr-4": {
 			"DIQA\\FacetedSearch\\": "src/FacetedSearch/"
-
 		}
 	},
 	"config": {

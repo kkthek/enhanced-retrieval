@@ -24,12 +24,12 @@ use DIQA\FacetedSearch\Exceptions\ERFSException;
 /**
  * @file
  * @ingroup FacetedSearch
- * 
+ *
  * This file contains the factory class for the Faceted Search Indexer.
- * 
+ *
  * @author Thomas Schweitzer
  * Date: 22.02.2011
- * 
+ *
  */
 if ( !defined( 'MEDIAWIKI' ) ) {
 	die( "This file is part of the Enhanced Retrieval Extension extension. It is not a valid entry point.\n" );
@@ -40,15 +40,15 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 /**
  * This factory creates indexer objects that encapsulate access to index servers
  * for faceted search.
- * 
+ *
  * @author Thomas Schweitzer
- * 
+ *
  */
-class FSIndexerFactory  {
+class FSIndexerFactory {
 
 	/**
 	 * Creates an indexer object which is described by the given configuration.
-	 * 
+	 *
 	 * @param array $indexerConfig
 	 * 	This array has the following key value pairs:
 	 *    'indexer' => 'SOLR'
@@ -57,9 +57,9 @@ class FSIndexerFactory  {
      *    'proxyServlet' => the part of the URL after the port
      *    'indexerHost'  => hostname of the indexer as seen from the wiki server
      *    'indexerPort'  => port number of the indexer as seen from the wiki server
-     *  If <null> (default), the global configuration which is stored in the 
+     *  If <null> (default), the global configuration which is stored in the
      *  variable $fsgFacetedSearchConfig is used.
-     * 
+     *
      * @return IFSIndexer
      * 	An instance of the interface IFSIndexer
      * @throws ERFSException
@@ -72,15 +72,15 @@ class FSIndexerFactory  {
 			$indexerConfig = $fsgFacetedSearchConfig;
 		}
 		// Check if the configuration is complete
-		$expKeys = array('indexer' => 0, 'source' => 0, 'proxyHost' => 0, 
-		                 'proxyServlet' => 0, 'indexerHost' => 0, 
+		$expKeys = array('indexer' => 0, 'source' => 0, 'proxyHost' => 0,
+		                 'proxyServlet' => 0, 'indexerHost' => 0,
 		                 'indexerPort' => 0);
 		$missingKeys = array_diff_key($expKeys, $indexerConfig);
 		if (count($missingKeys) > 0) {
 			$missingKeys = "The following keys are missing: ".implode(', ', array_keys($missingKeys));
-			throw new ERFSException(ERFSException::INCOMPLETE_CONFIG, $missingKeys); 
+			throw new ERFSException(ERFSException::INCOMPLETE_CONFIG, $missingKeys);
 		}
-		
+
 		// Check if the configuration is supported
 		$unsupported = array();
 		if (!in_array($indexerConfig['indexer'], array('SOLR'))) {
@@ -91,9 +91,9 @@ class FSIndexerFactory  {
 		}
 		if (count($unsupported) > 0) {
 			$unsupported = "The following values are not supported:\n".implode("\n", $unsupported);
-			throw new ERFSException(ERFSException::UNSUPPORTED_VALUE, $unsupported); 
+			throw new ERFSException(ERFSException::UNSUPPORTED_VALUE, $unsupported);
 		}
-				
+
 		// Create the indexer object
 		if ($indexerConfig['indexer'] == 'SOLR') {
 			// Indexer is Apache SOLR

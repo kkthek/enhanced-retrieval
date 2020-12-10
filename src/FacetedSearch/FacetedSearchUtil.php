@@ -2,6 +2,10 @@
 namespace DIQA\FacetedSearch;
 
 use SMW\ApplicationFactory;
+use SMWDIProperty;
+use SMWDIWikiPage;
+use Title;
+
 class FacetedSearchUtil {
 
 	/**
@@ -38,25 +42,26 @@ class FacetedSearchUtil {
 		// rewrite result as array
 		$results = array ();
 
-		$titleProperty = \SMWDIProperty::newFromUserLabel("Titel");
+		global $fsgTitleProperty;
+		$titleProperty = SMWDIProperty::newFromUserLabel($fsgTitleProperty);
 		if ($db->numRows ( $res ) > 0) {
 			while ( $row = $db->fetchObject ( $res ) ) {
 				if ($row->ns_value == -1) {
 					$results [] = [ 'id' => $row->p_value, 'label' => is_null($row->blob_value) ? $row->p_value : $row->blob_value ];
 				} else {
-					$title = \Title::newFromText($row->p_value, $row->ns_value);
+					$title = Title::newFromText($row->p_value, $row->ns_value);
 					if (is_null($title)) {
 						continue;
 					}
-					$subject = \SMWDIWikiPage::newFromTitle($title);
-					$odbTitle = ApplicationFactory::getInstance()->getStore()->getPropertyValues($subject, $titleProperty);
-					if (count($odbTitle) > 0) {
-						$odbTitle = reset($odbTitle);
-						$odbLabel = $odbTitle->getString();
+					$subject = SMWDIWikiPage::newFromTitle($title);
+					$displayTitleObject = ApplicationFactory::getInstance()->getStore()->getPropertyValues($subject, $titleProperty);
+					if (count($displayTitleObject) > 0) {
+						$displayTitleObject = reset($displayTitleObject);
+						$displayTitle = $displayTitleObject->getString();
 					} else {
-						$odbLabel = $title->getPrefixedText();
+						$displayTitle = $title->getPrefixedText();
 					}
-					$results[] = ['id' => $title->getPrefixedText(), 'label' => $odbLabel ];
+					$results[] = ['id' => $title->getPrefixedText(), 'label' => $displayTitle ];
 				}
 			}
 		}

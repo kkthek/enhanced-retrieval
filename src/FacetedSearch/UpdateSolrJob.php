@@ -20,6 +20,7 @@ class UpdateSolrJob extends Job {
 	 */
 	function __construct( $title, $params ) {
 		parent::__construct( 'UpdateSolrJob', $title, $params );
+		$this->removeDuplicates = true;
 	}
 
 	/**
@@ -29,7 +30,6 @@ class UpdateSolrJob extends Job {
 	 * @see Job::run()
 	 */
 	public function run() {
-	    
 	    $consoleMode = PHP_SAPI === 'cli' && !defined('UNITTEST_MODE');
 		$title = $this->params['title'];
 		$wp = new WikiPage(Title::newFromText($title));
@@ -53,6 +53,18 @@ class UpdateSolrJob extends Job {
 		if ( $consoleMode ) {
 			echo "Updated (SOLR): $title";
 		}
-		
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see Job::getDeduplicationInfo()
+	 */
+	public function getDeduplicationInfo() {
+	    $info = parent::getDeduplicationInfo();
+	    if ( isset( $info['params']) ) {
+	        // timestamp not relevant for duplicate detection
+	        unset( $info['params']['timestamp'] );
+	    }
+	    return $info;
 	}
 }

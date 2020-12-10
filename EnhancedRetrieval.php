@@ -45,13 +45,12 @@ define('US_EXACTMATCH', 2);
 
 global $wgExtensionCredits;
 $wgExtensionCredits['other'][] = array(
-        'name' => 'Enhanced Retrieval extension',
-        'version' => US_SEARCH_EXTENSION_VERSION,
-		'license-name' => 'GPL-2.0+',
-        'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].",
-        'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
-        'description' => 'Enhanced retrieval provides a faceted search for Mediawiki and SMW.
-It requires a SOLR server as backend.',
+    'name' => 'Enhanced Retrieval extension',
+    'version' => US_SEARCH_EXTENSION_VERSION,
+    'license-name' => 'GPL-2.0+',
+    'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].",
+    'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
+    'description' => 'Enhanced retrieval provides faceted search for Mediawiki and SMW. It requires a SOLR server as backend.',
 );
 
 global $wgJobClasses;
@@ -77,7 +76,7 @@ require_once 'DefaultSettings.php';
  * @return unknown
  */
 function wfUSSetupExtension() {
-	
+
 	###
 	# This array configures the indexer that is used for faceted search. It has the
 	# following key-value pairs:
@@ -108,7 +107,7 @@ function wfUSSetupExtension() {
         && !file_exists(__DIR__ . '/../../env.php')) {
         ConfigLoader::loadConfig();
     }
-	
+
 	if (!isset($SOLRhost)) {
 	    $SOLRhost = 'localhost';
 	}
@@ -124,10 +123,10 @@ function wfUSSetupExtension() {
 	if (!isset($SOLRcore)) {
 	    $SOLRcore = '';
 	}
-	
+
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 	global $wgServerHTTP, $wgScriptPath, $wgDBname;
-	
+
 	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
 	if (!isset($fsgFacetedSearchConfig)) {
 		$fsgFacetedSearchConfig = array(
@@ -143,33 +142,33 @@ function wfUSSetupExtension() {
 			'indexerCore' => $SOLRcore
 		);
 	}
-	
+
 	global $IP, $wgScriptPath;
 	global $fsgScriptPath, $fsgIP;
 	global $ergIP, $ergScriptPath;
-	
+
 	$ergIP = $IP . '/extensions/EnhancedRetrieval';
 	$ergScriptPath = $wgScriptPath . '/extensions/EnhancedRetrieval';
-	
+
 	###
 	# This is the path to your installation of the Faceted Search as seen from the
 	# web. Change it if required ($wgScriptPath is the path to the base directory
 	# of your wiki). No final slash.
 	##
 	$fsgScriptPath = $wgScriptPath . '/extensions/EnhancedRetrieval';
-	
+
 	###
 	# This is the installation path of the extension
 	$fsgIP = $IP.'/extensions/EnhancedRetrieval';
-	
+
 	global $wgSpecialPages;
-	$wgSpecialPages['Search'] = function() { 
+	$wgSpecialPages['Search'] = function() {
 	    return new FSFacetedSearchSpecial();
 	};
-	
+
 	// Set up Faceted Search
 	FSGlobalFunctions::setupFacetedSearch();
-	
+
 	return true;
 }
 
@@ -180,6 +179,4 @@ function wfUSSetupExtension() {
 function wfUSLogout() {
 	wfDIQAUtilLogout("/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?logout=true");
 };
-
-
 

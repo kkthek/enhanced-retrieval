@@ -107,6 +107,21 @@ FacetedSearch.classes.NumericFacetClusterer = function (facetName, plainName) {
 		return values;
 	};
 		
+//	that.makeCustomClusters_ALTERNATIVE = function(min, max) {
+//		var clusters = XFS.numericPropertyClusters[facetName];
+//		var interval = clusters['interval'];
+//		var start = Math.floor(min / interval) * interval;
+//			
+//		var values = [];
+//		for (var i = start; i < max; i=i+interval) {
+//			values.push( [ i, i + interval ] );
+//		}
+//		console.log("makeCustomCluster");
+//		console.log(values);
+//		
+//		return values;
+//	};
+		
 	construct(facetName, plainName);
 	return that;
 	

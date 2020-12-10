@@ -7,7 +7,7 @@
 	 * Returns the page title and optionally an appendix displayed directly after the title.
 	 * 
 	 * @param doc
-	 * @returns {___anonymous339_340}
+	 * @returns JS object with title and appendix properties
 	 */
 	xfs.getPageTitle = function(doc) {
 		var cats  = doc['smwh_categories'];

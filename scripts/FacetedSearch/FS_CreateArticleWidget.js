@@ -65,18 +65,18 @@ FacetedSearch.classes.CreateArticleWidget = AjaxSolr.AbstractWidget.extend({
 			}
 		}
 		$(this.target).empty();
-		if (!articleExists) {
-			// Check if the name starts with a known namespace
-			var ns = mw.config.get('wgFormattedNamespaces')[tcd.namespace] || '';
-			var colon = ns ? ':' : '';
-			var articleName = ns+colon+title;
-			var cnpLink = wgFSCreateNewPageLink.replace(/\{article\}/g, articleName);
-			var link = mw.config.get('wgServer') + mw.config.get('wgScript') + cnpLink;
-			if (wgFSCreateNewPageLink != '') {
-			$(this.target)
-				.append(AjaxSolr.theme('createArticle', articleName, link));
-			}
-		}
+        if (!articleExists) {
+            // Check if the name starts with a known namespace
+            var ns = mw.config.get('wgFormattedNamespaces')[tcd.namespace] || '';
+            var colon = ns ? ':' : '';
+            var articleName = ns+colon+title;
+            var cnpLink = mw.config.get('wgFSCreateNewPageLink').replace(/\{article\}/g, articleName);
+            var link = mw.config.get('wgServer') + mw.config.get('wgScript') + cnpLink;
+            if (mw.config.get('wgFSCreateNewPageLink') != '') {
+            	$(this.target)
+                	.append(AjaxSolr.theme('createArticle', articleName, link));
+            }
+        }
 	},
 	
 	/**

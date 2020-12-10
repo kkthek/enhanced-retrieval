@@ -80,8 +80,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 							DOCUMENT_ID,
 							TITLE_FIELD,
 							NAMESPACE_FIELD];
-	
-	
 						
 	var RELATION_REGEX = /^smwh_(.*)_(.*)$/;
 	var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
@@ -312,14 +310,15 @@ FacetedSearch.classes.FacetedSearch = function () {
 		var exactMatchQuery = '';
 		if (mSearch != '') {
 			var escapedmSearch = mSearch.toLowerCase()
-            	.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
-            	.replace(/(&&|\|\|)/g,'\\$1');
-			escapedmSearch = escapedmSearch.replace(/\s*/g, '');
+					.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
+					.replace(/(&&|\|\|)/g,'\\$1');
+					.replace(/\s*/g, ' ');
 			exactMatchQuery = ' OR ' + QUERY_FIELD + ':(' + escapedmSearch + ')';
 			exactMatchQuery += ' OR ' + TITLE_FIELD + ':(' + escapedmSearch + ')';
 		}
 		return exactMatchQuery;
 	}
+  
 	/**
 	 * Translates a query string that is not an expert query (i.e. not enclosed in
 	 * braces) to a SOLR query string:
@@ -411,8 +410,26 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * 
 	 */
 	function initializeGUIElements() {
-		// initalize sort order GUI element
-		
+		var sort = mAjaxSolrManager.store.values('sort');
+		if (!sort || sort.length == 0 || sort[0].length == 0) {
+			return;
+		}
+		var val='score';
+		switch(sort[0][0]) {
+			case MODIFICATION_DATE_FIELD+' desc':
+				val = 'newest';
+				break;
+			case MODIFICATION_DATE_FIELD+' asc':
+				val = 'oldest';
+				break;
+			case TITLE_STRING_FIELD+' asc':
+				val = 'ascending';
+				break;
+			case TITLE_STRING_FIELD+' desc':
+				val = 'descending';
+				break;
+		}
+		$("#search_order option[value="+val+"]").prop('selected', true);
 	}
 	
 	/**

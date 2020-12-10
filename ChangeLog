@@ -2,6 +2,7 @@ Enhanced Retrieval extension ChangeLog
 ======================================
 VERSION 2.1.8
 	- Fix: Race condition on loading of search page
+	
 VERSION 2.1.7
 	- Error on article that has no revision
 	
@@ -24,18 +25,15 @@ VERSION 2.1.3
 	- Bugfix: table prefix used by MW was not used by ER on some queries
 
 VERSION 2.1
-
 	- Compatibility with PHP 7
 	- Compatibility with MW 1.31 - 1.33
 	- Compatibility with SMW 3.0
 
 VERSION 1.9.3
-
 	- Refactoring extension structure. Basically using composer autoload.
 	- Support for DIQAimport (direct download of documents in search interface)
 
 VERSION 1.9.2
-
 	- Configurable numeric clusters(cf. FS_Settings.php for an example)
 		$fsgNumericPropertyClusters
 		
