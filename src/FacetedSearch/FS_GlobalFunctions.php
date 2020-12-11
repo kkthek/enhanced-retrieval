@@ -103,6 +103,7 @@ class FSGlobalFunctions {
         $wgResourceModules['ext.facetedSearch.special'] = $moduleTemplate + array(
                 'scripts' => array(
                         "scripts/FacetedSearch/FS_Theme.js",
+                        "scripts/FacetedSearch/FS_Utils.js",
                         "scripts/FacetedSearch/FS_ResultWidget.js",
                         "scripts/FacetedSearch/FS_PagerWidget.js",
                         "scripts/FacetedSearch/FS_FacetWidget.js",
@@ -195,7 +196,6 @@ class FSGlobalFunctions {
                 'styles' => array('skin/dialogs.css'),
                 'dependencies' => array(
                         'ext.facetedSearch.special',
-                        'ext.diqa.util',
                         'jquery.ui.autocomplete',
                         'ext.bootstrap.styles',
                         'ext.bootstrap.scripts'
