@@ -29,7 +29,7 @@
 
 $messages = array();
 
-/** 
+/**
  * English
  */
 $messages['en'] = array(
@@ -55,12 +55,12 @@ $messages['en'] = array(
 	'fs_sort_by'		  => 'Sort by',
 
 	'fs_prop_ignoreasfacet' => 'Ignore as facet',
-    
+
     /* Javascript messages */
     'solrConnectionError' => 'CONNECTION ERROR. Please check browser log.',
     'solrNotFound'		=> 'Could not connect to SOLR Server yet. Faceted Search will not work yet. Expecting to find SOLR Server at $1. '.
                             'Possibly your firewall is blocking the SOLR port.'.
-                            'Please make sure that proxy/env.php is configured. You\'ll find an example at proxy/env.sample.php',
+                            'Please make sure that proxy/env.php is configured. You\'ll find an example at proxy/env-sample.php',
     'tryConnectSOLR'	=> 'Trying to connect to the search engine...',
     'more' 				=> 'more',
     'less' 				=> 'less',
@@ -88,7 +88,7 @@ $messages['en'] = array(
     'nonexArticle'		=> 'The article does not exist. Click here to create it=>',
     'searchLink' 		=> 'Link to this search',
     'searchLinkTT'		=> 'Right click to copy or bookmark this search',
-    
+
     '_TYPE' => 'Has type',
     '_URI'  => 'Equivalent URI',
     '_SUBP' => 'Subproperty of',
@@ -112,7 +112,7 @@ $messages['en'] = array(
     '_ASKDE'=> 'Query depth'
 );
 
-/** 
+/**
  * German
  */
 $messages['de'] = array(
@@ -138,12 +138,12 @@ $messages['de'] = array(
 	'fs_sort_by'		  => 'Sortierung:',
 
 	'fs_prop_ignoreasfacet' => 'Ignoriere als Facette',
-    
+
     /* Javascript messages */
     'solrConnectionError' => 'VERBINDUNGSFEHLER. Bitte Browser-Log untersuchen.',
     'solrNotFound'		=> 'Es konnte noch keine Verbindung zum SOLR Server hergestellt werden. Die facettierte Suche wird noch nicht funktionieren.'.
                             'Der SOLR Server wird hier: "$1" gesucht. Möglicherweise blockiert die lokale Firewall den Port des SOLR Servers. '.
-                            'Bitte prüfen Sie ob proxy/env.php korrekt konfiguriert ist. Sie finden ein Beispiel unter proxy/env.sample.php',
+                            'Bitte prüfen Sie ob proxy/env.php korrekt konfiguriert ist. Sie finden ein Beispiel unter proxy/env-sample.php',
     'tryConnectSOLR'	=> 'Verbindung mit der Suchmaschine wird aufgebaut ...',
     'more' 				=> 'mehr',
     'less' 				=> 'weniger',
@@ -171,7 +171,7 @@ $messages['de'] = array(
     'nonexArticle'		=> 'Der Artikel existiert nicht. Klicken Sie hier, um ihn zu erstellen=>',
     'searchLink' 		=> 'Link zur Suche',
     'searchLinkTT'		=> 'Rechts klicken zum Kopieren oder Lesezeichen setzen.',
-    
+
     '_TYPE' => 'Datentyp',
     '_URI'  => 'Gleichwertige URI',
     '_SUBP' => 'Unterattribut von',

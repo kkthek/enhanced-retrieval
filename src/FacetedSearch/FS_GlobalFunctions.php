@@ -217,27 +217,45 @@ class FSGlobalFunctions {
                 $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgDateTimePropertyClusters,
                 $fsgTitleProperty, $fsgAnnotationsInSnippet, $fsgShowArticleProperties,
                 $fsgShownFacets, $fsgFacetsWithOR, $fsgShownCategoryFacets,
-                $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay, $fsgPromotionProperty, $fsgDemotionProperty,
-                $fsgHitsPerPage, $fsgDefaultSortOrder; 
+                $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay,
+                $fsgPromotionProperty, $fsgDemotionProperty,
+                $fsgHitsPerPage, $fsgDefaultSortOrder;
 
-        if (!isset($fsgExtraPropertiesToRequest)) {
-            $fsgExtraPropertiesToRequest = [];
+        if (isset($fsgExtraPropertiesToRequest)) {
+            $extraPropertiesToRequest = [];
+            foreach ($fsgExtraPropertiesToRequest as $prop) {
+                $extraPropertiesToRequest[] = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($prop));
+            }
+        } else {
+            $extraPropertiesToRequest = [];
         }
 
-        $fsgTitlePropertyField = '';
         if ($fsgTitleProperty != '') {
-            $fsgTitlePropertyField = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgTitleProperty));
-            $fsgExtraPropertiesToRequest[] = $fsgTitlePropertyField;
+            $titlePropertyField = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgTitleProperty));
+            $extraPropertiesToRequest[] = $titlePropertyField;
+        } else {
+            $titlePropertyField = '';
+        }
+
+        if ($fsgPromotionProperty) {
+            $promotionProperty = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgPromotionProperty));
+        } else {
+            $promotionProperty = '';
+        }
+
+        if ($fsgDemotionProperty) {
+            $demotionProperty = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgDemotionProperty));
+        } else {
+            $demotionProperty = '';
         }
 
         $script = "\n<script type='text/javascript'>";
         $script .= "var XFS = XFS || {};";
-        $script .= "XFS.titleProperty = '"              . $fsgTitleProperty . "';";
-        $script .= "XFS.titlePropertyField = '"         . $fsgTitlePropertyField . "';";
+        $script .= "XFS.titlePropertyField = '$titlePropertyField';";
         $script .= "XFS.numericPropertyClusters = "     . json_encode($fsgNumericPropertyClusters) . ";";
         $script .= "XFS.dateTimePropertyClusters = "    . json_encode($fsgDateTimePropertyClusters) . ";";
         self::addAnnotationSnippets($script);
-        $script .= "XFS.extraPropertiesToRequest = "    . json_encode($fsgExtraPropertiesToRequest) . ";";
+        $script .= "XFS.extraPropertiesToRequest = "    . json_encode($extraPropertiesToRequest) . ";";
         $script .= "XFS.fsgShowArticleProperties = "    . ($fsgShowArticleProperties?'true':'false') . ";";
 
         $script .= "XFS.SHOWN_CATEGORY_FACETS = "       . json_encode($fsgShownCategoryFacets).";";
@@ -245,8 +263,8 @@ class FSGlobalFunctions {
         $script .= "XFS.OREDFACETS = "                  . json_encode($fsgFacetsWithOR) . ';';
         $script .= "XFS.CATEGORIES_TO_SHOW_IN_TITLE = " . json_encode($fsgCategoriesToShowInTitle) . ';';
         $script .= "XFS.SHOW_FILE_IN_OVERLAY = "        . json_encode($fsgShowFileInOverlay) . ";";
-        $script .= "XFS.PROMOTION_PROPERTY = "          . json_encode($fsgPromotionProperty) . ';';
-        $script .= "XFS.DEMOTION_PROPERTY = "           . json_encode($fsgDemotionProperty) . ';';
+        $script .= "XFS.PROMOTION_PROPERTY = '$promotionProperty';";
+        $script .= "XFS.DEMOTION_PROPERTY = '$demotionProperty';";
         $script .= "XFS.HITS_PER_PAGE = "               . json_encode($fsgHitsPerPage).";";
         $script .= "XFS.DEFAULT_SORT_ORDER = "          . json_encode($fsgDefaultSortOrder).";";
         $script .= "</script>";

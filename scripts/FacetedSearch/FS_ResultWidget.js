@@ -113,9 +113,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		}
 		
 		// Check if the search term is an existing article
-		if (!fsi.isExpertQuery()) {
-			this.updateCreateArticleWidget(fsi.getSearch());
-		}
+		this.updateCreateArticleWidget(fsi.getSearch());
 		
 		this.showInOverlay();
 		
@@ -251,7 +249,6 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 	 * 		The current query string. It may be the name of an existing article.
 	 */
 	updateCreateArticleWidget: function (query) {
-		
 		if (query.length === 0) {
 			// Ignore empty queries
 			return;

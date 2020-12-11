@@ -14,9 +14,7 @@
 		
 		var vals = [];
 		if (typeof cats !== 'undefined') {
-			
 			vals = $(cats).filter(window.XFS.CATEGORIES_TO_SHOW_IN_TITLE).toArray();
-			
 		}
 		
 		var res = {};
@@ -29,6 +27,5 @@
 		}
 		return res;
 	};
-	
 
 })(jQuery);

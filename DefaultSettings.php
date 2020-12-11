@@ -136,11 +136,11 @@ $fsgTemplateBoosts = array(
  */
 global $fsgNamespaceBoosts;
 $fsgNamespaceBoosts = array(
-// SMW_NS_PROPERTY => 3.0
+    // SMW_NS_PROPERTY => 3.0
 );
 
-
 /* End of BOOSTING properties ****************************************/
+
 
 /**
  * All pages listed here are ignored by EnhancedRetrieval

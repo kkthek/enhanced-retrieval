@@ -159,29 +159,20 @@
 	}
 
     /**
-     * Decodes encoded characters.
-     * 
-     *  _<hex number> to character
-     *  
-     * @param {String} title
-     *          Name of title
+     * This is the counterpart of FS_SolrSMWDB.encodeTitle()
+     * Turns a SOLR field name into a readable Wiki title.
+     * @param {String}  title 
+     *          url-encoded and % replaced with _0x
      * @returns {String}
-     *          Decoded name
+     *          decoded, readable name
      */
     function decodeTitle(title) {
-         title = title.replace(/\s/g, "_");
-         title = title.replace(/__/g, "_0x5f");
-         var encChars = new RegExp("_0x[a-f0-9]{2}", "g");
-         var matches = title.match(encChars);
-         if (matches === null) return title;
-         for(var i = 0; i < matches.length; i++) {
-             var hex = matches[i].substr(1);
-             var dec = parseInt(hex, 16);
-             var char = String.fromCharCode(dec);
-             title = title.replace("_"+hex, char);
-         }
-         return title.replace(/_/g, " ");
-	};
+    	var tmp = title.replaceAll(" ", "_")
+    	               .replaceAll("_0x", "\%")
+    				   .replaceAll("__", "_");
+    	tmp = decodeURIComponent(tmp);
+    	return tmp.replaceAll("_", " ");
+	}
 	
 	/**
 	 * Some strings are too long for displaying them in the UI. This function
@@ -288,7 +279,6 @@
 		if (property == null) {
 			// if no property given, just extract the nicename
 			$.each(plainNames, function() {
-				
 				var nicename = window.XFS.translateName ? window.XFS.translateName(this) : this;
 				nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
 				vals.push(noUnderscore(nicename));
@@ -297,7 +287,6 @@
 		} else if (isRelation(property)) {
 			// Relation values are rendered as link
 			$.each(plainNames, function() {
-				
 				var nicename = window.XFS.translateName ? window.XFS.translateName(this) : this;
 				nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
 				var link = this.split('|').length > 1 ? this.split('|')[0] : this;
@@ -440,8 +429,8 @@
 	    if (window.XFS.getPageTitle) {
 	       var titleObj = window.XFS.getPageTitle(doc);
 	       output += noUnderscore(titleObj.title) + '</a> -- ' + titleObj.appendix;
-	    } else if(XFS.titleProperty != '' && doc['smwh_'+XFS.titleProperty+'_xsdvalue_t']) { 
-	    	  output += noUnderscore(doc['smwh_'+XFS.titleProperty+'_xsdvalue_t'][0]) + '</a>';
+	    } else if(XFS.titlePropertyField != '' && doc[XFS.titlePropertyField]) { 
+	    	  output += noUnderscore(doc[XFS.titlePropertyField][0]) + '</a>';
 	    } else {
 			  output += noUnderscore(doc.smwh_title) + '</a>';
 	    }

@@ -146,10 +146,8 @@ class UpdateSolr extends Maintenance
                 print implode("\t\n", $messages);
             }
         } catch (Exception $e) {
-            if (! $this->hasOption('x')) {
-                print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
-            } else {
-                print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
+            print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
+            if ($this->hasOption('x')) {
                 print sprintf("\t[NOT INDEXED] %s\n", $e->getMessage());
                 print sprintf("%s\n", $e->getTraceAsString());
                 print "---------------------------------------------------------\n";

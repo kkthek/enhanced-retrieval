@@ -50,7 +50,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
     const CREATE_FULL_INDEX_CMD = 'solr/<CORE>/dataimport?command=full-import';
     const FULL_INDEX_CLEAN_OPT = '&clean=true';
     const COMMIT_UPDATE_CMD = 'solr/<CORE>/update?commit=true';
-    const EXTRACT_CMD = 'solr/<CORE>/update/extract?extractOnly=true';
+    const EXTRACT_CMD = 'solr/<CORE>/update/extract?extractOnly=true&wt=json';
     const DELETE_INDEX_QUERY = '<delete><query>*:*</query></delete>';
     const DELETE_DOCUMENT_BY_ID = '<delete><id>$1</id></delete>'; // $1 must be replaced by the actual ID
     const QUERY_PREFIX = 'solr/<CORE>/select/?';
@@ -138,7 +138,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
      * Deletes the complete index.
      */
     public function deleteIndex() {
-        $this->postCommand(self::COMMIT_UPDATE_CMD, self::DELETE_INDEX_QUERY, $rc);
+        $rc = $this->postCommand(self::COMMIT_UPDATE_CMD, self::DELETE_INDEX_QUERY);
         return $rc == self::HTTP_OK;
     }
 
@@ -176,30 +176,29 @@ abstract class FSSolrIndexer implements IFSIndexer {
         // this is a dummy boost for the sole purpose of being requested even if no filter is applied
         // it assures that boosting is actually effective. it always has the value "1"
         global $fsgSwitchOfBoost;
-        if (isset($fsgSwitchOfBoost) && $fsgSwitchOfBoost === false) {
-            $xml .= "\t\t<field name=\"smwh_boost_dummy\" boost=\"".$options['smwh_boost_dummy']['boost']."\"><![CDATA[1]]></field>\n";
+        if (isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost === true) {
+            $xml .= "\t\t<field name='smwh_boost_dummy' boost='" . $options['smwh_boost_dummy']['boost'] . "'><![CDATA[1]]></field>\n";
         }
-
 
         foreach ($document as $field => $value) {
             if (is_array($value)) {
                 foreach ($value as $v) {
-                    $xml .= "\t\t<field name=\"$field\" %$field:options%><![CDATA[$v]]></field>\n";
+                    $xml .= "\t\t<field name='$field' %$field:options%><![CDATA[$v]]></field>\n";
                 }
             } else {
-                $xml .= "\t\t<field name=\"$field\" %$field:options%><![CDATA[$value]]></field>\n";
+                $xml .= "\t\t<field name='$field' %$field:options%><![CDATA[$value]]></field>\n";
             }
 
             // assemble xml attributes for field
-            $optionAtts = "";
+            $optionAtts = '';
             if (isset($options[$field])) {
                 foreach($options[$field] as $name => $value) {
-                    $optionAtts .= "$name=\"$value\" ";
+                    $optionAtts .= "$name='$value' ";
                 }
             }
             if (isset($options['*']) && !array_key_exists($field, $options)) {
                 foreach($options['*'] as $name => $value) {
-                    $optionAtts .= "$name=\"$value\" ";
+                    $optionAtts .= "$name='$value' ";
                 }
             }
 
@@ -214,15 +213,14 @@ abstract class FSSolrIndexer implements IFSIndexer {
         $xml .= "\t</doc>\n</add>";
 
         // Send the XML as update command to the SOLR server
-        $rc = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml, $rc);
+        $rc = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml);
 
         return $rc == self::HTTP_OK;
     }
 
     /**
      * Sends a document to Tika and extracts text. If Tika does not
-     * know the format, an empty string is returned. Currently supported
-     * and tested with SOLR 4.4
+     * know the format, an empty string is returned.
      *
      *  - PDF
      *  - DOC/X (Microsoft Word)
@@ -235,11 +233,9 @@ abstract class FSSolrIndexer implements IFSIndexer {
      * @return [ text => extracted text of document, xml => full XML-response of Tika ]
      */
     public function extractDocument($title) {
-
         if ($title instanceof Title) {
             $file = RepoGroup::singleton()->getLocalRepo()->newFile($title);
             $filepath = $file->getLocalRefPath();
-
         } else {
             $filepath = $title;
         }
@@ -248,21 +244,21 @@ abstract class FSSolrIndexer implements IFSIndexer {
         $ext = pathinfo($filepath, PATHINFO_EXTENSION);
 
         // choose content type
-        if ($ext == "pdf") {
-            $contentType = "application/pdf";
-        } else if ($ext == "doc" || $ext == "docx") {
-            $contentType = "application/msword";
-        } else if ($ext == "ppt" || $ext == "pptx") {
-            $contentType = "application/vnd.ms-powerpoint";
-        } else if ($ext == "xls" || $ext == "xlsx") {
-            $contentType = "application/vnd.ms-excel";
+        if ($ext == 'pdf') {
+            $contentType = 'application/pdf';
+        } else if ($ext == 'doc' || $ext == 'docx') {
+            $contentType = 'application/msword';
+        } else if ($ext == 'ppt' || $ext == 'pptx') {
+            $contentType = 'application/vnd.ms-powerpoint';
+        } else if ($ext == 'xls' || $ext == 'xlsx') {
+            $contentType = 'application/vnd.ms-excel';
         } else {
             // general binary data as fallback (don't know if Tika accepts it)
-            $contentType = "application/octet-stream";
+            $contentType = 'application/octet-stream';
         }
 
         // do not index unknown formats
-        if ($contentType == "application/octet-stream") {
+        if ($contentType == 'application/octet-stream') {
             return;
         }
 
@@ -273,24 +269,36 @@ abstract class FSSolrIndexer implements IFSIndexer {
             }
             return;
         }
+
         $result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);
 
         if ($rc != 200) {
             throw new Exception(sprintf('Keine Extraktion möglich: %s HTTP code: [%s] ', $title->getPrefixedText(), $rc));
         }
 
+        // SOLR-4 uses XML as default
+        // $xml = simplexml_load_string($result);
+        // if (!isset($xml->str)) {
+        //     throw new Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
+        // }
+        // $text = $xml->str;
+        // // strip tags and line feeds
+        // $text = str_replace(array("\n","\t"), ' ', strip_tags(str_replace('<', ' <', $text)));
+
         $obj = json_decode($result);
-        $xml = $obj->{""};
-        $text = strip_tags($xml);
-        $text = str_replace(array("\n","\t"), " ", strip_tags(str_replace('<', ' <', $text)));
-        
-        if ($text == "") {
+        $xml = $obj->{''};
+        $text = strip_tags( str_replace('<', ' <', $xml) );
+        // TODO actually we should do sth. like this
+        // $text = $xml->xpath( '//body/text()' )
+        // but this does not work for my sample document, possibly due to the SimpleXML of PHP and XML that TIKA creates
+
+        $text = preg_replace('/\s\s*/', ' ', $text );
+
+        if ($text == '') {
             throw new Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
         }
 
-
         return [ 'xml' => $xml, 'text' => $text ];
-
     }
 
     /**
@@ -335,7 +343,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
         if (!is_null($ignoreCopyFields)) {
             foreach ($ignoreCopyFields as $srcPattern => $targetPattern) {
                 foreach ($doc as $field => $val) {
-                    $f = preg_replace("/$srcPattern/", "$targetPattern", $field);
+                    $f = preg_replace("/$srcPattern/", $targetPattern, $field);
                     if ($f !== $field) {
                         // The source pattern matched => remove the target field
                         unset($doc[$f]);
@@ -358,9 +366,8 @@ abstract class FSSolrIndexer implements IFSIndexer {
      *
      */
     public function deleteDocument($id) {
-        $cmd = self::DELETE_DOCUMENT_BY_ID;
-        $cmd = str_replace('$1', $id, $cmd);
-        $this->postCommand(self::COMMIT_UPDATE_CMD, $cmd, $rc);
+        $cmd = str_replace('$1', $id, self::DELETE_DOCUMENT_BY_ID);
+        $rc = $this->postCommand(self::COMMIT_UPDATE_CMD, $cmd);
         return $rc == self::HTTP_OK;
     }
 
@@ -384,7 +391,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
         if( defined( 'ERDEBUG' ) ) {
             curl_setopt( $curl, CURLOPT_VERBOSE, 1 );
         }
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array("Authorization: Basic {$this->authBase64}"));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, ["Authorization: Basic {$this->authBase64}"] );
 
         ob_start();
         $ok = curl_exec( $curl );
@@ -398,7 +405,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
 
         curl_close( $curl );
 
-        $resultCode = $info['http_code']; # ????
+        $resultCode = $info['http_code'];
         return $result;
     }
 
@@ -413,11 +420,13 @@ abstract class FSSolrIndexer implements IFSIndexer {
      *         Returns the status of the HTTP request
      *             200 - HTTP_OK
      */
-    private function postCommand($command, $data, &$resultCode) {
+    private function postCommand($command, $data) {
         $url = $this->createCommandUrl($command);
 
         $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: text/xml', "Authorization: Basic {$this->authBase64}"));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                'Content-Type: text/xml',
+                "Authorization: Basic {$this->authBase64}"] );
         curl_setopt($curl, CURLOPT_HEADER, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -458,7 +467,9 @@ abstract class FSSolrIndexer implements IFSIndexer {
         $url = $this->createCommandUrl($command);
 
         $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: '.$contentType, "Authorization: Basic {$this->authBase64}"));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                "Content-Type: $contentType",
+                "Authorization: Basic {$this->authBase64}"] );
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -472,7 +483,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
         $info = curl_getinfo($curl);
         curl_close($curl);
 
-        $resultCode = $info['http_code']; # ????
+        $resultCode = $info['http_code'];
         return $result;
     }
 
@@ -484,7 +495,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
         if($this->indexCore == '') {
             $url = $this->mBaseURL . str_replace('<CORE>/', '', $command);
         } else {
-            $url = $this->mBaseURL . str_replace("<CORE>/", $this->indexCore . '/', $command);
+            $url = $this->mBaseURL . str_replace('<CORE>/', $this->indexCore . '/', $command);
         }
         return $url;
     }

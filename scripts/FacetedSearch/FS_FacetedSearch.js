@@ -23,7 +23,7 @@
  */
 
 if (typeof window.FacetedSearch == "undefined") {
-// Define the FacetedSearch module	
+	// Define the FacetedSearch module	
 	window.FacetedSearch = { 
 		classes : {}
 	};
@@ -80,6 +80,9 @@ FacetedSearch.classes.FacetedSearch = function () {
 							DOCUMENT_ID,
 							TITLE_FIELD,
 							NAMESPACE_FIELD];
+	if(XFS.titlePropertyField != '') {
+		QUERY_FIELD_LIST.push(XFS.titlePropertyField);
+	}
 						
 	var RELATION_REGEX = /^smwh_(.*)_(.*)$/;
 	var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
@@ -97,13 +100,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 	// AjaxSolr.FSManager - The manager from the AjaxSolr library.
 	var mAjaxSolrManager;
 	
-	// string - The current search string
-	var mSearch = '';
-	
-	// {bool} If true, the current search term is an expert query (i.e. may
-	//        contain logical operations and more)
-	var mExpertQuery = false;
-	
 	// reference to the (dummy) relation widget
 	var mRelationWidget;
 	
@@ -114,19 +110,25 @@ FacetedSearch.classes.FacetedSearch = function () {
 	//--- Getters/Setters ---
 	that.getAjaxSolrManager = function() {
 		return mAjaxSolrManager;
-	}
+	};
 	
 	that.getRelationWidget = function() {
 		return mRelationWidget;
-	}
+	};
 	
-	that.getSearch = function () {
+	function getSearch() {
+		var mSearch = $('#query').val();
+
+		// trim the search term
+		mSearch = mSearch.replace(/^\s*(.*?)\s*$/,'$1');
+	
+		if (mSearch == '*' || mSearch == '') {
+			mSearch="(*)";
+		}
+
 		return mSearch;
 	}
-	
-	that.isExpertQuery = function () {
-		return mExpertQuery;
-	}
+	that.getSearch = getSearch;
 	
 	/**
 	 * Adds the given facet to the set of expanded facets in the UI, if it is a
@@ -141,7 +143,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 				mExpandedFacets.push(facet);
 			}
 		}
-	}
+	};
 	
 	/**
 	 * Return true if the given facet is expanded in the User Interface.
@@ -153,7 +155,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 */
 	that.isExpandedFacet = function (facet) {
 		return $.inArray(facet, mExpandedFacets) >= 0;
-	}
+	};
 	
 	/**
 	 * Removes the given facet from the set of expanded facets in the UI. If no
@@ -176,7 +178,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		mExpandedFacets[pos] = mExpandedFacets[len-1];
 		// ... and reduce the array's length
 		mExpandedFacets.length = len - 1;
-	}
+	};
 	
 	/**
 	 * Shows the property values of all expanded facets.
@@ -186,7 +188,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			var facet = mExpandedFacets[i];
 			FacetedSearch.classes.ClusterWidget.showPropertyDetailsHandler(facet);
 		}
-	}
+	};
 	
 	/**
 	 * Constructor for the FacetedSearch class.
@@ -208,7 +210,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		
 		// Show all results at start up
 		updateSearchResults();
-	};
+	}
 	that.createUserInterface = createUserInterface;
 	
 	/**
@@ -229,14 +231,12 @@ FacetedSearch.classes.FacetedSearch = function () {
 		},KEY_DELAY);
 		return false;
 	};
-	
 		
 	/**
 	 * Event handler for the search order selection field. A new SOLR resquest is
 	 * sent for the new search result order.
 	 */
 	that.onSearchOrderChanged = function() {
-	
 		var selected =  $("#search_order option:selected");
 		var order = selected[0].value;
 		var sort = getSortOrderModifier(order);
@@ -244,7 +244,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		mAjaxSolrManager.store.addByValue('sort', sort);
 		mAjaxSolrManager.doRequest(0);
 		return false;
-	}
+	};
 	
 	/**
 	 * Event handler for clicking the search button. A new SOLR request is 
@@ -256,7 +256,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		if (!solrPresent) {
 			checkSolrPresent();
 		}
-	}
+	};
 	
 	/**
 	 * Adds the given widget to the SOLR manager.
@@ -265,69 +265,62 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 */
 	that.addWidget = function (widget) {
 		mAjaxSolrManager.addWidget(widget);
-	}
+	};
 	
 	/**
 	 * Gets the search term from the input field and triggers a new SOLR request.
 	 * All widgets will be updated.
 	 */
 	function updateSearchResults() {
-		mSearch = $('#query').val();
-		if ($.trim(mSearch) == '*') {
-			mSearch="(*)";
-		}
-		// trim the search term
-		mSearch = mSearch.replace(/^\s*(.*?)\s*$/,'$1');
+		var searchText = getSearch(); 
 		
-		var qs = mSearch;
-
-		// If the query is enclosed in braces it is treated as expert query.
+		// If the query is enclosed in parentheses it is treated as an expert query.
 		// Expert queries may contain logical operators. Text is not converted
 		// to lowercase.
-		mExpertQuery = qs.charAt(0) === '(' 
-					   && qs.charAt(mSearch.length-1) === ')';
+		var isExpertQuery = searchText.charAt(0) === '(' && searchText.charAt(searchText.length-1) === ')';
 		
-		if (!mExpertQuery) {
-			qs = prepareQueryString(mSearch);
-			qs += prepareTitleQuery(mSearch);
-		} else {
+		if (isExpertQuery) {
 			// A colon in the search term must be escaped otherwise SOLR will throw
 			// a parser exception
-			qs = qs.replace(/(:)/g,"\\$1");
+			var qs = searchText.replace(/(:)/g,"\\$1");
+		} else {
+			var qs = prepareQueryString(searchText) + prepareTitleQuery(searchText);
 		}
 		
-		mAjaxSolrManager.store.addByValue('q', QUERY_FIELD+':'+qs);
+		mAjaxSolrManager.store.addByValue('q', QUERY_FIELD + ':' + qs);
 		readPrefixParameter();
 		mAjaxSolrManager.doRequest(0);
-		
 	}
-	that.updateSearchResults = updateSearchResults;
 	
 	/**
 	 * Prepare query for exact title matches
 	 */
-	function prepareTitleQuery(mSearch) {
+	function prepareTitleQuery(searchText) {
 		var exactMatchQuery = '';
-		if (mSearch != '') {
-			var escapedmSearch = mSearch.toLowerCase()
+		if (searchText != '') {
+			var escapedSearchText = searchText.toLowerCase()
 					.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
-					.replace(/(&&|\|\|)/g,'\\$1');
-					.replace(/\s*/g, ' ');
-			exactMatchQuery = ' OR ' + QUERY_FIELD + ':(' + escapedmSearch + ')';
-			exactMatchQuery += ' OR ' + TITLE_FIELD + ':(' + escapedmSearch + ')';
+					.replace(/(&&|\|\|)/g,'\\$1')
+					.replace(/\s\s*/g, ' ');
+			escapedSearchText = '(' + escapedSearchText + ')';
+			exactMatchQuery = ' OR ' + QUERY_FIELD + ':'+ escapedSearchText;
+			exactMatchQuery += ' OR ' + TITLE_FIELD + ':' + escapedSearchText;
+			if(XFS.titlePropertyField != '') {
+				exactMatchQuery += ' OR ' + XFS.titlePropertyField + ':' + escapedSearchText;
+			}
 		}
 		return exactMatchQuery;
 	}
   
 	/**
 	 * Translates a query string that is not an expert query (i.e. not enclosed in
-	 * braces) to a SOLR query string:
+	 * parentheses) to a SOLR query string:
 	 * - A * is appended to the last word. 
 	 *   Example: foo -> (+foo*) 
 	 *            Searches for all documents containing words starting with foo
 	 * - Single words are converted to lowercase as the index is also lowercase
 	 *   Example: FOO -> (+foo*)
-	 *            Searches for the lowercase words starting with foo
+	 *            Searches for lowercase words starting with foo
 	 * - Single words are concatenated with the + operator (AND)
 	 *   Example: foo bar -> (+foo +bar*)
 	 *            Searches for documents containing the word foo and words 
@@ -340,26 +333,23 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 *   Example: (foo+bar) "(foo) in a (bar)" -> (\(foo\+bar\) "\(foo\) in a \(bar\)") 
 	 *            Searches for documents containing words starting with (foo+bar)
 	 *            and the phrase '(foo) in a (bar)'
-	 *            
-	 * @param {String} queryString
-	 * 		This query string is prepared for sending to SOLR
 	 * @return {String}
 	 * 		The prepared query string
 	 */
-	function prepareQueryString(queryString) {
+	function prepareQueryString(searchText) {
 		// Extract all phrases
-		var phrases = queryString.match(/".*?"/g);
-		var endWithPhrase = queryString.charAt(queryString.length-1) === '"';
+		var phrases = searchText.match(/".*?"/g);
+		var endWithPhrase = searchText.charAt(searchText.length-1) === '"';
 		
 		// Remove phrases from the query string and trim it
-		queryString = queryString.replace(/(".*?")/g, '')
+		searchText = searchText.replace(/(".*?")/g, '')
 								 .replace(/^\s*(.*?)\s*$/,'$1')
 								 .replace(/\s\s*/g, ' ');
 		
 		// Split the query string at spaces in words
-		var words = queryString.split(' ');
+		var words = searchText.split(' ');
 		
-		var result = "";
+		var queryString = "";
 		
 		// Convert words to lower case and escape the special characters:
 		// + - && || ! ( ) { } [ ] ^ " ~ * ? : \			
@@ -372,37 +362,35 @@ FacetedSearch.classes.FacetedSearch = function () {
 				w += '*';
 			}
 							   
-			result += "+" + w + " ";
+			queryString += "+" + w + " ";
 		}
 		
 		// Escape special characters in phrases
 		if (phrases) {
 			for (i = 0; i < phrases.length; ++i) {
-				var p = phrases[i].substring(1,phrases[i].length-1);
-				var p = '+"' + p.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
+				var p = phrases[i].substring(1, phrases[i].length-1);
+				p = '+"' + p.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
 								.replace(/(&&|\|\|)/g,'\\$1') +
 						'" ';
-				result += p;
+				queryString += p;
 			}
 		}
 		
-		if (result.length > 0) {
-			result = '(' + result + ')';
+		if (queryString.length > 0) {
+			queryString = '(' + queryString + ')';
 		}
 		
-		return result;		
+		return queryString;		
 	}
 	
 	/**
 	 * Initializes the event handlers for the User Interface.
 	 */
 	function addEventHandlers() {
-		
 		// Keyup handler for the search input field
 		$('#query').keyup(that.onSearchKeyup);
 		$('#search_order').change(that.onSearchOrderChanged);
 		$('#search_button').click(that.onSearchButtonClicked);
-		
 	}
 	
 	/**
@@ -456,9 +444,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			}
 			
 			switch(param.toLowerCase()) {
-			
 				case 'category':
-					
 					$('select#fs_category_filter option[value="'+params[param]+'"]').prop('selected', true);
 					var regex = new RegExp('smwh_categories:.*');
 					fsm.store.removeByValue('fq', regex);
@@ -470,21 +456,16 @@ FacetedSearch.classes.FacetedSearch = function () {
 					break;
 					
 				case 'sort':	
-					
 					$('select#search_order option[value="'+params[param]+'"]').prop('selected', true); 
 					that.onSearchOrderChanged();
-					
 					break;
 					
 				default:
-					
 					var property = params[param];
 					if (property != '') {
 						fsm.store.addByValue('fq', param+':'+property);
 					} 
-					
 			}
-			
 		}
 		
 		// clear init parameters
@@ -495,7 +476,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * Checks if the SOLR server is responding
 	 */
 	function checkSolrPresent() {
-		
 		var sm = new AjaxSolr.FSManager({
 			solrUrl : mw.config.get('wgFSSolrURL'),
 			servlet : mw.config.get('wgFSSolrServlet'),
@@ -545,7 +525,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 				$("#results").show();
 			}
 		}, 1000);
-
 	}
 	
 	/**
@@ -578,7 +557,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 		sm.store.addByValue('facet.field', NAMESPACE_FIELD);		
 		sm.store.addByValue('json.nl', 'map');	
 		sm.doRequest(0);
-
 	}
 	
 	/**
@@ -599,11 +577,9 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * default values are set.
 	 */
 	function initParameterStore() {
-		
 		if (!initParameterStoreFromURL()) {
 			initParameterStoreDefault();
 		}
-
 	}
 	
 	/**
@@ -676,7 +652,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * values.
 	 */
 	function initParameterStoreDefault() {
-		
 		for (var i = 0; i < XFS.extraPropertiesToRequest.length; i++) {
 			QUERY_FIELD_LIST.push(XFS.extraPropertiesToRequest[i]);
 		}
@@ -719,7 +694,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * Creates and attaches all widgets to the SOLR manager
 	 */
 	function createWidgets() {
-		
 		mAjaxSolrManager.addWidget(new FacetedSearch.classes.LinkCurrentSearchWidget({
 			id: 'currentSearchLink',
 			target: '#current_search_link'
@@ -801,7 +775,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 	that.TITLE_STRING_FIELD	= TITLE_STRING_FIELD;
 	that.TITLE_FIELD		= TITLE_FIELD;
 	return that;
-	
 }
 
 // Create the singleton instance of Faceted Search

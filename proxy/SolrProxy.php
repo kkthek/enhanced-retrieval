@@ -79,7 +79,7 @@ try {
     header('Content-Type: text/html');
     echo "<h1 style='color:red;'>ERROR</h1>\n";
     echo "<br>Error message from SOLR-proxy: " . $e->getMessage() . "\n";
-    echo "<br>Please make sure that proxy/env.php is configured. You'll find an example at proxy/env.sample.php\n";
+    echo "<br>Please make sure that proxy/env.php is configured. You'll find an example at proxy/env-sample.php\n";
     echo "<br>$SOLRhost, $SOLRport, $core, false, $SOLRuser:$SOLRpass\n";
     echo "$SOLRhost, $SOLRport, $core, false, $SOLRuser:$SOLRpass";
     die();

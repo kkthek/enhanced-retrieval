@@ -108,12 +108,12 @@ class FSSolrSMWDB extends FSSolrIndexer {
      */
     public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL, & $messages = [], $force = false ) {
 
-	    if (PHP_SAPI == 'cli' && !$force) {
-	        // do not update from job, unless it's forced
-	        $pageTitle = $wikiPage->getTitle()->getPrefixedText();
-	        echo "\nskipping SOLR.updateIndexForArticle( $pageTitle ) cli=TRUE, force=FALSE";
-	        return;
-	    }
+//         if (PHP_SAPI == 'cli' && !$force) {
+//             // do not update from job, unless it's forced
+//             $pageTitle = $wikiPage->getTitle()->getPrefixedText();
+//             echo "skipping SOLR.updateIndexForArticle( $pageTitle ) cli=TRUE, force=FALSE\n";
+//             return;
+//         }
 
         $doc = array();
         $this->dependant = [];
@@ -221,7 +221,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
             global $fsUpdateOnlyCurrentArticle;
             $fsUpdateOnlyCurrentArticle = true;
             foreach($this->dependant as $ttu) {
-                $this->updateIndexForArticle(new WikiPage($ttu), $user, $rawText, $messages);
+                $this->updateIndexForArticle(new WikiPage($ttu), $user, $rawText, $messages, $force);
             }
         }
 
@@ -290,8 +290,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
      */
     private function calculateBoostFactors(array &$options, $value) {
         $options['smwh_boost_dummy']['boost'] += intval($value);
-
     }
+
     /**
      * Retrieves the templates of the article with the page ID $pid and calculate
      * boosting factors for it
@@ -324,7 +324,6 @@ SQL;
         }
         $db->freeResult($res);
 
-
         // add boost according to templates
         global $fsgTemplateBoosts, $fsgDefaultBoost;
         if (count(array_intersect(array_keys($fsgTemplateBoosts), $smwhTemplates)) > 0) {
@@ -342,34 +341,21 @@ SQL;
         }
     }
 
-
     /**
-     * Encodes special characters in title
+     * Encodes special characters in a given SMW property name to make it compliant with SOLR field names
      *
-     * all non-alphanumeric characters below 128 are encoded.
-     * @param {String} $str
+     * @param string  $propertyName
      * @return string
      */
-    private static function encodeTitle($str) {
-        if ($str == '') {
-            return '';
-        }
-        $str = utf8_decode($str);
-        $hex = "";
-        $i = 0;
-        $str = str_replace("_", "__", $str);
-        do {
-            $ord = ord($str{$i});
-            if (($ord >= 65 && $ord <= 90) || ($ord >= 97 && $ord <= 122) || ($ord >= 48 && $ord <= 57) || $ord == 95) {
-                // do not encode alphnumeric chars or underscore
-                $hex .= $str{$i};
-            } else {
-                // encode all others
-                $hex .= "_0x".dechex(ord($str{$i}));
-            }
-            $i++;
-        } while ($i < strlen($str));
-        return $hex;
+    private static function encodeTitle($propertyName) {
+        // turns non-acii and some special characters into percent encoding, e.g. %3A
+        $tmp = rawurlencode($propertyName);
+
+        $tmp = str_replace("_", "__", $tmp);
+
+        // replaces % with _0x
+        $tmp = str_replace("%", "_0x", $tmp);
+        return $tmp;
     }
 
     /**
@@ -379,7 +365,6 @@ SQL;
      * @return string
      */
     public static function encodeSOLRFieldName($property) {
-
         $prop = str_replace(' ', '_', $property->getLabel());
 
         $prop = self::encodeTitle($prop);
@@ -387,7 +372,7 @@ SQL;
         $typeId = $property->findPropertyTypeID();
         $type = DataTypeRegistry::getInstance()->getDataItemByType($typeId);
 
-        // The property names of all attributes are according to their type.
+        // The property names of all attributes are built based on their type.
         switch($type) {
             case SMWDataItem::TYPE_BOOLEAN:
                 return "smwh_{$prop}_xsdvalue_b";
@@ -726,6 +711,8 @@ SQL;
     private function serializeDataItem($property, $dataItem, array &$doc) {
 
         $valueXSD = $dataItem->getSerialization();
+
+        // TODO use encodeSOLRFieldName() here
         $prop = str_replace(' ', '_', $property->getLabel());
         $prop = self::encodeTitle($prop);
         $type = $dataItem->getDIType();
