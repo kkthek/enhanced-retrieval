@@ -1,11 +1,11 @@
-== Enhanced Retrieval Extension 2.1.8 ==
+== Enhanced Retrieval Extension 2.2 ==
 
 === Requirements ===
 * PHP 7.x
 * Composer
 * MediaWiki 1.31.x - 1.33.x
-* SMW 3.1.x
-* Apache SOLR server v8.30+  
+* SMW 3.x
+* Apache SOLR server v4.4 or v8.30+
 
 	You can setup your own Solr server. Please use the SOLR-schema given in:
 		solr-config.zip (tested with Solr 8.30)

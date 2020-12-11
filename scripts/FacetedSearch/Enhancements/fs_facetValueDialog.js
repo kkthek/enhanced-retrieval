@@ -157,7 +157,7 @@
 			that.property = property;
 			that.facet = facet;
 			
-			var ajaxIndicator = new DIQAUTIL.Util.AjaxIndicator();
+			var ajaxIndicator = new XFS.Util.AjaxIndicator();
 			ajaxIndicator.setGlobalLoading(true);
 			
 			new Ajax().getDialog(property, function(jsondata) {

@@ -8,9 +8,9 @@ class Auth {
      * @return a list of groups for the currently logged-in user
      */
     public static function session() {
-        
+
         session_start();
-        
+
         if (Auth::checkLogout()) {
             @session_destroy();
             exit();
@@ -30,28 +30,27 @@ class Auth {
                 $wgDBname . 'UserName' => $userName,
                 $wgDBname . '_session' => $sessionId
             ];
-           
+
             global $wgHTTPAuthForLocalProxies;
             global $wgServer, $wgServerHTTP, $wgScriptPath;
             $server = isset($wgHTTPAuthForLocalProxies) && $wgHTTPAuthForLocalProxies === true ? $wgServerHTTP : $wgServer;
-            
-            $res = self::http("$server$wgScriptPath/api.php?action=diqa_util_userdataapi&format=json", $cookies);
-           
+
+            $res = self::http("$server$wgScriptPath/api.php?action=fs_userdataapi&format=json", $cookies);
+
             $o = json_decode($res[2]);
-            
+
             if (isset($o->result)) {
                 $groups = isset($o->result->user_groups) ? $o->result->user_groups : [];
                 $_SESSION['user_groups' . $userid] = $groups;
             } else {
                 @session_destroy();
-                throw new \Exception("Not logged in.");
+                throw new \Exception("Could not verify user via fs_userdataapi. Not logged in?!");
             }
-            
         }
 
         return $_SESSION['user_groups' . $userid];
     }
-    
+
     /**
      *
      * @return true iff the user is logged in

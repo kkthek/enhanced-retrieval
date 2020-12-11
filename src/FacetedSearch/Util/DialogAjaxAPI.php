@@ -1,5 +1,5 @@
 <?php
-namespace DIQA\FacetedSearch\Dialogs;
+namespace DIQA\FacetedSearch\Util;
 
 use ApiBase;
 use DIQA\FacetedSearch\FacetedSearchUtil;

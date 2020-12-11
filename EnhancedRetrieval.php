@@ -35,7 +35,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 }
 
 
-define('US_SEARCH_EXTENSION_VERSION', '2.1.8');
+define('US_SEARCH_EXTENSION_VERSION', '2.2');
 
 define('US_HIGH_TOLERANCE', 0);
 define('US_LOWTOLERANCE', 1);
@@ -67,13 +67,13 @@ $wgHooks['fs_extendedFilters'][] = 'DIQA\FacetedSearch\FacetedCategoryFilter::ad
 $wgHooks['UserLogout'][] = 'wfUSLogout';
 
 global $wgAPIModules;
-$wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Dialogs\DialogAjaxAPI';
+$wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Util\DialogAjaxAPI';
+$wgAPIModules['fs_userdataapi'] = 'DIQA\FacetedSearch\Util\UserDataAPI';
 
 require_once 'DefaultSettings.php';
+
 /**
- * Initializes PermissionACL extension
- *
- * @return unknown
+ * Initializes the extension
  */
 function wfUSSetupExtension() {
 
@@ -172,11 +172,10 @@ function wfUSSetupExtension() {
 	return true;
 }
 
-/**
- * Ends direct auto-complete session
- * @return
- */
 function wfUSLogout() {
-	wfDIQAUtilLogout("/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?logout=true");
-};
+    global $wgUser;
+    $proxyUrl = "/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?logout=" . $wgUser->getId();
+    global $wgServer, $wgScriptPath;
+    header("Location: $wgServer$wgScriptPath$proxyUrl");
+}
 
