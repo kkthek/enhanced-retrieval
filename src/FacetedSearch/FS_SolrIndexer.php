@@ -176,8 +176,9 @@ abstract class FSSolrIndexer implements IFSIndexer {
         // this is a dummy boost for the sole purpose of being requested even if no filter is applied
         // it assures that boosting is actually effective. it always has the value "1"
         global $fsgSwitchOfBoost;
-        if (isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost === true) {
-            $xml .= "\t\t<field name='smwh_boost_dummy' boost='" . $options['smwh_boost_dummy']['boost'] . "'><![CDATA[1]]></field>\n";
+        if ( isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost == true ) {
+            $boost = $options['smwh_boost_dummy']['boost'];
+            $xml .= "\t\t<field name='smwh_boost_dummy' boost='$boost'><![CDATA[1]]></field>\n";
         }
 
         foreach ($document as $field => $value) {

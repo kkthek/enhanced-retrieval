@@ -49,9 +49,7 @@ class SolrService extends \Apache_Solr_Service {
      * @throws Apache_Solr_InvalidArgumentException If an invalid HTTP method is used
      */
     public function rawsearch($queryString, $method = self::METHOD_GET) {
-
-        $queryString = $this->applyConstraints($queryString);
-        $queryString = $this->putFilterParamsToMainParams($queryString);
+        $queryString = $this->extendQuery($queryString);
 
         if ($method == self::METHOD_GET) {
             return $this->_sendRawGet($this->_searchUrl . $this->_queryDelimiter . $queryString);
@@ -96,9 +94,11 @@ class SolrService extends \Apache_Solr_Service {
      * @param string $query
      * @return string
      */
-    private function applyConstraints($query) {
-        $modifiedQuery = $this->applyNamespaceConstraints($query);
+    private function extendQuery($queryString) {
+        $modifiedQuery = $this->applyNamespaceConstraints($queryString);
         $modifiedQuery = $this->applyCustomConstraints($modifiedQuery);
+        $modifiedQuery = $this->putFilterParamsToMainParams($modifiedQuery);
+        $modifiedQuery = str_replace(' ', '%20', $modifiedQuery);
         return $modifiedQuery;
     }
 
@@ -114,7 +114,7 @@ class SolrService extends \Apache_Solr_Service {
         foreach ($fsgNamespaceConstraint as $group => $namespaces) {
             if (in_array($group, $userGroups)) {
                 foreach ($namespaces as $namespace) {
-                    $constraints[] = "smwh_namespace_id:$namespace";
+                    $constraints[] = "smwh_namespace_id%3A$namespace";
                 }
             }
         }
@@ -165,7 +165,7 @@ class SolrService extends \Apache_Solr_Service {
         $parsedResults = [];
         $params = explode("&", $query);
         foreach ($params as $p) {
-            $keyValue = explode("=", $p);
+            $keyValue = explode("=", $p, 2);
             $parsedResults[$keyValue[0]][] = $keyValue[1];
         }
 
@@ -178,7 +178,7 @@ class SolrService extends \Apache_Solr_Service {
 
         // add boost dummy
         global $fsgSwitchOfBoost;
-        if (isset($fsgSwitchOfBoost) && $fsgSwitchOfBoost === false) {
+        if ( isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost === true ) {
             $parsedResults['q'][] = 'smwh_boost_dummy%3A1';
         }
 
@@ -186,7 +186,6 @@ class SolrService extends \Apache_Solr_Service {
         $url = '';
         $first = true;
         foreach ($parsedResults as $key => $values) {
-
             if ($key == 'q') {
                 if (! $first) {
                     $url .= '&';

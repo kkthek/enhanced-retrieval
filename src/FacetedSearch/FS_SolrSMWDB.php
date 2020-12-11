@@ -166,18 +166,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $doc['smwh_full_text'] = $text;
 
         $options = array();
-        global $fsgDefaultBoost;
-        $options['smwh_boost_dummy']['boost'] = intval($fsgDefaultBoost);
-
-        global $fsgNamespaceBoosts;
-        if (array_key_exists($pns, $fsgNamespaceBoosts)) {
-            $this->calculateBoostFactors($options, $fsgNamespaceBoosts[$pns]);
-        }
 
         $db = wfGetDB( DB_REPLICA  );
-
-        // retrieve templates (currently only needed for boosts)
-        $this->retrieveTemplates($db, $pid, $doc, $options);
 
         if ($this->retrieveSMWID($db, $pns, $pt, $doc)) {
             $smwID = $doc['smwh_smw_id'];
@@ -195,6 +185,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 $doc['smwh_full_text'] .= " " . $e->getMessage();
             }
         }
+
+        $this->calculateBoosting($wikiPage, $options, $doc);
 
         // call fs_saveArticle hook
         \Hooks::run('fs_saveArticle', array( &$rawText, &$doc ));
@@ -228,8 +220,57 @@ class FSSolrSMWDB extends FSSolrIndexer {
         return true;
     }
 
-    private function getApprovedRevision(WikiPage $wikiPage) {
+    /**
+     * Will update the $options['smwh_boost_dummy']['boost'] field with the accumulated boost value
+     * from namespaces, templates and categories of the wiki page.
+     */
+    private function calculateBoosting(WikiPage $wikiPage, array &$options, array $doc) {
+        global $fsgSwitchOfBoost;
+        if (! isset($fsgSwitchOfBoost) || $fsgSwitchOfBoost == true) {
+            return;
+        }
 
+        global $fsgDefaultBoost;
+        if($fsgDefaultBoost) {
+            $options['smwh_boost_dummy']['boost'] = $fsgDefaultBoost;
+        } else {
+            $options['smwh_boost_dummy']['boost'] = 1.0;
+        }
+
+        $title = $wikiPage->getTitle();
+        $namespace = $title->getNamespace();
+        $pid = $wikiPage->getId();
+
+        // add boost according to namespace
+        global $fsgNamespaceBoosts;
+        if( array_key_exists($namespace, $fsgNamespaceBoosts) ) {
+            $this->updateBoostFactor($options, $fsgNamespaceBoosts[$namespace]);
+        }
+
+        $db = wfGetDB( DB_REPLICA  );
+
+        // add boost according to templates
+        global $fsgTemplateBoosts;
+        $templates = $this->retrieveTemplates($db, $pid, $doc, $options);
+        $templates = array_intersect(array_keys($fsgTemplateBoosts), $templates);
+        foreach($templates as $template) {
+            $this->updateBoostFactor($options, $fsgTemplateBoosts[$template]);
+        }
+
+        // add boost according to categories
+        global $fsgCategoryBoosts;
+        $categoriesIterator = $wikiPage->getCategories();
+        $categories = array();
+        foreach ($categoriesIterator as $categoryTitle) {
+            $categories[] = $categoryTitle;
+        }
+        $categories = array_intersect(array_keys($fsgCategoryBoosts), $categories);
+        foreach($categories as $category) {
+            $this->updateBoostFactor($options, $fsgCategoryBoosts[$category]);
+        }
+    }
+
+    private function getApprovedRevision(WikiPage $wikiPage) {
         // get approved rev_id
         $db = wfGetDB( DB_MASTER );
         $approved_revs_table = $db->tableName("approved_revs");
@@ -288,8 +329,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
      * @param array $options
      * @param float $value
      */
-    private function calculateBoostFactors(array &$options, $value) {
-        $options['smwh_boost_dummy']['boost'] += intval($value);
+    private function updateBoostFactor(array &$options, $value) {
+        $options['smwh_boost_dummy']['boost'] *= $value;
     }
 
     /**
@@ -315,30 +356,14 @@ SQL;
         $smwhTemplates = array();
         $res = $db->query($sql);
         if ($db->numRows($res) > 0) {
-
             while ($row = $db->fetchObject($res)) {
                 $template = $row->template;
                 $smwhTemplates[] = str_replace("_", " ", $template);
             }
-
         }
         $db->freeResult($res);
 
-        // add boost according to templates
-        global $fsgTemplateBoosts, $fsgDefaultBoost;
-        if (count(array_intersect(array_keys($fsgTemplateBoosts), $smwhTemplates)) > 0) {
-            // boost factor defined by category
-
-            $templates = array_intersect(array_keys($fsgTemplateBoosts), $smwhTemplates);
-            $max = 0;
-
-            foreach($templates as $t) {
-                if ($fsgTemplateBoosts[$t] > $max) {
-                    $max = $fsgTemplateBoosts[$t];
-                }
-            }
-            $this->calculateBoostFactors($options, $max);
-        }
+        return $smwhTemplates;
     }
 
     /**
@@ -578,7 +603,6 @@ SQL;
      * @param array $options
      */
     private function indexCategories($categories, array &$doc, array &$options) {
-
         $prop_ignoreasfacet = wfMessage('fs_prop_ignoreasfacet')->text();
         $ignoreAsFacetProp = SMWDIProperty::newFromUserLabel($prop_ignoreasfacet);
         $store = smwfGetStore();
@@ -600,7 +624,7 @@ SQL;
             $doc['smwh_directcategories'][] = $categoryAsText;
             $categories[] = str_replace("_", " ", $categoryAsText);
 
-            $this->_getAllSupercategories($category->getTitle(), $allParentCategories);
+            $this->getAllSupercategories($category->getTitle(), $allParentCategories);
 
         }
 
@@ -610,20 +634,6 @@ SQL;
             $doc['smwh_categories'][] = $pc;
             $categories[] = str_replace("_", " ", $pc);
         }
-
-        // add boost according to categories
-        global $fsgCategoryBoosts, $fsgDefaultBoost;
-        if (count(array_intersect(array_keys($fsgCategoryBoosts), $categories)) > 0) {
-            // boost factor defined by category
-            $categories = array_intersect(array_keys($fsgCategoryBoosts), $categories);
-            $max = 0;
-            foreach($categories as $c) {
-                if ($fsgCategoryBoosts[$c] > $max) {
-                    $max = $fsgCategoryBoosts[$c];
-                }
-            }
-            $this->calculateBoostFactors($options, $max);
-        }
     }
 
     /**
@@ -632,12 +642,12 @@ SQL;
      * @param Title $cTitle
      * @param array $categories Category names as text
      */
-    private function _getAllSupercategories($cTitle, & $categories) {
+    private function getAllSupercategories($cTitle, & $categories) {
         $parentCategories = $cTitle->getParentCategories();
         foreach($parentCategories as $parentCat => $childCat) {
             $parentCatTitle = \Title::newFromText($parentCat);
             $categories[] = $parentCatTitle->getText();
-            $this->_getAllSupercategories($parentCatTitle, $categories);
+            $this->getAllSupercategories($parentCatTitle, $categories);
         }
     }
 
