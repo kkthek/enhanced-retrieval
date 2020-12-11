@@ -232,6 +232,10 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		if (docData[fs.ATTRIBUTE_FIELD]) {
 			fields = fields.concat(docData[fs.ATTRIBUTE_FIELD]);
 		}
+		
+		//this will add the relevancy ranking to the result of each search hit
+		fields = fields.concat(["score"]);
+		
 		asm.store.addByValue('fl', fields);
 		var query = fs.DOCUMENT_ID + ':' + docData.id;
 		asm.store.addByValue('q', query);

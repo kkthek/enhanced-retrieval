@@ -237,7 +237,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * sent for the new search result order.
 	 */
 	that.onSearchOrderChanged = function() {
-		var selected =  $("#search_order option:selected");
+		var selected =  $("#fs_sort_order_drop_down option:selected");
 		var order = selected[0].value;
 		var sort = getSortOrderModifier(order);
 		
@@ -389,7 +389,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	function addEventHandlers() {
 		// Keyup handler for the search input field
 		$('#query').keyup(that.onSearchKeyup);
-		$('#search_order').change(that.onSearchOrderChanged);
+		$('#fs_sort_order_drop_down').change(that.onSearchOrderChanged);
 		$('#search_button').click(that.onSearchButtonClicked);
 	}
 	
@@ -417,7 +417,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 				val = 'descending';
 				break;
 		}
-		$("#search_order option[value="+val+"]").prop('selected', true);
+		$("#fs_sort_order_drop_down option[value="+val+"]").prop('selected', true);
 	}
 	
 	/**
@@ -456,7 +456,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 					break;
 					
 				case 'sort':	
-					$('select#search_order option[value="'+params[param]+'"]').prop('selected', true); 
+					$('select#fs_sort_order_drop_down option[value="'+params[param]+'"]').prop('selected', true); 
 					that.onSearchOrderChanged();
 					break;
 					

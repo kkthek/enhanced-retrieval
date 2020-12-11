@@ -367,7 +367,6 @@
 	 * opening the 'properties'-view
 	 */
 	AjaxSolr.theme.prototype.annotationsInSnippet = function (doc, snippets) {
-
 		  var output = '';
 		  output += '<div><div class="xfs_additional_property_table">';
 		  
@@ -414,7 +413,6 @@
 	 * 		HTML representation of the highlighed text
 	 */
 	AjaxSolr.theme.prototype.article = function (doc, data, highlight, showDataHandler) {
-		
 		var link = getLink(doc.smwh_namespace_id, doc.smwh_title);
 		if (doc.smwh_diqa_import_fullpath_xsdvalue_t) {
 			link = doc.smwh_diqa_import_fullpath_xsdvalue_t;
@@ -558,7 +556,6 @@
 	 * 		The article given as SOLR document
 	 */
 	AjaxSolr.theme.prototype.articleProperties = function(doc) {
-		
 		var lang = FacetedSearch.singleton.Language;
 		
  		var output = '<table>';

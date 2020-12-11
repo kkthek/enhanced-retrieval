@@ -55,9 +55,9 @@ class FSFacetedSearchSpecial extends SpecialPage {
     	           <input type="text" id="query" placeholder="{{placeholderText}}" name="query" value="{{searchTerm}}" />
     	           <input type="button" id="search_button" name="search" value="{{fs_search}}" />
     	        </div>
-	            <div class="xfsSortOrder col-md-6 col-lg-3" style="{{fs_show_sortorder}}">
-    				{{fs_sort_by}}
-    				<select id="search_order" name="search_order" size="1">
+	            <div class="fs_sort_order col-md-6 col-lg-3" style="{{fs_show_sortorder}}">
+    				<span id="fs_sort_order_label">{{fs_sort_by}}</span>
+    				<select id="fs_sort_order_drop_down" name="fs_sort_order_drop_down" size="1">
     					<option value="relevance" {{fs_score_order_selected}}>{{fs_relevance}}</option>
     					<option value="newest" {{fs_newest_order_selected}}>{{fs_newest_date_first}}</option>
     					<option value="oldest" {{fs_oldest_order_selected}}>{{fs_oldest_date_first}}</option>
@@ -65,7 +65,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
     					<option value="descending" {{fs_descending_order_selected}}>{{fs_title_descending}}</option>
     				</select>
     			</div>
-	            <div class="xfsCategoryFilter col-md-6 col-lg-3">
+	            <div class="fs_category_filter col-md-6 col-lg-3">
     			     {{extendedFilters}}
 	            </div>
 	       </div>
@@ -159,7 +159,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 			if ($fulltext == NULL && $fulltext_x == NULL) {
 
 				# If the string cannot be used to create a title
-				if(!is_null( $t ) ){
+				if( !is_null( $t ) ){
 
 					# If there's an exact or very near match, jump right there.
 					$t = static::defaultNearMatcher()->getNearMatch( $search );
@@ -167,13 +167,6 @@ class FSFacetedSearchSpecial extends SpecialPage {
 						$wgOut->redirect( $t->getFullURL() );
 						return;
 					}
-
-					# If just the case is wrong, jump right there.
-	//				$t = USStore::getStore()->getSingleTitle($search);
-	//				if (!is_null( $t ) ) {
-	//					$wgOut->redirect( $t->getFullURL() );
-	//					return;
-	//				}
 				}
 			}
 

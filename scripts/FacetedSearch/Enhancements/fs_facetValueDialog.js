@@ -3,7 +3,7 @@
 	window.XFS = window.XFS || {};
 	XFS.Dialogs = XFS.Dialogs || {};
 	
-	var xfs = window.XFS || {};
+	var xfs = window.XFS;
 	xfs.registerAdditionalFacets = function(html, handlerData, facet, property) { 
 		html.find('.xfsAddFacetOperation').bind('click', handlerData, function(event) {
 			
@@ -41,8 +41,7 @@
 	};
 	
 	xfs.addAdditionalFacets = function(facet) {
-		
-		// check if facet should have a OR-dialog link
+		// check if facet should have an OR-dialog link
 		var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
 		var result = ATTRIBUTE_REGEX.exec(facet);
 		if (result == null || $.inArray(result[1], XFS.OREDFACETS) == -1) {
@@ -53,30 +52,9 @@
 			}
 		}
 		
-		
 		return '<span style="float:right"><small><a class="xfsAddFacetOperation">(Facetten)</a></small></span>';
 	};
 	
-	window.XFS.Util = window.XFS.Util || {};
-	window.XFS.Util.getFacetName = function(property) {
-		if (property.match(/_t$/)) {
-			return property.replace(/_t$/, '_s');
-		}
-		return property;
-	};
-	
-	window.XFS.Util.getFacetType = function(facet) {
-		var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
-		if (facet.match(ATTRIBUTE_REGEX)) {
-			// Attribute field
-			field = 'smwh_attributes';
-		} else {
-			// Relation field
-			field = 'smwh_properties';
-		}
-		return field;
-	};
-
 	var Ajax = function() {
 		var that = {};
 
@@ -184,7 +162,5 @@
 		};
 		return that;
 	};
-	
-	
-	
+
 })(jQuery);

@@ -133,6 +133,7 @@ $fsgTemplateBoosts = array(
 
 /**
  * All pages in the namespaces are boosted by the given value
+ * Use the namespace numbers here, not their names.
  */
 global $fsgNamespaceBoosts;
 $fsgNamespaceBoosts = array(
@@ -264,7 +265,7 @@ $fsgCategoriesToShowInTitle=[];
 global $fsgUseDirectCategories;
 
 /**
- * Shown category facets (if empty all are shown)
+ * List of categories to show in the category facet (if empty all categories are shown)
  */
 global $fsgShownCategoryFacets;
 $fsgShownCategoryFacets = [];
