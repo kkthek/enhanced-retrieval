@@ -111,18 +111,18 @@ FacetedSearch.classes.DateFacetClusterer = function (facetName, plainName) {
 	 */
 	that.makeClusters = function makeClusters(min, max) {
 		
-		if (XFS.dateTimePropertyClusters[facetName]) {
-			
-			if (XFS.dateTimePropertyClusters[facetName]['max']) {
-				var clusterMax = XFS.dateTimePropertyClusters[facetName]['max'];
+		if (mw.config.get('ext.er.dateTimePropertyClusters')[facetName]) {
+			var dateTimePropertyClusters = mw.config.get('ext.er.dateTimePropertyClusters')[facetName];
+			if (dateTimePropertyClusters['max']) {
+				var clusterMax = dateTimePropertyClusters['max'];
 				clusterMax = parseInt(clusterMax.replace(/-|:/g,''));
 				if (max > clusterMax) {
 					max = clusterMax;
 				}
 			}
 			
-			if (XFS.dateTimePropertyClusters[facetName]['min']) {
-				var clusterMin = XFS.dateTimePropertyClusters[facetName]['min'];
+			if (dateTimePropertyClusters['min']) {
+				var clusterMin = dateTimePropertyClusters['min'];
 				clusterMin = parseInt(clusterMin.replace(/-|:/g,''));
 				if (min < clusterMin) {
 					min = clusterMin;

@@ -5,7 +5,7 @@ class Auth {
 
     /**
      *
-     * @return a list of groups for the currently logged-in user
+     * @return array list of groups for the currently logged-in user
      */
     public static function session() {
 

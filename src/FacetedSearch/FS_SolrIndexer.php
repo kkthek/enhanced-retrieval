@@ -321,6 +321,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
      * @return bool
      *         <true> if the copy was created successfully
      *         <false> otherwise
+     * @deprecated
      */
     public function copyDocument($sourceID, $targetID, $ignoreCopyFields = null) {
         $doc = array();
@@ -352,8 +353,13 @@ abstract class FSSolrIndexer implements IFSIndexer {
                 }
             }
         }
+        // create dummy options
+        $options = [] ;
+        $options['smwh_boost_dummy'] = [];
+        $options['smwh_boost_dummy']['boost'] = 1;
+
         // Create the copy
-        return $this->updateIndex($doc);
+        return $this->updateIndex($doc, $options);
     }
 
     /**

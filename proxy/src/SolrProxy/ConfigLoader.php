@@ -53,7 +53,6 @@ class ConfigLoader {
             'fsgShownFacets',
             'fsgSwitchOfBoost',
             'fsgTemplateBoosts',
-            'fsgTitleProperty',
             'fsgUseStatistics'
         ];
 

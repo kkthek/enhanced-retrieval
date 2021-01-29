@@ -15,8 +15,8 @@
 				
 				var selectedCategory = $('select#fs_category_filter option:selected').val();
 				
-				if (XFS.SHOWNFACETS[selectedCategory]) {
-					var propertiesToShow = XFS.SHOWNFACETS[selectedCategory];
+				if (mw.config.get('ext.er.SHOWNFACETS')[selectedCategory]) {
+					var propertiesToShow = mw.config.get('ext.er.SHOWNFACETS')[selectedCategory];
 					for (var i = 0; i < propertiesToShow.length; i++) {
 						var property = propertiesToShow[i];
 						property.replace(/\s/g, '_');

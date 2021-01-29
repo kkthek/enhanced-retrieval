@@ -34,23 +34,16 @@ if( !defined( 'MEDIAWIKI' ) ) {
 	die(1);
 }
 
-
-define('US_SEARCH_EXTENSION_VERSION', '2.2');
-
-define('US_HIGH_TOLERANCE', 0);
-define('US_LOWTOLERANCE', 1);
-define('US_EXACTMATCH', 2);
-
-#require_once 'src/FacetedSearch/FS_GlobalFunctions.php';
+define('ER_EXTENSION_VERSION', '2.2');
 
 global $wgExtensionCredits;
 $wgExtensionCredits['other'][] = array(
     'name' => 'Enhanced Retrieval extension',
-    'version' => US_SEARCH_EXTENSION_VERSION,
+    'version' => ER_EXTENSION_VERSION,
     'license-name' => 'GPL-2.0+',
     'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].",
     'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
-    'description' => 'Enhanced retrieval provides faceted search for Mediawiki and SMW. It requires a SOLR server as backend.',
+    'description' => 'Enhanced retrieval provides faceted search for MediaWiki and SMW. It requires a SOLR server as backend.',
 );
 
 global $wgJobClasses;
@@ -58,13 +51,13 @@ $wgJobClasses['UpdateSolrJob'] = 'DIQA\FacetedSearch\UpdateSolrJob';
 
 global $wgExtensionFunctions, $wgExtensionMessagesFiles;
 $dir = dirname(__FILE__).'/';
-$wgExtensionFunctions[] = 'wfUSSetupExtension';
+$wgExtensionFunctions[] = 'wfERSetupExtension';
 $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Languages/FS_Messages.php'; // register messages (requires MW=>1.11)
 
 global $wgHooks;
 $wgHooks['ParserFirstCallInit'][] = 'DIQA\FacetedSearch\FSGlobalFunctions::initializeBeforeParserInit';
 $wgHooks['fs_extendedFilters'][] = 'DIQA\FacetedSearch\FacetedCategoryFilter::addFilter';
-$wgHooks['UserLogout'][] = 'wfUSLogout';
+$wgHooks['UserLogout'][] = 'wfERLogout';
 
 global $wgAPIModules;
 $wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Util\DialogAjaxAPI';
@@ -75,7 +68,7 @@ require_once 'DefaultSettings.php';
 /**
  * Initializes the extension
  */
-function wfUSSetupExtension() {
+function wfERSetupExtension() {
 
 	###
 	# This array configures the indexer that is used for faceted search. It has the
@@ -172,10 +165,9 @@ function wfUSSetupExtension() {
 	return true;
 }
 
-function wfUSLogout() {
+function wfERLogout() {
     global $wgUser;
     $proxyUrl = "/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?logout=" . $wgUser->getId();
     global $wgServer, $wgScriptPath;
     header("Location: $wgServer$wgScriptPath$proxyUrl");
 }
-

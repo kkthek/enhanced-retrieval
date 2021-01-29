@@ -65,7 +65,7 @@ FacetedSearch.classes.NumericFacetClusterer = function (facetName, plainName) {
 	 * 		The maximal number value of the value range.
 	 */
 	that.makeClusters = function makeClusters(min, max) {
-		if (XFS.numericPropertyClusters[facetName]) {
+		if (mw.config.get('ext.er.numericPropertyClusters')[facetName]) {
 			return that.makeCustomClusters(min, max);
 		}
 		var diff = max - min;
@@ -86,7 +86,7 @@ FacetedSearch.classes.NumericFacetClusterer = function (facetName, plainName) {
 	};
 	
 	that.makeCustomClusters = function(min, max) {
-		var clusters = XFS.numericPropertyClusters[facetName];
+		var clusters = mw.config.get('ext.er.numericPropertyClusters')[facetName];
 		var values = [];
 		if (clusters['min']) {
 			values.push([clusters['min'], clusters['min']]);
@@ -108,7 +108,7 @@ FacetedSearch.classes.NumericFacetClusterer = function (facetName, plainName) {
 	};
 		
 //	that.makeCustomClusters_ALTERNATIVE = function(min, max) {
-//		var clusters = XFS.numericPropertyClusters[facetName];
+//		var clusters = mw.config.get('ext.er.numericPropertyClusters')[facetName];
 //		var interval = clusters['interval'];
 //		var start = Math.floor(min / interval) * interval;
 //			

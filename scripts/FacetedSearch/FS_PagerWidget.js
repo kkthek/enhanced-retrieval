@@ -124,7 +124,7 @@ FacetedSearch.classes.PagerWidget = AjaxSolr.PagerWidget.extend({
 	    	var end = Math.min(this.mPageRanges[i].endIdx, total);
 	    	filtered += end + 1 - this.mPageRanges[i].startIdx;
 	    	if (this.mPageRanges[i].endIdx <= total) {
-	    		filtered -= XFS.HITS_PER_PAGE;
+	    		filtered -= mw.config.get('ext.er.HITS_PER_PAGE');
 	    	} else {
 	    		filtered -= numDocsInResult + 1;
 	    		// Now we've got the exact number of results
@@ -147,7 +147,7 @@ FacetedSearch.classes.PagerWidget = AjaxSolr.PagerWidget.extend({
 	    this.renderLinks(this.windowedLinks());
 	    
 	    var perPage = this.manager.response.response.docs.length;
-	    var offset = (this.currentPage-1) * XFS.HITS_PER_PAGE;
+	    var offset = (this.currentPage-1) * mw.config.get('ext.er.HITS_PER_PAGE');
 	    var dispTotal = total - filtered;
 	    this.renderHeader(perPage, offset, dispTotal, approx);
 		
@@ -171,7 +171,7 @@ FacetedSearch.classes.PagerWidget = AjaxSolr.PagerWidget.extend({
 	fpwClickHandler: function (page) {
 		var self = this;
 		return function () {
-			var next = (page - 1) * (self.manager.response.responseHeader.params.rows || XFS.HITS_PER_PAGE);
+			var next = (page - 1) * (self.manager.response.responseHeader.params.rows || mw.config.get('ext.er.HITS_PER_PAGE'));
 			if (self.mPageRanges.length > 0) {
 				// variable ranges due to access control
 				if (page > self.mPageRanges.length) {
@@ -184,7 +184,7 @@ FacetedSearch.classes.PagerWidget = AjaxSolr.PagerWidget.extend({
 				}
 			}
 			self.manager.store.get('start').val(next);
-			self.manager.store.get('rows').val(XFS.HITS_PER_PAGE);
+			self.manager.store.get('rows').val(mw.config.get('ext.er.HITS_PER_PAGE'));
 			self.mDoResetRanges = false;
 			self.manager.doRequest();
 			return false;

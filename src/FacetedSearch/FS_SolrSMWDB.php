@@ -162,15 +162,15 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
         $doc['id'] = $pid;
         $doc['smwh_namespace_id'] = $pns;
-        $doc['smwh_title'] = $pt;
+        $doc['smwh_title'] = $pt; 
         $doc['smwh_full_text'] = $text;
+        $doc['smwh_displaytitle'] = FacetedSearchUtil::findDisplayTitle($t, $wikiPage);
 
         $options = array();
 
         $db = wfGetDB( DB_REPLICA  );
 
         if ($this->retrieveSMWID($db, $pns, $pt, $doc)) {
-            $smwID = $doc['smwh_smw_id'];
             $this->retrievePropertyValues($db, $pns, $pt, $doc, $options);
         }
 
@@ -654,6 +654,7 @@ SQL;
     /**
      * Serialize SMWDIWikiPage into $doc array.
      *
+     * @param SMWDIWikiPage $subject
      * @param SMWDIProperty $property
      * @param SMWDataItem $dataItem
      * @param array $doc
@@ -661,12 +662,9 @@ SQL;
      * @return encoded property name
      */
     private function serializeWikiPageDataItem($subject, $property, $dataItem, array &$doc) {
-        $obj = $dataItem->getTitle()->getPrefixedText();
+        $obj = $this->createPropertyValueWithLabel( $dataItem );
 
-        global $fsgTitleProperty;
-        if (isset($fsgTitleProperty) && $fsgTitleProperty != '') {
-            $this->addTitleAndUpdateDependent($subject, $dataItem, $obj);
-        }
+        $this->updateDependent($subject);
 
         // The values of all properties are stored as string.
         $prop = str_replace(' ', '_', $property->getLabel());
@@ -679,27 +677,23 @@ SQL;
         return $prop;
     }
 
-     private function addTitleAndUpdateDependent($subject, $dataItem, & $obj) {
-        global $fsgTitleProperty;
-        $titleProperty = SMWDIProperty::newFromUserLabel($fsgTitleProperty);
-        $store = ApplicationFactory::getInstance()->getStore();
-        $titleValue = $store->getPropertyValues($dataItem, $titleProperty);
-        if (count($titleValue) > 0) {
-            $titleValue = reset($titleValue);
-            if ($titleValue instanceof \SMWDIString || $titleValue instanceof \SMWDIBlob) {
-                $obj .= '|'.$titleValue->getString();
-            }
-        }
+    private function createPropertyValueWithLabel(SMWDataItem $dataItem) {
+        $title = $dataItem->getTitle();
+        $valueId = $title->getPrefixedText();
+        $valueLabel = FacetedSearchUtil::findDisplayTitle($title);
+        return "$valueId|$valueLabel";
+    }
 
+     private function updateDependent($subject) {
         if($this->updateOnlyCurrentArticle()) {
             return;
         }
 
+        $store = ApplicationFactory::getInstance()->getStore();
         $inProperties = $store->getInProperties($subject);
 
         foreach($inProperties as $inProperty) {
             $subjects = $store->getPropertySubjects($inProperty, $subject);
-
             foreach($subjects as $subj) {
                 $this->dependant[] = $subj->getTitle();
             }

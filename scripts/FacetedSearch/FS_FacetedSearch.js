@@ -63,9 +63,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 	// Name of the SOLR field that stores the namespace id of an article
 	var NAMESPACE_FIELD = 'smwh_namespace_id';
 
-	// Name of the SOLR field that stores the title of an article as string.
-	// This is used for sorting search results.
-	var TITLE_STRING_FIELD = 'smwh_title_s';
+	// Name of the SOLR field that stores the dispaly title of an article as string.
+	var DISPLAY_TITLE_FIELD = 'smwh_displaytitle';
 	
 	// Names of the facet classes
 	var FACET_FIELDS = ['smwh_categories', ATTRIBUTE_FIELD, RELATION_FIELD,
@@ -79,10 +78,9 @@ FacetedSearch.classes.FacetedSearch = function () {
 							RELATION_FIELD,
 							DOCUMENT_ID,
 							TITLE_FIELD,
-							NAMESPACE_FIELD];
-	if(XFS.titlePropertyField != '') {
-		QUERY_FIELD_LIST.push(XFS.titlePropertyField);
-	}
+							NAMESPACE_FIELD,
+							'score',
+							DISPLAY_TITLE_FIELD];
 						
 	var RELATION_REGEX = /^smwh_(.*)_(.*)$/;
 	var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
@@ -305,9 +303,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 			escapedSearchText = '(' + escapedSearchText + ')';
 			exactMatchQuery = ' OR ' + QUERY_FIELD + ':'+ escapedSearchText;
 			exactMatchQuery += ' OR ' + TITLE_FIELD + ':' + escapedSearchText;
-			if(XFS.titlePropertyField != '') {
-				exactMatchQuery += ' OR ' + XFS.titlePropertyField + ':' + escapedSearchText;
-			}
+			exactMatchQuery += ' OR ' + DISPLAY_TITLE_FIELD + ':' + escapedSearchText;
+
 		}
 		return exactMatchQuery;
 	}
@@ -402,20 +399,22 @@ FacetedSearch.classes.FacetedSearch = function () {
 		if (!sort || sort.length == 0 || sort[0].length == 0) {
 			return;
 		}
-		var val='score';
+		
 		switch(sort[0][0]) {
-			case MODIFICATION_DATE_FIELD+' desc':
-				val = 'newest';
+			case MODIFICATION_DATE_FIELD + ' desc, score desc':
+				var val = 'newest';
 				break;
-			case MODIFICATION_DATE_FIELD+' asc':
-				val = 'oldest';
+			case MODIFICATION_DATE_FIELD + ' asc, score desc':
+				var val = 'oldest';
 				break;
-			case TITLE_STRING_FIELD+' asc':
-				val = 'ascending';
+			case DISPLAY_TITLE_FIELD + ' asc, score desc':
+				var val = 'ascending';
 				break;
-			case TITLE_STRING_FIELD+' desc':
-				val = 'descending';
+			case DISPLAY_TITLE_FIELD + ' desc, score desc':
+				var val = 'descending';
 				break;
+			default:
+				var val = 'relevance';
 		}
 		$("#fs_sort_order_drop_down option[value="+val+"]").prop('selected', true);
 	}
@@ -577,9 +576,9 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * default values are set.
 	 */
 	function initParameterStore() {
-		if (!initParameterStoreFromURL()) {
-			initParameterStoreDefault();
-		}
+		initParameterStoreDefault();
+		// overwrite defaults with values from URL
+		initParameterStoreFromURL();
 	}
 	
 	/**
@@ -626,7 +625,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		var sort;
 		switch (order) {
 		case "relevance":
-			sort = 'score desc';
+			sort = 'score desc, ' + DISPLAY_TITLE_FIELD + ' asc';
 			break;
 		case "newest":
 			sort = MODIFICATION_DATE_FIELD + ' desc, score desc';
@@ -635,14 +634,13 @@ FacetedSearch.classes.FacetedSearch = function () {
 			sort = MODIFICATION_DATE_FIELD + ' asc, score desc';
 			break;
 		case "ascending":
-			sort = TITLE_STRING_FIELD + ' asc, score desc';
+			sort = DISPLAY_TITLE_FIELD + ' asc, score desc';
 			break;
 		case "descending":
-			sort = TITLE_STRING_FIELD + ' desc, score desc';
+			sort = DISPLAY_TITLE_FIELD + ' desc, score desc';
 			break;
 		default:
 			sort = 'score desc';
-			break;
 		}
 		return sort;
 	}
@@ -652,25 +650,24 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * values.
 	 */
 	function initParameterStoreDefault() {
-		for (var i = 0; i < XFS.extraPropertiesToRequest.length; i++) {
-			QUERY_FIELD_LIST.push(XFS.extraPropertiesToRequest[i]);
+		for (var i = 0; i < mw.config.get('ext.er.extraPropertiesToRequest').length; i++) {
+			QUERY_FIELD_LIST.push(mw.config.get('ext.er.extraPropertiesToRequest')[i]);
 		}
 		
 		var params = {
-			facet: true,
+			'facet': true,
 			'facet.field': FACET_FIELDS,
 			'facet.mincount': 1,
 			'json.nl': 'map',
-			fl: QUERY_FIELD_LIST,
-			hl: true,
+			'fl': QUERY_FIELD_LIST,
+			'hl': true,
 			'hl.fl': HIGHLIGHT_FIELD,
-			'hl.simple.pre' : '<b>',
+			'hl.simple.pre': '<b>',
 			'hl.simple.post': '</b>',
 			'hl.fragsize': '250',
-			'sort' : getSortOrderModifier(XFS.DEFAULT_SORT_ORDER)
+			'sort': getSortOrderModifier(mw.config.get('ext.er.DEFAULT_SORT_ORDER')),
+			'q': '*:*'
 		};
-
-		mAjaxSolrManager.store.addByValue('q', '*:*');
 		
 		// initialize the parameter store
 		for (var name in params) {
@@ -766,14 +763,14 @@ FacetedSearch.classes.FacetedSearch = function () {
 	construct();
 	
 	// Public constants
-	that.FACET_FIELDS		= FACET_FIELDS;
-	that.DOCUMENT_ID		= DOCUMENT_ID;
-	that.HIGHLIGHT_FIELD	= HIGHLIGHT_FIELD;
-	that.RELATION_FIELD		= RELATION_FIELD;
-	that.ATTRIBUTE_FIELD	= ATTRIBUTE_FIELD;
-	that.NAMESPACE_FIELD	= NAMESPACE_FIELD;
-	that.TITLE_STRING_FIELD	= TITLE_STRING_FIELD;
-	that.TITLE_FIELD		= TITLE_FIELD;
+	that.FACET_FIELDS		 = FACET_FIELDS;
+	that.DOCUMENT_ID		 = DOCUMENT_ID;
+	that.HIGHLIGHT_FIELD	 = HIGHLIGHT_FIELD;
+	that.RELATION_FIELD		 = RELATION_FIELD;
+	that.ATTRIBUTE_FIELD	 = ATTRIBUTE_FIELD;
+	that.NAMESPACE_FIELD	 = NAMESPACE_FIELD;
+	that.TITLE_FIELD		 = TITLE_FIELD;
+	that.DISPLAY_TITLE_FIELD = DISPLAY_TITLE_FIELD;
 	return that;
 }
 

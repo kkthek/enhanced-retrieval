@@ -4,6 +4,9 @@ VERSION 2.2
 	- Support for promoting and demoting search results visually
 	- SOLR field names with non-ascii characters are now properly escaped
 	  Make sure to re-index your wiki when updating from an earlier version!
+	- DISPLAYTITLE of pages is now used to display them on the search page:
+	  This replaces $fsgTitleProperty . Please use the DisplayTitle extension to set the page titles.
+	- Ranking by display title is now possible
 	
 VERSION 2.1.8
 	- Fix: Race condition on loading of search page

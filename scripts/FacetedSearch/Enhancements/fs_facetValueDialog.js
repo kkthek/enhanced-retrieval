@@ -44,10 +44,10 @@
 		// check if facet should have an OR-dialog link
 		var ATTRIBUTE_REGEX = /smwh_(.*)_xsdvalue_(.*)/;
 		var result = ATTRIBUTE_REGEX.exec(facet);
-		if (result == null || $.inArray(result[1], XFS.OREDFACETS) == -1) {
+		if (result == null || $.inArray(result[1], mw.config.get('ext.er.OREDFACETS')) == -1) {
 			var PROPERTY_REGEX = /smwh_(.*)_t/;
 			var result = PROPERTY_REGEX.exec(facet);
-			if (result == null || $.inArray(result[1], XFS.OREDFACETS) == -1) {
+			if (result == null || $.inArray(result[1], mw.config.get('ext.er.OREDFACETS')) == -1) {
 				return '';
 			}
 		}

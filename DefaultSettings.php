@@ -24,7 +24,6 @@ $SOLRcore = '';
 global $fsgNamespaceConstraint;
 $fsgNamespaceConstraint = [];
 
-
 global $fsgCustomConstraint;
 $fsgCustomConstraint = [
     /**
@@ -47,7 +46,6 @@ $fsgCustomConstraint = [
  */
 global $fsgUseStatistics;
 $fsgUseStatistics = false;
-
 
 /**
  * If this variable is <true>, a search in the MediaWiki search field is redirected
@@ -154,13 +152,6 @@ $fsgBlacklistPages = array(
 );
 
 /**
- * Indicates if there's a Title-Property that should be used for relations
- * Empty value means there is none.
- */
-global $fsgTitleProperty;
-$fsgTitleProperty = "";
-
-/**
  * Set of properties which are requested on search hits. Change this only
  * if you want to extend the search
  */
@@ -227,6 +218,12 @@ global $fsgShowArticleProperties;
 $fsgShowArticleProperties = true;
 
 /**
+ * Show the SOLR search score as a tooltip for the SHOW DETAILS link of each search result.
+ */
+global $fsgShowSolrScore;
+$fsgShowSolrScore = false;
+
+/**
  * Show in overlay
  */
 global $fsgShowFileInOverlay;
@@ -251,18 +248,13 @@ $fsgShownFacets = [
  * List of properties for which ER will offer a selection dialog for OR
  */
 global $fsgFacetsWithOR;
-$fsgFacetsWithOR=[];
+$fsgFacetsWithOR = [];
 
 /**
  * Categories which should be shown in title of search hit
  */
 global $fsgCategoriesToShowInTitle;
-$fsgCategoriesToShowInTitle=[];
-
-/**
- * Use direct categories
- */
-global $fsgUseDirectCategories;
+$fsgCategoriesToShowInTitle = [];
 
 /**
  * List of categories to show in the category facet (if empty all categories are shown)
@@ -274,12 +266,14 @@ $fsgShownCategoryFacets = [];
  * boolean property indicating that a search result should be highlighted (promoted)
  * use the SOLR field name here, e.g. 'smwh_HatInventarbeschrieb_xsdvalue_b' or false to turn it off
  */
+global $fsgPromotionProperty;
 $fsgPromotionProperty = false;
 
 /**
  * boolean property indicating that a search result should be grayed out (demoted)
  * use the SOLR field name here, e.g. 'smwh_HatInventarbeschrieb_xsdvalue_b' or false to turn it off
  */
+global $fsgDemotionProperty;
 $fsgDemotionProperty = false;
 
 /**

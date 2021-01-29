@@ -58,7 +58,7 @@ FacetedSearch.classes.CreateArticleWidget = AjaxSolr.AbstractWidget.extend({
 			var docNS = doc[fsi.NAMESPACE_FIELD].toString();
 			if ((tcd.namespace === false && docNS === '0')
 			    || (tcd.namespace === docNS)) {
-				articleExists = this.checkArticleNameMatches(title, doc[fsi.TITLE_STRING_FIELD]);
+				articleExists = this.checkArticleNameMatches(title, doc[fsi.TITLE_FIELD]);
 				if (articleExists) {
 					break;
 				}

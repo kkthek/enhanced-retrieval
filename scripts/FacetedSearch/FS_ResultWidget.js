@@ -296,14 +296,12 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		var ucfTitle = '(' + title.charAt(0).toUpperCase() + title.substr(1) + ')';
 		var brTitle = '(' + title + ')';
 		this.mASMforTitleCheck.store.addByValue('q', 
-			fsi.TITLE_FIELD + ':' + brTitle + 
+			fsi.TITLE_FIELD + ':' + brTitle +
 			' OR ' +
-			fsi.TITLE_STRING_FIELD + ':' + brTitle +
+			fsi.TITLE_FIELD + ':' + ucfTitle +
 			' OR ' +
-			fsi.TITLE_STRING_FIELD + ':' + ucfTitle +
-			' OR ' +
-			fsi.TITLE_STRING_FIELD + ':' + lcfTitle);
-		this.mASMforTitleCheck.store.addByValue('fl', [fsi.TITLE_STRING_FIELD, fsi.NAMESPACE_FIELD]);
+			fsi.TITLE_FIELD + ':' + lcfTitle);
+		this.mASMforTitleCheck.store.addByValue('fl', [fsi.TITLE_FIELD, fsi.NAMESPACE_FIELD]);
 		this.mASMforTitleCheck.doRequest(0);
 		this.mASMforTitleCheck.titleCheckData = {
 			title: title,

@@ -215,7 +215,7 @@ class FSGlobalFunctions {
 
         global $wgOut,
                 $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgDateTimePropertyClusters,
-                $fsgTitleProperty, $fsgAnnotationsInSnippet, $fsgShowArticleProperties,
+                $fsgShowArticleProperties, $fsgShowSolrScore,
                 $fsgShownFacets, $fsgFacetsWithOR, $fsgShownCategoryFacets,
                 $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay,
                 $fsgPromotionProperty, $fsgDemotionProperty,
@@ -230,13 +230,6 @@ class FSGlobalFunctions {
             $extraPropertiesToRequest = [];
         }
 
-        if ($fsgTitleProperty != '') {
-            $titlePropertyField = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgTitleProperty));
-            $extraPropertiesToRequest[] = $titlePropertyField;
-        } else {
-            $titlePropertyField = '';
-        }
-
         if ($fsgPromotionProperty) {
             $promotionProperty = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgPromotionProperty));
         } else {
@@ -249,27 +242,24 @@ class FSGlobalFunctions {
             $demotionProperty = '';
         }
 
-        $script = "\n<script type='text/javascript'>";
-        $script .= "var XFS = XFS || {};";
-        $script .= "XFS.titlePropertyField = '$titlePropertyField';";
-        $script .= "XFS.numericPropertyClusters = "     . json_encode($fsgNumericPropertyClusters) . ";";
-        $script .= "XFS.dateTimePropertyClusters = "    . json_encode($fsgDateTimePropertyClusters) . ";";
-        self::addAnnotationSnippets($script);
-        $script .= "XFS.extraPropertiesToRequest = "    . json_encode($extraPropertiesToRequest) . ";";
-        $script .= "XFS.fsgShowArticleProperties = "    . ($fsgShowArticleProperties?'true':'false') . ";";
+        $xfsVars = [];
+        $xfsVars["ext.er.numericPropertyClusters"] = $fsgNumericPropertyClusters;
+        $xfsVars["ext.er.dateTimePropertyClusters"] = $fsgDateTimePropertyClusters;
+        $xfsVars["ext.er.annotationsInSnippet"] = self::addAnnotationSnippetVars();
+        $xfsVars["ext.er.extraPropertiesToRequest"] = $extraPropertiesToRequest;
+        $xfsVars["ext.er.showArticleProperties"] = $fsgShowArticleProperties ? 1 : 0;
+        $xfsVars["ext.er.showSolrScore"] = $fsgShowSolrScore ? true : false;
+        $xfsVars["ext.er.SHOWN_CATEGORY_FACETS"] = $fsgShownCategoryFacets;
+        $xfsVars["ext.er.SHOWNFACETS"] = $fsgShownFacets;
+        $xfsVars["ext.er.OREDFACETS"] = $fsgFacetsWithOR;
+        $xfsVars["ext.er.CATEGORIES_TO_SHOW_IN_TITLE"] = $fsgCategoriesToShowInTitle;
+        $xfsVars["ext.er.SHOW_FILE_IN_OVERLAY"] = $fsgShowFileInOverlay;
+        $xfsVars["ext.er.PROMOTION_PROPERTY"] = $promotionProperty;
+        $xfsVars["ext.er.DEMOTION_PROPERTY"] = $demotionProperty;
+        $xfsVars["ext.er.HITS_PER_PAGE"] = $fsgHitsPerPage;
+        $xfsVars["ext.er.DEFAULT_SORT_ORDER"] = $fsgDefaultSortOrder;
+        $wgOut->addJsConfigVars($xfsVars);
 
-        $script .= "XFS.SHOWN_CATEGORY_FACETS = "       . json_encode($fsgShownCategoryFacets).";";
-        $script .= "XFS.SHOWNFACETS = "                 . json_encode($fsgShownFacets) . ';';
-        $script .= "XFS.OREDFACETS = "                  . json_encode($fsgFacetsWithOR) . ';';
-        $script .= "XFS.CATEGORIES_TO_SHOW_IN_TITLE = " . json_encode($fsgCategoriesToShowInTitle) . ';';
-        $script .= "XFS.SHOW_FILE_IN_OVERLAY = "        . json_encode($fsgShowFileInOverlay) . ";";
-        $script .= "XFS.PROMOTION_PROPERTY = '$promotionProperty';";
-        $script .= "XFS.DEMOTION_PROPERTY = '$demotionProperty';";
-        $script .= "XFS.HITS_PER_PAGE = "               . json_encode($fsgHitsPerPage).";";
-        $script .= "XFS.DEFAULT_SORT_ORDER = "          . json_encode($fsgDefaultSortOrder).";";
-        $script .= "</script>";
-
-        $wgOut->addScript( $script );
         return true;
     }
 
@@ -279,9 +269,9 @@ class FSGlobalFunctions {
      *  1. adds every property in $fsgExtraPropertiesToRequest
      *  2. retrieves metadata like DisplayTitle
      *
-     * @param string $script (out)
+     * @return array with key/value pairs
      */
-    private static function addAnnotationSnippets(& $script) {
+    private static function addAnnotationSnippetVars() {
         global $fsgAnnotationsInSnippet, $fsgExtraPropertiesToRequest;
 
         $result = [];
@@ -296,20 +286,14 @@ class FSGlobalFunctions {
                     $fsgExtraPropertiesToRequest[] = $solrFieldName;
                 }
 
-                global $fsgTitleProperty;
-                $value = $store->getPropertyValues( $smwProperty->getDiWikiPage(),
-                        \SMWDIProperty::newFromUserLabel ( $fsgTitleProperty ) );
-                $value = reset($value);
-                $displayTitle = $value !== false ? $value->getString() : $smwProperty->getDiWikiPage()->getTitle()->getText();
-
-                if (!array_key_exists($solrFieldName, $result)) {
-                    $result[$solrFieldName] = ['label' => $displayTitle, 'category' => [ $category ] ];
-                } else {
+                if ( array_key_exists($solrFieldName, $result) ) {
                     $result[$solrFieldName]['category'][] = $category;
+                } else {
+                    $displayTitle = FacetedSearchUtil::findDisplayTitle($smwProperty->getDiWikiPage()->getTitle());
+                    $result[$solrFieldName] = [ 'label' => $displayTitle, 'category' => [ $category ] ];
                 }
             }
         }
-
-        $script .= "XFS.annotationsInSnippet = ".json_encode($result).";";
+        return $result;
     }
 }
