@@ -42,7 +42,7 @@ FacetedSearch.classes.FacetClusterer = function (facetName, plainName) {
 	
 	//--- Constants ---
 	// The number of clusters that are generated for a facet.
-	that.NUM_CLUSTERS = 5;
+	that.NUM_CLUSTERS = 10;
 	
 	
 	//--- Private members ---

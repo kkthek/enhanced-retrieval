@@ -13,12 +13,12 @@
 			
 			that.categoryFacetListener = function(facetItem) {
 				
-				if (XFS.SHOWN_CATEGORY_FACETS.length == 0) {
+				if (mw.config.get('ext.er.SHOWN_CATEGORY_FACETS').length == 0) {
 					return true;
 				}
 				
-				return XFS.SHOWN_CATEGORY_FACETS.indexOf(facetItem.facet) > -1;
-				
+				return mw.config.get('ext.er.SHOWN_CATEGORY_FACETS').indexOf(facetItem.facet) > -1;
+					
 			};
 			
 			return that;

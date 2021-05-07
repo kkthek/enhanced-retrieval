@@ -31,15 +31,15 @@ class UpdateSolr extends Maintenance
 
     public function execute()
     {
-        
+
         // when indexing everything, dependent pages do not need special treatment
         global $fsUpdateOnlyCurrentArticle;
         $fsUpdateOnlyCurrentArticle = true;
-        
+
         $this->linkCache = LinkCache::singleton();
         $this->num_files = 0;
         $this->printDocHeader();
-        
+
         if (!$this->hasOption('p')) {
             $startId = $this->getStartId();
             $endId = $this->getEndId($startId);
@@ -48,10 +48,10 @@ class UpdateSolr extends Maintenance
             $pages = explode(',', $this->getOption('p'));
             $this->refreshPages($pages);
         }
-        
+
         print "{$this->num_files} IDs refreshed.\n";
     }
-    
+
     /**
      * Print Documatation header
      */
@@ -63,78 +63,78 @@ class UpdateSolr extends Maintenance
             " at the last processed page id using the parameter -s (use -v to display\n" .
             " page ids during refresh). \n\n[Use -x for debugging information]\n\n" .
             "Continue this until all pages were refreshed.\n---\n";
-        
+
     }
 
     /**
      * Refresh all pages from ID start to ID end
      * Writes last processed ID to a file if option 'startidfile' is set.
-     * 
+     *
      * @param int $start
      * @param int $end
      */
     private function refreshPagesByIds($start, $end)
     {
-        
+
         print "Processing all IDs from $start to " . ($end ? "$end" : 'last ID') . " ...\n";
         new SMWDIProperty("_wpg");
         $id = $start;
         while (((! $end) || ($id <= $end)) && ($id > 0)) {
             $title = Title::newFromID($id);
             if ($this->hasOption('v')) {
-                print sprintf("(%s) Processing ID %s ... [%s]\n", 
+                print sprintf("(%s) Processing ID %s ... [%s]\n",
                     $this->num_files, $id, ! is_null($title) ? $title->getPrefixedText() : "-");
             }
             $id ++;
             if (is_null($title)) {
                 continue;
             }
-            
+
             $this->updateIndex($title);
-            
+
             if (($this->hasOption('d')) && (($this->num_files + 1) % 100 === 0)) {
                 usleep($this->getOption('d'));
             }
             $this->num_files ++;
             $this->linkCache->clear(); // avoid memory leaks
-            
+
             if ($this->writeToStartidfile) {
                 file_put_contents($this->getOption('startidfile'), "$id");
             }
         }
-        
+
     }
 
     /**
      * Refresh given pages.
-     * 
+     *
      * @param array of string $pages Page titles
      */
     private function refreshPages($pages)
     {
         print "Refreshing specified pages!\n\n";
-        
+
         foreach ($pages as $page) {
-            
+
             $page = trim($page);
             if ($this->getOption('v')) {
                 print sprintf("(%s) Processing page %s ... \n", $this->num_files, $page);
             }
-            
+
             $title = Title::newFromText($page);
-            
+
             if (! is_null($title)) {
                 $this->updateIndex($title);
             }
-            
+
             $this->num_files ++;
         }
-     
+
     }
-    
+
     /**
      * Update SOLR index of $title.
-     * 
+     *
      * @param Title $title
      */
     private function updateIndex($title) {
@@ -146,20 +146,19 @@ class UpdateSolr extends Maintenance
                 print implode("\t\n", $messages);
             }
         } catch (Exception $e) {
-            if (! $this->hasOption('x')) {
-                print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
-            } else {
-                print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
-                print sprintf("\n[NOT INDEXED]\n%s\n", $e->getMessage());
+            print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
+            if ($this->hasOption('x')) {
+                print sprintf("\t[NOT INDEXED] %s\n", $e->getMessage());
+                print sprintf("%s\n", $e->getTraceAsString());
                 print "---------------------------------------------------------\n";
             }
         }
     }
 
     /**
-     * Calculates startID of MW-page 
+     * Calculates startID of MW-page
      * Reads ID from a file if option 'startidfile' is specified.
-     * 
+     *
      * @return int
      */
     private function getStartId()
@@ -185,9 +184,9 @@ class UpdateSolr extends Maintenance
 
     /**
      * Calculates endID of MW-page
-     * 
+     *
      * @param int $start Start-ID
-     * 
+     *
      * @return int
      */
     private function getEndId($start)

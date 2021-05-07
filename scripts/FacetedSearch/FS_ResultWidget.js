@@ -113,9 +113,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		}
 		
 		// Check if the search term is an existing article
-		if (!fsi.isExpertQuery()) {
-			this.updateCreateArticleWidget(fsi.getSearch());
-		}
+		this.updateCreateArticleWidget(fsi.getSearch());
 		
 		this.showInOverlay();
 		
@@ -234,6 +232,10 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		if (docData[fs.ATTRIBUTE_FIELD]) {
 			fields = fields.concat(docData[fs.ATTRIBUTE_FIELD]);
 		}
+		
+		//this will add the relevancy ranking to the result of each search hit
+		fields = fields.concat(["score"]);
+		
 		asm.store.addByValue('fl', fields);
 		var query = fs.DOCUMENT_ID + ':' + docData.id;
 		asm.store.addByValue('q', query);
@@ -251,7 +253,6 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 	 * 		The current query string. It may be the name of an existing article.
 	 */
 	updateCreateArticleWidget: function (query) {
-		
 		if (query.length === 0) {
 			// Ignore empty queries
 			return;
@@ -295,14 +296,12 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		var ucfTitle = '(' + title.charAt(0).toUpperCase() + title.substr(1) + ')';
 		var brTitle = '(' + title + ')';
 		this.mASMforTitleCheck.store.addByValue('q', 
-			fsi.TITLE_FIELD + ':' + brTitle + 
+			fsi.TITLE_FIELD + ':' + brTitle +
 			' OR ' +
-			fsi.TITLE_STRING_FIELD + ':' + brTitle +
+			fsi.TITLE_FIELD + ':' + ucfTitle +
 			' OR ' +
-			fsi.TITLE_STRING_FIELD + ':' + ucfTitle +
-			' OR ' +
-			fsi.TITLE_STRING_FIELD + ':' + lcfTitle);
-		this.mASMforTitleCheck.store.addByValue('fl', [fsi.TITLE_STRING_FIELD, fsi.NAMESPACE_FIELD]);
+			fsi.TITLE_FIELD + ':' + lcfTitle);
+		this.mASMforTitleCheck.store.addByValue('fl', [fsi.TITLE_FIELD, fsi.NAMESPACE_FIELD]);
 		this.mASMforTitleCheck.doRequest(0);
 		this.mASMforTitleCheck.titleCheckData = {
 			title: title,

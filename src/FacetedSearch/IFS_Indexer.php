@@ -68,12 +68,20 @@ interface IFSIndexer {
 	public function deleteIndex();
 	
 	/**
-	 * Updates the index for the given $article.
+	 * Updates the index for the given $wikiPage.
 	 * It retrieves all semantic data of the new version and adds it to the index.
-	 * 
-	 * @param Article $article
+	 *
+	 * @param WikiPage $wikiPage
 	 * 		The article that changed.
+	 * @param User $user
+	 * 		Optional user object
+	 * @param string $text
+	 *		Optional content of the article. If NULL, the content of $wikiPage is
+	 *		retrieved in this method.
+	 * @param array $messages 
+	 *      User readible messages (out)
+	 * @param bool force 
+	 *      Force update from command-line
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL, & $messages = []);
-	
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL, & $messages = [], $force = false);	
 }

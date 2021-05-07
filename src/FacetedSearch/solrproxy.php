@@ -33,7 +33,7 @@
 define ( 'SOLRPROXY', true );
 
 if (is_readable ( __DIR__ . '/../../proxy/vendor/autoload.php' )) {
-	include_once __DIR__ . '/../../proxy/vendor/autoload.php';
-	exit ();
+    include_once __DIR__ . '/../../proxy/vendor/autoload.php';
+    exit ();
 }
 

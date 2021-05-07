@@ -31,8 +31,6 @@ class UpdateSearchStats extends Maintenance {
 			$cache->set('DIQA.EnhancedRetrieval.num_search_hits', ++$num_search_hits);
 		}
 	}
-	
-	
 }
 
 $maintClass = "UpdateSearchStats";

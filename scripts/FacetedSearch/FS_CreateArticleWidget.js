@@ -58,25 +58,25 @@ FacetedSearch.classes.CreateArticleWidget = AjaxSolr.AbstractWidget.extend({
 			var docNS = doc[fsi.NAMESPACE_FIELD].toString();
 			if ((tcd.namespace === false && docNS === '0')
 			    || (tcd.namespace === docNS)) {
-				articleExists = this.checkArticleNameMatches(title, doc[fsi.TITLE_STRING_FIELD]);
+				articleExists = this.checkArticleNameMatches(title, doc[fsi.TITLE_FIELD]);
 				if (articleExists) {
 					break;
 				}
 			}
 		}
 		$(this.target).empty();
-		if (!articleExists) {
-			// Check if the name starts with a known namespace
-			var ns = mw.config.get('wgFormattedNamespaces')[tcd.namespace] || '';
-			var colon = ns ? ':' : '';
-			var articleName = ns+colon+title;
-			var cnpLink = wgFSCreateNewPageLink.replace(/\{article\}/g, articleName);
-			var link = mw.config.get('wgServer') + mw.config.get('wgScript') + cnpLink;
-			if (wgFSCreateNewPageLink != '') {
-			$(this.target)
-				.append(AjaxSolr.theme('createArticle', articleName, link));
-			}
-		}
+        if (!articleExists) {
+            // Check if the name starts with a known namespace
+            var ns = mw.config.get('wgFormattedNamespaces')[tcd.namespace] || '';
+            var colon = ns ? ':' : '';
+            var articleName = ns+colon+title;
+            var cnpLink = mw.config.get('wgFSCreateNewPageLink').replace(/\{article\}/g, articleName);
+            var link = mw.config.get('wgServer') + mw.config.get('wgScript') + cnpLink;
+            if (mw.config.get('wgFSCreateNewPageLink') != '') {
+            	$(this.target)
+                	.append(AjaxSolr.theme('createArticle', articleName, link));
+            }
+        }
 	},
 	
 	/**

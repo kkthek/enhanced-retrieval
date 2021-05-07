@@ -14,15 +14,13 @@
 				if (result == null) {
 					return;
 				}
-				// there should be only one category at a time in ODB
+				// mark the category from the URI as selected in the drop down menu
 				$('select#fs_category_filter option[value="'+result[1]+'"]').prop('selected', true);
-				
 			};
 			
 			that.onCategoryChange = function(event) {
 				var category = $('select#fs_category_filter option:selected').val();
 				that.selectCategory(category);
-				
 			};
 			
 			that.selectCategory = function(category) {
@@ -36,7 +34,6 @@
 				
 				fsm.doRequest(0);
 			};
-			
 			
 			return that;
 	};

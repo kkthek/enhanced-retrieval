@@ -1,32 +1,31 @@
 @media (min-width: 200px) and  (max-width: 768px) {
-
     div.facets { width:100%; }
     div#results { width:100%;  }
     div#xfsPropertyFacetContainer { display: none; }
-	
-
 }
 
 @media (min-width: 769px) and (max-width: 1100px) {
-
     div.facets { width:30%; }
-    div#results { width:60%; }  
+    div#results { width:65%; }  
 }
+
 @media (min-width: 1101px) and (max-width: 1920px) {
     div.facets { width:25%; }
     div#results { width:70%; }  
 }
+
 @media (min-width: 1921px) {
     div.facets { width:15%; }
     div#results { width:80%; }  
 }
 
-#fs_query_button, .xfsCategoryFilter, .xfsSortOrder {
+#fs_query_button, .fs_category_filter, .fs_sort_order {
 	margin-top: 5px;
 	margin-bottom: 5px;
 	white-space:nowrap;
 	padding: 0px;
 }
+
 #search_button {
 	font-size: 18px;
 }
@@ -36,9 +35,11 @@
 	padding: 0 0 10px 10px;
 	word-wrap: break-word;
 }
+
 .detailsImage {
 	cursor: pointer;
 }
+
 #query {
 	min-width: 80%;
 	font-size: 18px;
@@ -60,7 +61,7 @@
 
 .results {
 	float: right;
-	padding: 0 0 0 10px;
+	padding: 10px 20px 10px 40px;
 	border-left: 1px solid #aaa;
 	text-align: left;
 	line-height: 1.3em;
@@ -111,6 +112,14 @@
 	padding: 2px 15px 2px 5px;
 }
 
+.xfsPromotedResult {
+    background-color: beige;
+}
+
+.xfsDemotedResult {
+    color: gray;
+}
+
 .xfsClusterEntry {
 	margin-left: 3em;
 }
@@ -134,13 +143,16 @@
 	font-size: 90%;
 	margin-bottom: 10px;
 }
+
 #selection > span > img {
 	padding-left: 3px;
     vertical-align: text-bottom;
 }
+
 a.xfsFMore, a.xfsFLess {
 	cursor: pointer;
 }
+
 #xfsFilterDebug {
 	background-color: gold;
     border: 1px solid darkGoldenRod;
@@ -149,6 +161,7 @@ a.xfsFMore, a.xfsFLess {
     margin: 0;
     padding: 2px 2px 2px 18px;	
 }
+
 .xfsMinor {
 	color: gray;
 	cursor: default;
@@ -172,7 +185,6 @@ a.xfsFMore, a.xfsFLess {
 }
 
 .xfsEmptyNamespace {
-/*	color: #CC2200 !important;*/
 	color: gray !important;
 }
 
@@ -222,7 +234,6 @@ div.xfs_additional_property_table_row,div.xfs_additional_property_table_row_firs
 }
 table.xfs_additional_property_table td {
 }
-
 table.xfs_additional_property_table td span.xfs_additional_property_value {
 	font-size: 13px;
     font-style: italic;
@@ -233,4 +244,16 @@ div.fs_error_hint {
 	padding: 15px;
 	background-color: red;
 	color: white;
+}
+
+.globalSpinner{
+    position:fixed;
+    z-index:10000;/* make higher than whatever is on the page */
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:auto;
+    width:100px;
+    height:100px;
 }
