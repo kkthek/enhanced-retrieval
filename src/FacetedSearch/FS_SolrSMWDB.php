@@ -619,10 +619,10 @@ SQL;
             }
 
             // index this category
-            $categoryAsText = $category->getTitle()->getText();
-            $doc['smwh_categories'][] = $categoryAsText;
-            $doc['smwh_directcategories'][] = $categoryAsText;
-            $categories[] = str_replace("_", " ", $categoryAsText);
+            $categoryAsDBkey = $category->getTitle()->getDBkey();
+            $doc['smwh_categories'][] = $categoryAsDBkey;
+            $doc['smwh_directcategories'][] = $categoryAsDBkey;
+            
 
             $this->getAllSupercategories($category->getTitle(), $allParentCategories);
 
@@ -632,7 +632,7 @@ SQL;
         $allParentCategories = array_unique($allParentCategories);
         foreach($allParentCategories as $pc) {
             $doc['smwh_categories'][] = $pc;
-            $categories[] = str_replace("_", " ", $pc);
+            
         }
     }
 
