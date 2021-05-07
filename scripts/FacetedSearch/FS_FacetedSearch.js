@@ -286,6 +286,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		}
 		
 		mAjaxSolrManager.store.addByValue('q', QUERY_FIELD + ':' + qs);
+		mAjaxSolrManager.store.addByValue('searchText', searchText);
 		readPrefixParameter();
 		mAjaxSolrManager.doRequest(0);
 	}
@@ -591,30 +592,16 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 */
 	function initParameterStoreFromURL() {
 		var url = document.URL;
-		var params = url.match(/^.*?fssearch=(.*)$/);
+		var params = url.match(/^.*[?&]fssearch=(.*)$/);
 		if (params) {
-			mAjaxSolrManager.store.parseString(params[1]);
+			mAjaxSolrManager.store.parseString(decodeURIComponent(params[1]));
 			// Is a query string given?
-			var qs = mAjaxSolrManager.store.get('q');
-			if (qs) {
-				var val = qs.val();
-				var regEx = new RegExp(QUERY_FIELD + ":(.*?)\\**$");
-				qs = val.match(regEx);
-				if (qs) {
-					// Query found => set it in the search field
-					var qstring = qs[1];
-					var qstring_simple = qstring;
-					if (qstring.indexOf("(") === 0 && qstring.indexOf(")") === qstring.length-1) {
-						var regEx = new RegExp('\\+([^\\s*]+)','g');
-						var parts;
-						qstring_simple = '';
-						while( parts =  regEx.exec(qstring)) {
-							qstring_simple += parts[1] + " ";
-						}
-						
-					}
-					$('#query').val(qstring_simple);
+			var searchText = mAjaxSolrManager.store.get('searchText').val();
+			if (searchText) {
+				if (searchText == '(*)') {
+					return true;
 				}
+				$('#query').val(searchText);
 			}
 			return true;
 		}

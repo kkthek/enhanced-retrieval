@@ -131,6 +131,11 @@ AjaxSolr.Parameter = AjaxSolr.Class.extend(
       else {
         this.name = param[1];
         this.value = this.parseValueString(param[3]);
+        if (this.name == 'sort') {
+        	this.value = this.parseValueString(param[3].replaceAll('+', ' '));
+        } else {
+        	this.value = this.parseValueString(param[3]);
+        }
       }
     }
   },
