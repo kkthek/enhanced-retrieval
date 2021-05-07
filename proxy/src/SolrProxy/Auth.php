@@ -13,7 +13,9 @@ class Auth {
 
         if (Auth::checkLogout()) {
             @session_destroy();
-            exit();
+            global $wgServer, $wgScriptPath;
+            header("Location: $wgServer$wgScriptPath");
+            exit;
         }
 
         global $wgDBname;
