@@ -72,7 +72,7 @@ FacetedSearch.classes.CreateArticleWidget = AjaxSolr.AbstractWidget.extend({
             var articleName = ns+colon+title;
             var cnpLink = mw.config.get('wgFSCreateNewPageLink').replace(/\{article\}/g, articleName);
             var link = mw.config.get('wgServer') + mw.config.get('wgScript') + cnpLink;
-            if (mw.config.get('wgFSCreateNewPageLink') != '') {
+            if (mw.config.get('wgFSCreateNewPageLink') != '' && articleName != '(*)') {
             	$(this.target)
                 	.append(AjaxSolr.theme('createArticle', articleName, link));
             }
