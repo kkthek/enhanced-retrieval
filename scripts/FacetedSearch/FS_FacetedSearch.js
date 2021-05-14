@@ -401,7 +401,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			return;
 		}
 		
-		switch(sort[0][0]) {
+		switch(sort[0]) {
 			case MODIFICATION_DATE_FIELD + ' desc, score desc':
 				var val = 'newest';
 				break;

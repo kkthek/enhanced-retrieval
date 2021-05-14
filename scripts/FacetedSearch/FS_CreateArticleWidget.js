@@ -70,9 +70,13 @@ FacetedSearch.classes.CreateArticleWidget = AjaxSolr.AbstractWidget.extend({
             var ns = mw.config.get('wgFormattedNamespaces')[tcd.namespace] || '';
             var colon = ns ? ':' : '';
             var articleName = ns+colon+title;
-            var cnpLink = mw.config.get('wgFSCreateNewPageLink').replace(/\{article\}/g, articleName);
+            var wgFSCreateNewPageLink = mw.config.get('wgFSCreateNewPageLink');
+            if (wgFSCreateNewPageLink == false) {
+            	return;
+            }
+            var cnpLink = wgFSCreateNewPageLink.replace(/\{article\}/g, articleName);
             var link = mw.config.get('wgServer') + mw.config.get('wgScript') + cnpLink;
-            if (mw.config.get('wgFSCreateNewPageLink') != '' && articleName != '(*)') {
+            if (wgFSCreateNewPageLink != '' && articleName != '(*)') {
             	$(this.target)
                 	.append(AjaxSolr.theme('createArticle', articleName, link));
             }

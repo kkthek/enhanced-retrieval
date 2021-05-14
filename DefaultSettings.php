@@ -283,7 +283,7 @@ global $fsgHitsPerPage;
 $fsgHitsPerPage = 10;
 
 /**
- * Sort order default. Possible values: relevance, newest, oldest, ascending, descending
+ * Sort order default. Possible values: score, newest, oldest, ascending, descending
  */
 global $fsgDefaultSortOrder;
-$fsgDefaultSortOrder = "relevance";
+$fsgDefaultSortOrder = "score";
