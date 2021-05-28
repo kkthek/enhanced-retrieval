@@ -1,6 +1,6 @@
 <?php
 use DIQA\FacetedSearch\FSGlobalFunctions;
-use DIQA\SolrProxy\ConfigLoader;
+use DIQA\FacetedSearch\Proxy\SolrProxy\ConfigLoader;
 use DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial;
 
 /*
@@ -35,6 +35,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 }
 
 define('ER_EXTENSION_VERSION', '2.2');
+wfLoadExtension( 'EnhancedRetrieval', dirname( __FILE__ ) . '/extension.json' );
 
 global $wgExtensionCredits;
 $wgExtensionCredits['other'][] = array(
@@ -57,11 +58,9 @@ $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Language
 global $wgHooks;
 $wgHooks['ParserFirstCallInit'][] = 'DIQA\FacetedSearch\FSGlobalFunctions::initializeBeforeParserInit';
 $wgHooks['fs_extendedFilters'][] = 'DIQA\FacetedSearch\FacetedCategoryFilter::addFilter';
-$wgHooks['UserLogout'][] = 'wfERLogout';
 
 global $wgAPIModules;
 $wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Util\DialogAjaxAPI';
-$wgAPIModules['fs_userdataapi'] = 'DIQA\FacetedSearch\Util\UserDataAPI';
 
 require_once 'DefaultSettings.php';
 
@@ -83,7 +82,7 @@ function wfERSetupExtension() {
 	#          If the solrproxy is used this can be omitted.
 	# proxyServlet: Servlet of the indexer proxy as seen from the client. If the
 	#          solrproxy is used it should be
-	#          "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php"
+	#          "$wgScriptPath/rest.php/EnhancedRetrieval/v1/proxy"
 	#          If the indexer is addressed directly it should be '/solr/select' (for SOLR)
 	# indexerHost: Name or IP address of the indexer server as seen from the wiki server
 	#          e.g. 'localhost'
@@ -95,10 +94,17 @@ function wfERSetupExtension() {
 	#          If the solrproxy is used and the port of the indexer host (SOLR) is
 	#          different from 8983, the variable $SOLRport must be set in solrproxy.php.
 	##
-	require_once __DIR__ . '/proxy/src/SolrProxy/ConfigLoader.php';
-    if (!file_exists(__DIR__ . '/proxy/env.php')
-        && !file_exists(__DIR__ . '/../../env.php')) {
-        ConfigLoader::loadConfig();
+    ConfigLoader::loadConfig();
+
+    if (file_exists(__DIR__ . '/custom.php')) {
+        require_once(__DIR__ . '/custom.php');
+    }
+
+    global $SOLRProxyDebug;
+    if (isset($SOLRProxyDebug) && $SOLRProxyDebug === true) {
+        error_reporting( E_ALL );
+        ini_set( 'display_startup_errors', 1 );
+        ini_set( 'display_errors', 1 );
     }
 
 	if (!isset($SOLRhost)) {
@@ -114,11 +120,10 @@ function wfERSetupExtension() {
 	    $SOLRpass = '';
 	}
 	if (!isset($SOLRcore)) {
-	    $SOLRcore = '';
+	    $SOLRcore = 'mw';
 	}
 
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
-	global $wgServerHTTP, $wgScriptPath, $wgDBname;
 
 	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
 	if (!isset($fsgFacetedSearchConfig)) {
@@ -127,7 +132,7 @@ function wfERSetupExtension() {
 		    'source'  => 'SMWDB',
 		    'proxyHost'    => $wgServer,
 		//	'proxyPort'    => 8983,
-			'proxyServlet' => "$wgScriptPath/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php",
+			'proxyServlet' => "$wgScriptPath/rest.php/EnhancedRetrieval/v1/proxy",
 		    'indexerHost' => $SOLRhost,
 			'indexerPort' => $SOLRport,
 			'indexerUser' => $SOLRuser,
@@ -161,13 +166,7 @@ function wfERSetupExtension() {
 
 	// Set up Faceted Search
 	FSGlobalFunctions::setupFacetedSearch();
-
+	
+	
 	return true;
-}
-
-function wfERLogout() {
-    global $wgUser;
-    $proxyUrl = "/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?logout=" . $wgUser->getId();
-    global $wgServer, $wgScriptPath;
-    header("Location: $wgServer$wgScriptPath$proxyUrl");
 }
