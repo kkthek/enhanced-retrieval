@@ -1,6 +1,7 @@
 <?php
 namespace DIQA\FacetedSearch;
 
+use Bootstrap\BootstrapManager;
 use SMW\StoreFactory;
 /*
  * Copyright (C) Vulcan Inc., DIQA Projektmanagement GmbH
@@ -182,6 +183,7 @@ class FSGlobalFunctions {
                         '_ASKDE'
                 )
         );
+        BootstrapManager::getInstance()->addBootstrapModule("modals");
 
         $wgResourceModules['ext.facetedSearch.enhancements'] = $moduleTemplate + array(
                 'localBasePath' => __DIR__,
@@ -196,7 +198,6 @@ class FSGlobalFunctions {
                 'styles' => array('skin/dialogs.css'),
                 'dependencies' => array(
                         'ext.facetedSearch.special',
-                        'jquery.ui.autocomplete',
                         'ext.bootstrap.styles',
                         'ext.bootstrap.scripts'
                 )
