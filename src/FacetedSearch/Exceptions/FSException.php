@@ -1,6 +1,5 @@
 <?php
 namespace DIQA\FacetedSearch\Exceptions;
-
 /*
  * Copyright (C) Vulcan Inc.
  *
@@ -21,62 +20,57 @@ namespace DIQA\FacetedSearch\Exceptions;
 
 /**
  * @file
- * @ingroup ER_Exception
  *
- * This file contains the base class for enhanced retrieval exceptions
- *
+ * This file contains the exception class for Faceted Search
+ * 
  * @author Thomas Schweitzer
  * Date: 22.02.2011
- *
+ * 
  */
 if ( !defined( 'MEDIAWIKI' ) ) {
-	die( "This file is part of the Enhanced Retrieval extension. It is not a valid entry point.\n" );
+	die( "This file is part of the HaloACL extension. It is not a valid entry point.\n" );
 }
 
 /**
- * Base class for all exceptions of Enhanced Retrieval.
+ * Exceptions for the Faceted Search.
  *
  */
-class ERException extends \Exception {
+class FSException extends FSBaseException {
 
-	// An internal error occurred
-	// Parameters:
-	// 1 - Description of the internal error
-	const INTERNAL_ERROR = 2;
+	//--- Constants ---
 	
+	// An incomplete configuration was given.
+	// Parameters:
+	// 1 - Missing fields in the configuration
+	const INCOMPLETE_CONFIG = 1;	
+
+	// An unsupported value was given.
+	// Parameters:
+	// 1 - Unsupported values
+	const UNSUPPORTED_VALUE = 2;	
 	
 	/**
-	 * Constructor of the Enhanced Retrieval exception.
+	 * Constructor of the group exception.
 	 *
-	 * @param string $message
-	 * 		The error message
 	 * @param int $code
 	 * 		A user defined error code.
 	 */
-    public function __construct($args) {
-    	$code = 0;
-    	if (!is_array($args)) {
-    		$code = $args;
-    		$args = func_get_args();
-    	} else {
-    		// If the constructor is called from sub-classes, all parameters
-    		// are passed as array
-    		$code = $args[0];
-    	}
-    	$msg = $this->createMessage($args);
-    	
+    public function __construct($code = 0) {
+    	$args = func_get_args();
     	// initialize super class
-        parent::__construct($msg, $code);
+        parent::__construct($args);
     }
     
     protected function createMessage($args) {
     	$msg = "";
     	switch ($args[0]) {
-   			case self::INTERNAL_ERROR:
-    			$msg = "Internal error: $args[1]";
+    		case self::INCOMPLETE_CONFIG:
+    			$msg = "The configuration for creating a Faceted Search Indexer is incomplete:\n $args[1]";
+    			break;
+    		case self::UNSUPPORTED_VALUE:
+    			$msg = "The configuration for creating a Faceted Search Indexer contains unsupported values:\n $args[1]";
     			break;
     	}
     	return $msg;
     }
-    
 }

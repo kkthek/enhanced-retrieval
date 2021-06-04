@@ -55,6 +55,8 @@ abstract class FSSolrIndexer implements IFSIndexer {
     const DELETE_DOCUMENT_BY_ID = '<delete><id>$1</id></delete>'; // $1 must be replaced by the actual ID
     const QUERY_PREFIX = 'solr/<CORE>/select/?';
 
+    const MAGIC_BOOST_VALUE = "955B76377F2547AD919E7AA156C66624";
+
     const HTTP_OK = 200;
 
     //--- Private fields ---
@@ -173,12 +175,12 @@ abstract class FSSolrIndexer implements IFSIndexer {
         // Create the XML for the document
         $xml = "<add>\n\t<doc>\n";
 
-        // this is a dummy boost for the sole purpose of being requested even if no filter is applied
-        // it assures that boosting is actually effective. it always has the value "1"
+        // this is a dummy boost for the sole purpose of being requested even if no filter is applied.
+        // it always has the value "1". it assures that boosting is actually effective.
         global $fsgSwitchOfBoost;
         if ( isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost == true ) {
             $boost = $options['smwh_boost_dummy']['boost'];
-            $xml .= "\t\t<field name='smwh_boost_dummy' boost='$boost'><![CDATA[1]]></field>\n";
+            $xml .= "\t\t<field name='smwh_boost_dummy' boost='$boost'><![CDATA[" . FSSolrIndexer::MAGIC_BOOST_VALUE . "]]></field>\n";
         }
 
         foreach ($document as $field => $value) {
@@ -365,8 +367,7 @@ abstract class FSSolrIndexer implements IFSIndexer {
     /**
      * Deletes the document with the ID $id from the index.
      *
-     * @param string/int $id
-     *         ID of the document to delete.
+     * @param string/int $id  ID of the document to delete.
      * @return bool
      *         <true> if the document was deleted successfully
      *         <false> otherwise

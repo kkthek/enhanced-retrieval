@@ -83,5 +83,29 @@ interface IFSIndexer {
 	 * @param bool force 
 	 *      Force update from command-line
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL, & $messages = [], $force = false);	
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL, & $messages = [], $force = false);
+
+    /**
+     * Updates the index for a moved article.
+     *
+     * @param int $oldid
+     *         Old page ID of the article
+     * @param int $newid
+     *         New page ID of the article
+     * @return bool
+     *         <true> if the document in the index for the article was moved successfully
+     *         <false> otherwise
+     */
+    public function updateIndexForMovedArticle($oldid, $newid);
+
+    /**
+     * Deletes the document with the ID $id from the index.
+     *
+     * @param string/int $id  ID of the document to delete.
+     * @return bool
+     *         <true> if the document was deleted successfully
+     *         <false> otherwise
+     *
+     */
+    public function deleteDocument($id);
 }

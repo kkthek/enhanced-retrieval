@@ -1,10 +1,12 @@
 <?php
 namespace DIQA\FacetedSearch;
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 use WikiPage;
 use Title;
 use SMWStore;
-use Revision;
 use SMW\SemanticData;
 
 
@@ -50,10 +52,6 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  */
 class FSIncrementalUpdater  {
 	
-	//--- Constants ---
-		
-	//--- Private fields ---
-	
 	/**
 	 * Constructor for  FSIncrementalUpdater
 	 */		
@@ -73,21 +71,24 @@ class FSIncrementalUpdater  {
 	 * @param SemanticData $semanticData
 	 * @return void|boolean
 	 */
-	public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
-		
-		$wikiTitle = $semanticData->getSubject()->getTitle();
-		$Revision = Revision::newFromTitle ( $wikiTitle );
-		if (is_null($Revision)) {
-			return;
-		}
-		
-		$WikiPageContent = $Revision->getContent ( Revision::RAW )->serialize ();
-		$indexer = FSIndexerFactory::create();
-		try {
-			$indexer->updateIndexForArticle(new \WikiPage($wikiTitle), null, $WikiPageContent);
-		} catch(\Exception $e) { }
-		return true;
-	}
+    public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
+        $wikiTitle = $semanticData->getSubject()->getTitle();
+
+        $store = MediaWikiServices::getInstance()->getRevisionStore();
+        $revision = $store->getRevisionByTitle( $wikiTitle );
+        if (is_null($revision)) {
+            return;
+        }
+
+        $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW)->serialize();
+        $indexer = FS_IndexerFactory::create();
+        try {
+            $indexer->updateIndexForArticle(new WikiPage($wikiTitle), null, $content);
+        } catch(Exception $e) {
+            // TODO error logging
+        }
+        return true;
+    }
 	
 	public static function onUploadComplete( &$image ) {
 		global $wgUser;
@@ -131,7 +132,7 @@ class FSIncrementalUpdater  {
 	 * 
 	 * @param Title $title
 	 * @param Title $newTitle
-	 * @param unknown_type $user
+	 * @param unknown_type $user    not used
 	 * @param unknown_type $oldid
 	 * @param unknown_type $newid
 	 * @return bool
@@ -148,8 +149,8 @@ class FSIncrementalUpdater  {
 	 * the index.
 	 *
 	 * @param unknown_type $article
-	 * @param unknown_type $user
-	 * @param unknown_type $reason
+	 * @param unknown_type $user    not used
+	 * @param unknown_type $reason  not used
 	 * 
 	 * @return bool
 	 * 		As a hook function it always returns <true>
@@ -169,20 +170,22 @@ class FSIncrementalUpdater  {
 	 * @param int $rev_id
 	 * @return void|boolean
 	 */
-	public static function onRevisionApproved($parser, $title, $rev_id) {
-		
-		$Revision = Revision::newFromTitle ( $title, $rev_id );
-		if (is_null($Revision)) {
-			return;
-		}
-		
-		$WikiPageContent = $Revision->getContent ( Revision::RAW )->serialize ();
-		$indexer = FSIndexerFactory::create();
-		try {
-			$indexer->updateIndexForArticle(new \WikiPage($title), null, $WikiPageContent);
-		} catch(\Exception $e) { }
-		return true;
-	}
+    public static function onRevisionApproved($parser, $title, $rev_id) {
+        $store = MediaWikiServices::getInstance()->getRevisionStore();
+        $revision = $store->getRevisionByTitle( $title, $rev_id);
+        if (is_null($revision)) {
+            return;
+        }
+
+        $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW)->serialize();
+        $indexer = FS_IndexerFactory::create();
+        try {
+            $indexer->updateIndexForArticle(new WikiPage($title), null, $content);
+        } catch(Exception $e) {
+            # TODO add error-logging
+        }
+        return true;
+    }
 
 	//--- Private methods ---
 }

@@ -1,19 +1,23 @@
 <?php
 namespace DIQA\FacetedSearch;
 
-use Article;
+use Exception;
 use JobQueueGroup;
 use ParserOptions;
-use Revision;
 use Sanitizer;
-use SMW\ApplicationFactory;
+use SMWDataItem;
+use SMWDITime;
+use Title;
+use WikiPage;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
+use RepoGroup;
+use SMW\Services\ServicesFactory as ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty as SMWDIProperty;
 use SMW\DIWikiPage as SMWDIWikiPage;
 use SMW\PropertyRegistry;
-use SMWDataItem;
-use Title;
-use WikiPage;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -122,12 +126,12 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $t = $wikiPage->getTitle();
         $pid = $wikiPage->getId();
         if($pid == 0) {
-            throw new \Exception("invalid page ID for " . $t->getPrefixedText());
+            throw new Exception("invalid page ID for " . $t->getPrefixedText());
         }
 
         global $fsgBlacklistPages;
         if (in_array($t->getPrefixedText(), $fsgBlacklistPages)) {
-            throw new \Exception("blacklisted page: " . $t->getPrefixedText());
+            throw new Exception("blacklisted page: " . $t->getPrefixedText());
         }
 
         $pns = $t->getNamespace();
@@ -143,11 +147,11 @@ class FSSolrSMWDB extends FSSolrIndexer {
             // indexed approved revision
             $revision = $this->getApprovedRevision($wikiPage);
             if ($revision === false) {
-                throw new \Exception("unapproved " . $t->getPrefixedText());
+                throw new Exception("unapproved " . $t->getPrefixedText());
             }
-            $content = $revision->getContent();
-            $text = $content->getParserOutput($wikiPage->getTitle(),
-                    $revision->getId(), $parserOptions)->getText();
+            $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW);
+
+            $text = $content->getParserOutput($wikiPage->getTitle(), $revision->getId(), $parserOptions)->getText();
             $text = Sanitizer::stripAllTags($text);
 
         } else {
@@ -171,7 +175,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $db = wfGetDB( DB_REPLICA  );
 
         if ($this->retrieveSMWID($db, $pns, $pt, $doc)) {
-            $this->retrievePropertyValues($db, $pns, $pt, $doc, $options);
+            $this->retrievePropertyValues($pns, $pt, $doc, $options);
         }
 
         // extract document if a file was uploaded
@@ -180,7 +184,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 $this->retrieveFileSystemPath($db, $pns, $pt, $doc);
                 $docData = $this->extractDocument($t);
                 $doc['smwh_full_text'] = $docData['text'];
-            } catch(\Exception $e) {
+            } catch( Exception $e ) {
                 $messages[] = $e->getMessage();
                 $doc['smwh_full_text'] .= " " . $e->getMessage();
             }
@@ -189,7 +193,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $this->calculateBoosting($wikiPage, $options, $doc);
 
         // call fs_saveArticle hook
-        \Hooks::run('fs_saveArticle', array( &$rawText, &$doc ));
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( 'fs_saveArticle', [ &$rawText, &$doc ] );
 
         // Let the super class update the index
         $this->updateIndex($doc, $options);
@@ -270,6 +275,10 @@ class FSSolrSMWDB extends FSSolrIndexer {
         }
     }
 
+    /**
+     * @param WikiPage
+     * @return RevisionRecord
+     */
     private function getApprovedRevision(WikiPage $wikiPage) {
         // get approved rev_id
         $db = wfGetDB( DB_MASTER );
@@ -292,7 +301,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
             return false;
         }
 
-        $revision = \Revision::newFromId($rev_id);
+        $store = MediaWikiServices::getInstance()->getRevisionStore();
+        $revision = $store->getRevisionById( $rev_id );
         return $revision;
     }
 
@@ -301,22 +311,31 @@ class FSSolrSMWDB extends FSSolrIndexer {
      *
      * @param int $oldid
      *         Old page ID of the article
-     * @param $newid
+     * @param int $newid
      *         New page ID of the article
      * @return bool
-     *         <true> if the document in the index for the article was moved
-     *                 successfully
+     *         <true> if the document in the index for the article was moved successfully
      *         <false> otherwise
      */
     public function updateIndexForMovedArticle($oldid, $newid) {
         if ($this->deleteDocument($oldid)) {
             global $wgUser;
             // The article with the new name has the same page id as before
-            $article = Article::newFromID($oldid);
-            $text = $article->getContent();
+            $wp = WikiPage::newFromID( $oldid );
+
+            $content = $wp->getContent(RevisionRecord::RAW);
+            if($content == null) {
+                $text = '';
+            } else  {
+                $text = $content->getParserOutput( $wp->getTitle() );
+                $text = Sanitizer::stripAllTags( $text );
+            }
+
             try {
-                $this->updateIndexForArticle($article->getPage(), $wgUser, $text);
-            } catch(\Exception $e) { }
+                $this->updateIndexForArticle($wp, $wgUser, $text);
+            } catch( Exception $e) {
+                // TODO error logging
+             }
         }
         return false;
     }
@@ -394,7 +413,7 @@ SQL;
 
         $prop = self::encodeTitle($prop);
 
-        $typeId = $property->findPropertyTypeID();
+        $typeId = $property->findPropertyValueType();
         $type = DataTypeRegistry::getInstance()->getDataItemByType($typeId);
 
         // The property names of all attributes are built based on their type.
@@ -468,7 +487,7 @@ SQL;
      */
     private function retrieveFileSystemPath($db, $namespace, $title, array &$doc) {
         $title = Title::newFromText($title, $namespace);
-        $file = \RepoGroup::singleton()->getLocalRepo()->newFile($title);
+        $file = RepoGroup::singleton()->getLocalRepo()->newFile($title);
         $filepath = $file->getFullUrl();
 
         $propXSD = "smwh_diqa_import_fullpath_xsdvalue_t";
@@ -480,8 +499,6 @@ SQL;
      * Retrieves the relations of the article with the SMW ID $smwID and adds
      * them to the document description $doc.
      *
-     * @param Database $db
-     *         The database object
      * @param int $smwID
      *         The SMW ID.
      * @param array $doc
@@ -490,7 +507,7 @@ SQL;
      *         be an array of relation names and a key will be added for each
      *         relation with the value of the relation.
      */
-    private function retrievePropertyValues($db, $namespace, $title, array &$doc, array &$options) {
+    private function retrievePropertyValues($namespace, $title, array &$doc, array &$options) {
         global $fsgIndexPredefinedProperties;
 
         $store = smwfGetStore();
@@ -645,7 +662,7 @@ SQL;
     private function getAllSupercategories($cTitle, & $categories) {
         $parentCategories = $cTitle->getParentCategories();
         foreach($parentCategories as $parentCat => $childCat) {
-            $parentCatTitle = \Title::newFromText($parentCat);
+            $parentCatTitle = Title::newFromText($parentCat);
             $categories[] = $parentCatTitle->getText();
             $this->getAllSupercategories($parentCatTitle, $categories);
         }
@@ -678,6 +695,7 @@ SQL;
     }
 
     private function createPropertyValueWithLabel(SMWDataItem $dataItem) {
+        /** @var SMWDIWikiPage $dataItem */
         $title = $dataItem->getTitle();
         $valueId = $title->getPrefixedText();
         $valueLabel = FacetedSearchUtil::findDisplayTitle($title);
@@ -693,6 +711,7 @@ SQL;
         $inProperties = $store->getInProperties($subject);
 
         foreach($inProperties as $inProperty) {
+            /** @var SMWDIProperty $inProperty */
             $subjects = $store->getPropertySubjects($inProperty, $subject);
             foreach($subjects as $subj) {
                 $this->dependant[] = $subj->getTitle();
@@ -725,6 +744,7 @@ SQL;
         if ($type == SMWDataItem::TYPE_TIME) {
             $typeSuffix = 'dt';
 
+            /** @var SMWDITime $dataItem */
             $year = $dataItem->getYear();
             $month = $dataItem->getMonth();
             $day = $dataItem->getDay();
@@ -800,6 +820,7 @@ SQL;
         switch ($property->getKey()) {
             case '_MDAT':
                 // used for sorting
+                /** @var SMWDITime $dataItem */
                 $doc['smwh__MDAT_datevalue_l'] = $dataItem->getMwTimestamp();
                 break;
         }

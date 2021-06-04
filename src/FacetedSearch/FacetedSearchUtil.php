@@ -2,9 +2,6 @@
 namespace DIQA\FacetedSearch;
 
 use PageProps;
-use SMW\ApplicationFactory;
-use SMWDIProperty;
-use SMWDIWikiPage;
 use Title;
 use WikiPage;
 

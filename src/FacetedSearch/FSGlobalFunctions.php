@@ -44,7 +44,7 @@ class FSGlobalFunctions {
         $dir = dirname(__FILE__).'/';
 
         // Register special pages aliases file
-        $wgExtensionAliasesFiles['FacetedSearch'] = $dir . '/Languages/FS_Aliases.php';
+        $wgExtensionAliasesFiles['FacetedSearch'] = $dir . '/Languages/FSAliases.php';
 
         // Register hooks
         if ($fsgEnableIncrementalIndexer) {
@@ -65,8 +65,7 @@ class FSGlobalFunctions {
         // Register specials pages
         global $wgSpecialPages, $wgSpecialPageGroups;
         $wgSpecialPages['FacetedSearch']      = array('DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
-        $wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
-        $wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
+        $wgSpecialPageGroups['FacetedSearch'] = 'fs_specialpage_group';
 
         self::initResourceLoaderModules();
     }

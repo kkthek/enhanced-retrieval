@@ -1,7 +1,7 @@
 <?php
 namespace DIQA\FacetedSearch;
 
-use DIQA\FacetedSearch\Exceptions\ERFSException;
+use DIQA\FacetedSearch\Exceptions\FSException;
 
 /*
  * Copyright (C) Vulcan Inc.
@@ -35,8 +35,6 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 	die( "This file is part of the Enhanced Retrieval Extension extension. It is not a valid entry point.\n" );
 }
 
-//--- Includes ---
-
 /**
  * This factory creates indexer objects that encapsulate access to index servers
  * for faceted search.
@@ -62,7 +60,7 @@ class FSIndexerFactory {
      *
      * @return IFSIndexer
      * 	An instance of the interface IFSIndexer
-     * @throws ERFSException
+     * @throws FSException
      * 	INCOMPLETE_CONFIG: If the configuration is incomplete
      *  UNSUPPORTED_VALUE: If a value for a field in the configuration is not supported
 	 */
@@ -78,7 +76,7 @@ class FSIndexerFactory {
 		$missingKeys = array_diff_key($expKeys, $indexerConfig);
 		if (count($missingKeys) > 0) {
 			$missingKeys = "The following keys are missing: ".implode(', ', array_keys($missingKeys));
-			throw new ERFSException(ERFSException::INCOMPLETE_CONFIG, $missingKeys);
+			throw new FSException(FSException::INCOMPLETE_CONFIG, $missingKeys);
 		}
 
 		// Check if the configuration is supported
@@ -91,7 +89,7 @@ class FSIndexerFactory {
 		}
 		if (count($unsupported) > 0) {
 			$unsupported = "The following values are not supported:\n".implode("\n", $unsupported);
-			throw new ERFSException(ERFSException::UNSUPPORTED_VALUE, $unsupported);
+			throw new FSException(FSException::UNSUPPORTED_VALUE, $unsupported);
 		}
 
 		// Create the indexer object

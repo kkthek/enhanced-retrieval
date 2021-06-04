@@ -53,7 +53,7 @@ $wgJobClasses['UpdateSolrJob'] = 'DIQA\FacetedSearch\UpdateSolrJob';
 global $wgExtensionFunctions, $wgExtensionMessagesFiles;
 $dir = dirname(__FILE__).'/';
 $wgExtensionFunctions[] = 'wfERSetupExtension';
-$wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Languages/FS_Messages.php'; // register messages (requires MW=>1.11)
+$wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Languages/FSMessages.php';
 
 global $wgHooks;
 $wgHooks['ParserFirstCallInit'][] = 'DIQA\FacetedSearch\FSGlobalFunctions::initializeBeforeParserInit';
@@ -88,11 +88,11 @@ function wfERSetupExtension() {
 	#          e.g. 'localhost'
 	#          If the solrproxy is used and the indexer host (SOLR) is different from
 	#          'localhost', i.e. SOLR is running on another machine than the wiki server,
-	#          the variable $SOLRhost must be set in solrproxy.php.
+	#          the variable $SOLRhost must be set in LocalSettings.php
 	# indexerPort: The port number of the indexer server e.g. 8983 as seen from the
 	#          wiki server.
 	#          If the solrproxy is used and the port of the indexer host (SOLR) is
-	#          different from 8983, the variable $SOLRport must be set in solrproxy.php.
+	#          different from 8983, the variable $SOLRport must be set in LocalSettings.php.
 	##
     ConfigLoader::loadConfig();
 
@@ -120,7 +120,7 @@ function wfERSetupExtension() {
 	    $SOLRpass = '';
 	}
 	if (!isset($SOLRcore)) {
-	    $SOLRcore = 'mw';
+	    $SOLRcore = '';
 	}
 
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;

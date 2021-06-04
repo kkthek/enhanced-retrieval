@@ -21,7 +21,7 @@ class FacetedCategoryFilter {
         global $wgContLang;
         $categoryLabel = $wgContLang->getNsText(NS_CATEGORY);
 
-        $html = "<span id='fs_category_filter_label'>$categoryLabel: </span><select id='fs_category_filter' name='fs_category_filter'>";
+        $html = "<span id='fs_category_filter_label'>$categoryLabel: </span><br/><select id='fs_category_filter' name='fs_category_filter'>";
         $html .= '<option value="" selected="true">Alle Wikiseiten</option>';
         foreach ( $fsgCategoryFilter as $cat => $label ) {
             $html .= "<option value='$cat'>$label</option>";

@@ -1,3 +1,5 @@
+console.log("ER: Loading scripts/FacetedSearch/FS_Utils.js");
+
 (function($) {
 
 	window.XFS = window.XFS || {};

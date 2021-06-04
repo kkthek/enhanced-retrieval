@@ -1,3 +1,5 @@
+console.log("ER: Loading scripts/FacetedSearch/Enhancements/fs_facetValueDialog.js");
+
 (function($) {
 
 	window.XFS = window.XFS || {};
@@ -100,19 +102,19 @@
 		that.initializeDialog = function() {
 			
 			/**
-			 * OK button
+			 * react to buttons
 			 */
-			$("#facet-value-dialog button.btn").on("click", function(event) {
+			$("#fs-facet-value-dialog button.btn").on("click", function(event) {
 				var action = $(event.target).attr("action");
 				if (action == "ok") {
 					if (that.onCloseCallback) {
-						that.onCloseCallback($('#facet-value-dialog input:checked'));
+						that.onCloseCallback($('#fs-facet-value-dialog input:checked'));
 					}
 					that.dialog.modal('hide');
 				} else if (action == "select-all") {
-					$('#facet-value-dialog input[type=checkbox]').prop("checked", true);
+					$('#fs-facet-value-dialog input[type=checkbox]').prop("checked", true);
 				} else if (action == "select-none") {
-					$('#facet-value-dialog input[type=checkbox]').prop("checked", false);
+					$('#fs-facet-value-dialog input[type=checkbox]').prop("checked", false);
 				}
 			});
 			
@@ -123,10 +125,10 @@
 			var facetregexp = new RegExp(facetPropertyName+':"?([^"]+)"?', 'g');
 			var values = [];
 			while(result = facetregexp.exec(value_param)){
-			    values.push(result[1]);
+				values.push(result[1]);
 			}
 			for(var i = 0; i < values.length;i++) {
-				$('#facet-value-dialog input[value="'+values[i]+'"]').prop('checked', true);
+				$('#fs-facet-value-dialog input[value="'+values[i]+'"]').prop('checked', true);
 			}
 		};
 		
@@ -142,15 +144,15 @@
 				
 				ajaxIndicator.setGlobalLoading(false);
 				var html = jsondata.fs_dialogapi.html;
-				$('div#facet-value-dialog').remove();
+				$('div#fs-facet-value-dialog').remove();
 				$('body').append($(html));
-				that.dialog = $('#facet-value-dialog').modal({
+
+				that.dialog = $('#fs-facet-value-dialog').modal({
 					"backdrop" : "static",
 					"keyboard" : true,
 					"show" : true
-
 				}).on('shown.bs.modal', function(e) {
-					
+					// ???
 				});
 				
 				that.initializeDialog();

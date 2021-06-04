@@ -17,6 +17,7 @@
  */
 
 // $Id$
+console.log("ER: Loading scripts/FacetedSearch/FS_Manager.js");
 
 /**
  * @see http://wiki.apache.org/solr/SolJSON#JSON_specific_parameters
