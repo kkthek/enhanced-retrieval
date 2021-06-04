@@ -58,7 +58,7 @@ class FSIndexerFactory {
      *  If <null> (default), the global configuration which is stored in the
      *  variable $fsgFacetedSearchConfig is used.
      *
-     * @return IFSIndexer
+     * @return FSIndexerInterface
      * 	An instance of the interface IFSIndexer
      * @throws FSException
      * 	INCOMPLETE_CONFIG: If the configuration is incomplete

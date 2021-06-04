@@ -43,7 +43,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  * @author thsc
  *
  */
-interface IFSIndexer {
+interface FSIndexerInterface {
 	
 	/**
 	 * Pings the server of the indexer and checks if it is responding.

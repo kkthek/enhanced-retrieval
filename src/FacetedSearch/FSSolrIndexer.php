@@ -43,7 +43,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  * @author thsc
  *
  */
-abstract class FSSolrIndexer implements IFSIndexer {
+abstract class FSSolrIndexer implements FSIndexerInterface {
 
     //--- Constants ---
     const PING_CMD = 'solr/<CORE>/admin/ping';
