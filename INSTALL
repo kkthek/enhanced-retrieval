@@ -65,7 +65,7 @@ If the wiki is protected by Basic Auth, define this in env.php
 
 ==== Permission denied when accessing SOLR via the Wiki-Proxy ==== 
 Replace {$WIKIHOST_AND_PATH} and try to access this URL:
-	http://{$WIKIHOST_AND_PATH}/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?q=smwh_search_field%3A(%2B*%20)&facet=true&facet.field=smwh_categories&facet.field=smwh_attributes&facet.field=smwh_properties&facet.field=smwh_namespace_id&facet.mincount=1&json.nl=map&fl=smwh__MDAT_datevalue_l%2Csmwh_categories%2Csmwh_directcategories%2Csmwh_attributes%2Csmwh_properties%2Cid%2Csmwh_title%2Csmwh_namespace_id&hl=true&hl.fl=smwh_search_field&hl.simple.pre=%3Cb%3E&hl.simple.post=%3C%2Fb%3E&hl.fragsize=250&sort=score%20desc&rows=12&wt=json&json.wrf=_jqjsp&_1585311900675=
+	http://{$WIKIHOST_AND_PATH}/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?q=smwh_search_field%3A(%2B*%20)&facet=true&facet.field=smwh_categories&facet.field=smwh_attributes&facet.field=smwh_properties&facet.field=smwh_namespace_id&facet.mincount=1&json.nl=map&fl=smwh__MDAT_datevalue_l%2Csmwh_categories%2Csmwh_directcategories%2Csmwh_attributes%2Csmwh_properties%2Cid%2Csmwh_title%2Csmwh_namespace_id&hl=true&hl.fl=smwh_search_field&hl.simple.pre=%3Cb%3E&hl.simple.post=%3C%2Fb%3E&hl.fragsize=250&sort=score%20desc&rows=12&wt=json&_1585311900675=
 If it yields something like this as error message, then you probably cannot make HTTP connections via Apache.
 	"Failed to connect to ::1: Permission denied"
 To fix it, run the following command on the shell:

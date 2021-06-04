@@ -896,8 +896,14 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
 
     AjaxSolr.theme.prototype.underspecified_search = function() {
         var lang = FacetedSearch.singleton.Language;
-        return $('<div class="xfsUnderspecifiedSearch">')
+        return $('<div class="xfsErrorMessage">')
                 .text(mw.msg('underspecifiedSearch'));
+    };
+
+    AjaxSolr.theme.prototype.session_lost = function() {
+        var lang = FacetedSearch.singleton.Language;
+        return $('<div class="xfsErrorMessage">')
+            .text(mw.msg('session_lost'));
     };
 
     AjaxSolr.theme.prototype.remove_all_filters = function(handler) {

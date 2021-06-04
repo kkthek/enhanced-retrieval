@@ -127,8 +127,12 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 	 * expansion of a query generates too many clauses. In this case the user has 
 	 * to refine his search. An appropriate message is shown in the result area.
 	 */
-	requestFailed: function () {
-		$(this.target).empty().append(AjaxSolr.theme('underspecified_search'));
+	requestFailed: function (xOptions) {
+		if (xOptions.status == 403) {
+			$(this.target).empty().append(AjaxSolr.theme('session_lost'));
+		} else {
+			$(this.target).empty().append(AjaxSolr.theme('underspecified_search'));
+		}
 	},
 
 	/**

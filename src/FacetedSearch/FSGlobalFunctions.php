@@ -137,6 +137,7 @@ class FSGlobalFunctions {
                         'less'                 ,
                         'noFacetFilter'        ,
                         'underspecifiedSearch' ,
+                        'session_lost' ,
                         'removeFilter'        ,
                         'removeRestriction'    ,
                         'removeAllFilters'    ,

@@ -37,20 +37,20 @@ AjaxSolr.FSManager = AjaxSolr.AbstractManager.extend(/** @lends AjaxSolr.Manager
 							self.handleResponse(data);
 						}, 'json');
 		} else {
-			var url = this.solrUrl + servlet + '?' + this.store.string() + '&wt=json&json.wrf=?';
-			
-			jQuery.jsonp({
+			var url = this.solrUrl + servlet + '?' + this.store.string() + '&wt=json?';
+
+			jQuery.ajax({
 				url: url,
-				pageCache: false,
 				error: function(xOptions, textStatus){
-					self.handleErrorResponse();
+					self.handleErrorResponse(xOptions);
 				},
 				success: function(json, textStatus){
-					self.handleResponse(json);
+					var response = JSON.parse(json);
+					self.handleResponse(response);
 					self.resetErrorState();
 				}
 			});
-			
+
 		}
 	},
 	
@@ -63,7 +63,7 @@ AjaxSolr.FSManager = AjaxSolr.AbstractManager.extend(/** @lends AjaxSolr.Manager
 	 * all widget that have the method "requestFailed" are notified of the error.
 	 * 
 	 */
-	handleErrorResponse: function () {
+	handleErrorResponse: function (xOptions) {
 		if (!this.retryWithoutHighlight) {
 			// The first request failed => try again without highlighting
 			this.setErrorState();
@@ -72,7 +72,7 @@ AjaxSolr.FSManager = AjaxSolr.AbstractManager.extend(/** @lends AjaxSolr.Manager
 			// Second try failed too => notify all widgets.
 			for (var widgetId in this.widgets) {
 				if (typeof this.widgets[widgetId].requestFailed === 'function') {
-					this.widgets[widgetId].requestFailed();
+					this.widgets[widgetId].requestFailed(xOptions);
 				}
 			}
 			this.resetErrorState();

@@ -50,9 +50,7 @@ class ProxyRestEndpoint extends Handler
                     "<br>You'll find documentation at extensions/EnhancedRetrieval/INSTALL\n"]);
         }
 
-        $responseObj = new Response($response);
-        $responseObj->setHeader("Content-Type", "application/javascript");
-        return $responseObj;
+        return new Response($response);
     }
 
 }
