@@ -34,7 +34,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 	die(1);
 }
 
-define('ER_EXTENSION_VERSION', '2.2');
+define('ER_EXTENSION_VERSION', '2.3');
 wfLoadExtension( 'EnhancedRetrieval', dirname( __FILE__ ) . '/extension.json' );
 
 global $wgExtensionCredits;
