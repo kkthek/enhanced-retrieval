@@ -69,7 +69,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		$(this.target).empty();
 		var fsi = FacetedSearch.singleton.FacetedSearchInstance;
 		
-		var query = this.manager.store.values('q');
+		var query = this.manager.store.values('q.alt');
 		var emptyQuery = true;
 		if (query.length == 1) {
 			query = query[0];	
@@ -243,7 +243,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		
 		asm.store.addByValue('fl', fields);
 		var query = fs.DOCUMENT_ID + ':' + docData.id;
-		asm.store.addByValue('q', query);
+		asm.store.addByValue('q.alt', query);
 		
 		this.mArticlePropertiesWidget.setTarget(domElement);
 		asm.doRequest(0);
@@ -300,7 +300,7 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		var lcfTitle = '(' + title.charAt(0).toLowerCase() + title.substr(1) + ')';
 		var ucfTitle = '(' + title.charAt(0).toUpperCase() + title.substr(1) + ')';
 		var brTitle = '(' + title + ')';
-		this.mASMforTitleCheck.store.addByValue('q', 
+		this.mASMforTitleCheck.store.addByValue('q.alt',
 			fsi.TITLE_FIELD + ':' + brTitle +
 			' OR ' +
 			fsi.TITLE_FIELD + ':' + ucfTitle +

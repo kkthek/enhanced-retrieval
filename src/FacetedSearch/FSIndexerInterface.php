@@ -82,8 +82,11 @@ interface FSIndexerInterface {
 	 *      User readible messages (out)
 	 * @param bool force 
 	 *      Force update from command-line
+     * @param bool $debugMode
+     *      prints verbose output
 	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL, & $messages = [], $force = false);
+	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL,
+                                          & $messages = [], $force = false, bool $debugMode = false);
 
     /**
      * Updates the index for a moved article.

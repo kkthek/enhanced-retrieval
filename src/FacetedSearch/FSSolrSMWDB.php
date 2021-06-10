@@ -94,23 +94,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
         parent::__construct($host, $port, $user, $pass, $indexCore);
     }
 
-    /**
-     * Updates the index for the given $wikiPage.
-     * It retrieves all semantic data of the new version and adds it to the index.
-     *
-     * @param WikiPage $wikiPage
-     *         The article that changed.
-     * @param User $user
-     *         Optional user object
-     * @param string $text
-     *        Optional content of the article. If NULL, the content of $wikiPage is
-     *        retrieved in this method.
-     * @param array $messages
-     *      User readible messages (out)
-     * @param bool force
-     *      Force update from command-line
-     */
-    public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL, & $messages = [], $force = false ) {
+
+    public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL,
+                                          & $messages = [], $force = false, bool $debugMode = false ) {
 
 //         if (PHP_SAPI == 'cli' && !$force) {
 //             // do not update from job, unless it's forced
@@ -197,7 +183,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $hookContainer->run( 'fs_saveArticle', [ &$rawText, &$doc ] );
 
         // Let the super class update the index
-        $this->updateIndex($doc, $options);
+        $this->updateIndex($doc, $options, $debugMode);
 
         if($this->updateOnlyCurrentArticle()) {
             return true;
@@ -218,7 +204,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
             global $fsUpdateOnlyCurrentArticle;
             $fsUpdateOnlyCurrentArticle = true;
             foreach($this->dependant as $ttu) {
-                $this->updateIndexForArticle(new WikiPage($ttu), $user, $rawText, $messages, $force);
+                $this->updateIndexForArticle(new WikiPage($ttu), $user, $rawText, $messages, $force, $debugMode);
             }
         }
 
@@ -230,8 +216,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
      * from namespaces, templates and categories of the wiki page.
      */
     private function calculateBoosting(WikiPage $wikiPage, array &$options, array $doc) {
-        global $fsgSwitchOfBoost;
-        if (! isset($fsgSwitchOfBoost) || $fsgSwitchOfBoost == true) {
+        global $fsgActivateBoosting;
+        if (! isset($fsgActivateBoosting) || $fsgActivateBoosting === false) {
             return;
         }
 

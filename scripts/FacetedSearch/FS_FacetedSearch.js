@@ -286,7 +286,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			var qs = prepareQueryString(searchText) + prepareTitleQuery(searchText);
 		}
 		
-		mAjaxSolrManager.store.addByValue('q', QUERY_FIELD + ':' + qs);
+		mAjaxSolrManager.store.addByValue('q.alt', QUERY_FIELD + ':' + qs);
 		mAjaxSolrManager.store.addByValue('searchText', searchText);
 		readPrefixParameter();
 		mAjaxSolrManager.doRequest(0);
@@ -498,7 +498,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		var dots = '';
 		var numTries = 0;
 		sm.init();
-		sm.store.addByValue('q', '*:*');		
+		sm.store.addByValue('q.alt', '*:*');
 		sm.doRequest(0);
 		
 		var lang = FacetedSearch.singleton.Language;
@@ -552,7 +552,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			}
 		});
 		sm.init();
-		sm.store.addByValue('q', '*:*');		
+		sm.store.addByValue('q.alt', '*:*');
 		sm.store.addByValue('fl', NAMESPACE_FIELD);		
 		sm.store.addByValue('facet', true);		
 		sm.store.addByValue('facet.field', NAMESPACE_FIELD);		
@@ -643,6 +643,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 		}
 		
 		var params = {
+			'defType': 'dismax',
+			'bf': 'max(smwh_boost_dummy)',
 			'facet': true,
 			'facet.field': FACET_FIELDS,
 			'facet.mincount': 1,
@@ -654,7 +656,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			'hl.simple.post': '</b>',
 			'hl.fragsize': '250',
 			'sort': getSortOrderModifier(mw.config.get('ext.er.DEFAULT_SORT_ORDER')),
-			'q': '*:*'
+			'q.alt': '*:*'
 		};
 		
 		// initialize the parameter store
