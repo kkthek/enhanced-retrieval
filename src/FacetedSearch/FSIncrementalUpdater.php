@@ -81,7 +81,7 @@ class FSIncrementalUpdater  {
         }
 
         $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW)->serialize();
-        $indexer = FS_IndexerFactory::create();
+        $indexer = FSIndexerFactory::create();
         try {
             $indexer->updateIndexForArticle(new WikiPage($wikiTitle), null, $content);
         } catch(Exception $e) {
@@ -178,7 +178,7 @@ class FSIncrementalUpdater  {
         }
 
         $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW)->serialize();
-        $indexer = FS_IndexerFactory::create();
+        $indexer = FSIndexerFactory::create();
         try {
             $indexer->updateIndexForArticle(new WikiPage($title), null, $content);
         } catch(Exception $e) {
