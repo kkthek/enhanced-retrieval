@@ -643,8 +643,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 		}
 		
 		var params = {
-			'defType': 'dismax',
-			'bf': 'max(smwh_boost_dummy)',
+			'defType': 'edismax',
+			'boost': 'max(smwh_boost_dummy)',
 			'facet': true,
 			'facet.field': FACET_FIELDS,
 			'facet.mincount': 1,
