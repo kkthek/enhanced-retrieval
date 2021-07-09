@@ -63,7 +63,7 @@ class FSGlobalFunctions {
 
         // Register specials pages
         global $wgSpecialPages, $wgSpecialPageGroups;
-        $wgSpecialPages['FacetedSearch']      = array('DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
+        $wgSpecialPages['FacetedSearch']      = array( 'class' => 'DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
         $wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
         $wgSpecialPageGroups['FacetedSearch'] = 'smwplus_group';
 
