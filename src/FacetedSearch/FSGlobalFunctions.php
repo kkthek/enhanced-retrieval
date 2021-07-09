@@ -64,8 +64,8 @@ class FSGlobalFunctions {
 
         // Register specials pages
         global $wgSpecialPages, $wgSpecialPageGroups;
-        $wgSpecialPages['FacetedSearch']      = array('DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
-        $wgSpecialPageGroups['FacetedSearch'] = 'fs_specialpage_group';
+        $wgSpecialPages['FacetedSearch']      = array( 'class' => 'DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial');
+        $wgSpecialPageGroups['FacetedSearch'] = 'facetedsearch_group';
 
         self::initResourceLoaderModules();
     }
