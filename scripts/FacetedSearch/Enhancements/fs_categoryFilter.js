@@ -1,3 +1,5 @@
+console.log("ER: Loading scripts/FacetedSearch/Enhancements/fs_categoryFilter.js");
+
 (function($) {
 	
 	var CategoryFilter = function() {

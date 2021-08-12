@@ -2,6 +2,7 @@
 
 namespace DIQA\FacetedSearch;
 
+use Exception;
 use Job;
 use WikiPage;
 use Title;
@@ -30,22 +31,22 @@ class UpdateSolrJob extends Job {
 	 * @see Job::run()
 	 */
 	public function run() {
-	    $consoleMode = PHP_SAPI === 'cli' && !defined('UNITTEST_MODE');
+		$consoleMode = PHP_SAPI === 'cli' && !defined('UNITTEST_MODE');
 		$title = $this->params['title'];
 		$wp = new WikiPage(Title::newFromText($title));
 		
-        // when indexing with jobs, dependent pages do not need special treatment, because jobs already represent the dependent pages
-   		global $fsUpdateOnlyCurrentArticle;
+		// when indexing with jobs, dependent pages do not need special treatment, because jobs already represent the dependent pages
+		global $fsUpdateOnlyCurrentArticle;
 		$fsUpdateOnlyCurrentArticle = true;
-		
-		$indexer = FSIndexerFactory::create();
+
 		try {
-		    $messages = [];
+            $indexer = FSIndexerFactory::create();
+			$messages = [];
 			$indexer->updateIndexForArticle($wp, null, null, $messages );
 			if ($consoleMode && count($messages) > 0) {
-			    print implode("\t\n", $messages);
+				print implode("\t\n", $messages);
 			}
-		} catch(\Exception $e) {
+		} catch(Exception $e) {
 			if ( $consoleMode ) {
 				print sprintf("\tnot indexed, reason: %s \n", $e->getMessage());
 			}
@@ -60,11 +61,11 @@ class UpdateSolrJob extends Job {
 	 * @see Job::getDeduplicationInfo()
 	 */
 	public function getDeduplicationInfo() {
-	    $info = parent::getDeduplicationInfo();
-	    if ( isset( $info['params']) ) {
-	        // timestamp not relevant for duplicate detection
-	        unset( $info['params']['timestamp'] );
-	    }
-	    return $info;
+		$info = parent::getDeduplicationInfo();
+		if ( isset( $info['params']) ) {
+			// timestamp not relevant for duplicate detection
+			unset( $info['params']['timestamp'] );
+		}
+		return $info;
 	}
 }

@@ -15,6 +15,7 @@
  * with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  */
+console.log("ER: Loading scripts/FacetedSearch/FS_FacatedSearch.binding.js");
 
 // Expose the global variables of FacetedSearch
 if (typeof window.FacetedSearch === 'undefined') {

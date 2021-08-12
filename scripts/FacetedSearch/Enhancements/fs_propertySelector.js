@@ -1,3 +1,5 @@
+console.log("ER: Loading scripts/FacetedSearch/Enhancements/fs_propertySelector.js");
+
 (function($) {
 	
 	var PropertySelector = function() {

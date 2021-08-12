@@ -21,6 +21,7 @@
  * @ingroup FacetedSearchScripts
  * @author: Thomas Schweitzer
  */
+console.log("ER: Loading scripts/FacetedSearch/FS_CurrentSearchWidget.js");
 
 if (typeof window.FacetedSearch == "undefined") {
 	// Define the FacetedSearch module

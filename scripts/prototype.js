@@ -5,6 +5,7 @@
  *  For details, see the Prototype web site: http://www.prototypejs.org/
  *
  *--------------------------------------------------------------------------*/
+console.log("ER: Loading scripts/prototype.js");
 
 var Prototype = {
   Version: '1.6.0.3',

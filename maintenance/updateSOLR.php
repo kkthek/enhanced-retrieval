@@ -1,5 +1,6 @@
 <?php
 use DIQA\FacetedSearch\FSIndexerFactory;
+use MediaWiki\MediaWikiServices;
 
 /**
  * Updates the solr index.
@@ -36,7 +37,7 @@ class UpdateSolr extends Maintenance
         global $fsUpdateOnlyCurrentArticle;
         $fsUpdateOnlyCurrentArticle = true;
 
-        $this->linkCache = LinkCache::singleton();
+        $this->linkCache = MediaWikiServices::getInstance()->getLinkCache();
         $this->num_files = 0;
         $this->printDocHeader();
 

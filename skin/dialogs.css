@@ -1,51 +1,20 @@
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 768px) and (max-width: 991px) {
 	.modal-dialog-fs {
-		width: 550px; /* New width for default modal */
-		margin: 30px auto;
-		position: relative;
-	}
-	.modal-sm {
-		width: 450px; /* New width for small modal */
+		width: 750px;
+		max-width: 90%;
 	}
 }
 
 @media screen and (min-width: 992px) {
-	.modal-lg {
-		width: 450px; /* New width for large modal */
+	.modal-dialog-fs {
+		width: 900px;
+		max-width: 90%;
 	}
 }
 
-
-#select-facet-value div.modal-body {
-	height: 100px;
-}
-
-#select-facet-value iframe {
-	width: 100%;
-	height: 100%;
-}
-
-.select-facet-value-globalSpinner{
-    position:fixed;
-    z-index:99;/* make higher than whatever is on the page */
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    margin:auto;
-    background:red;
-    width:100px;
-    height:100px;
-}
-
-.select-facet-value-facet-link {
-	cursor: pointer;
-}
-
-#facet-value-dialog div.facet {
-	margin-left: 10px;
+#fs-facet-value-dialog div.facet {
+	margin-left: 5px;
 	padding: 5px;
 	float: left;
-	width: 160px;
+	width: 30%;
 }
-

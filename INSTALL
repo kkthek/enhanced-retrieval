@@ -3,9 +3,9 @@
 === Requirements ===
 * PHP 7.x
 * Composer
-* MediaWiki 1.31.x - 1.33.x
+* MediaWiki 1.35.x
 * SMW 3.x
-* Apache SOLR server v4.4 or v8.30+
+* Apache SOLR server v8.30+
 
 	You can setup your own Solr server. Please use the SOLR-schema given in:
 		solr-config.zip (tested with Solr 8.30)
@@ -21,10 +21,10 @@
 
 * Start the SOLR server 
 
-* Create a file proxy/env.php with the following content: (adjust the values of course)
+* Add these settings to LocalSettings.php: (adjust the values of course)
 
 	-----------------------------------------------------------------------------------
-	<?php
+
 		global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 		$SOLRhost = 'localhost';
 		$SOLRport = 8983;
@@ -32,10 +32,6 @@
 		$SOLRpass = '';
 		$SOLRcore = 'mw';
 
-		global $wgServer, $wgScriptPath, $wgDBname;
-		$wgServer = "http://wimawiki.local";
-		$wgScriptPath = "/mediawiki";
-		$wgDBname = 'wima_wiki';
 	-----------------------------------------------------------------------------------
 
 	Note: SOLRuser / SOLRpass / SOLRcore are optional, default is empty. 
@@ -53,19 +49,9 @@ That's it.
 
 === Troubleshooting ===
 
-==== SSL users ==== 
-Sometimes servers are configured to not allow *local* HTTPS requests but only HTTP.
-In this case define this in env.php 
-	$wgServerHTTP = http://....
-	$wgHTTPAuthForLocalProxies = true;
-
-==== HTTP Auth ==== 
-If the wiki is protected by Basic Auth, define this in env.php
-	$fsgHTTPAuth = "user:pass";
-
 ==== Permission denied when accessing SOLR via the Wiki-Proxy ==== 
 Replace {$WIKIHOST_AND_PATH} and try to access this URL:
-	http://{$WIKIHOST_AND_PATH}/extensions/EnhancedRetrieval/src/FacetedSearch/solrproxy.php?q=smwh_search_field%3A(%2B*%20)&facet=true&facet.field=smwh_categories&facet.field=smwh_attributes&facet.field=smwh_properties&facet.field=smwh_namespace_id&facet.mincount=1&json.nl=map&fl=smwh__MDAT_datevalue_l%2Csmwh_categories%2Csmwh_directcategories%2Csmwh_attributes%2Csmwh_properties%2Cid%2Csmwh_title%2Csmwh_namespace_id&hl=true&hl.fl=smwh_search_field&hl.simple.pre=%3Cb%3E&hl.simple.post=%3C%2Fb%3E&hl.fragsize=250&sort=score%20desc&rows=12&wt=json&json.wrf=_jqjsp&_1585311900675=
+	http://{$WIKIHOST_AND_PATH}/rest.php/EnhancedRetrieval/v1/proxy?defType=dismax&bf=max(smwh_boost_dummy)&facet=true&facet.field=smwh_categories&facet.field=smwh_attributes&facet.field=smwh_properties&facet.field=smwh_namespace_id&facet.field=smwh_Datentyp_xsdvalue_s&facet.field=smwh_Schematyp_xsdvalue_s&facet.field=smwh_Schemadefinition_xsdvalue_s&facet.field=smwh_Schemakennzeichen_xsdvalue_s&facet.mincount=1&json.nl=map&fl=smwh__MDAT_datevalue_l%2Csmwh_categories%2Csmwh_directcategories%2Csmwh_attributes%2Csmwh_properties%2Cid%2Csmwh_title%2Csmwh_namespace_id%2Cscore%2Csmwh_displaytitle&hl=true&hl.fl=smwh_search_field&hl.simple.pre=%3Cb%3E&hl.simple.post=%3C%2Fb%3E&hl.fragsize=250&sort=score%20desc%2C%20smwh_displaytitle%20asc&q.alt=smwh_search_field%3A(*)&searchText=(*)&rows=10&wt=json?
 If it yields something like this as error message, then you probably cannot make HTTP connections via Apache.
 	"Failed to connect to ::1: Permission denied"
 To fix it, run the following command on the shell:
