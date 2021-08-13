@@ -1,12 +1,13 @@
 {
 	"name": "EnhancedRetrieval",
 	"author": [
-		"Kai Kühn"
+		"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA]"
 	],
 	"url": "https://github.com/kkthek/enhanced-retrieval",
-	"descriptionmsg": "enhancedretrieval-desc",
+	"descriptionmsg": "facetedsearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
+	"version": "2.3",
 	"requires": {
 		"MediaWiki": ">= 1.35",
 		"platform": {

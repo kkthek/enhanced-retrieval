@@ -37,16 +37,6 @@ if( !defined( 'MEDIAWIKI' ) ) {
 define('ER_EXTENSION_VERSION', '2.3');
 wfLoadExtension( 'EnhancedRetrieval', dirname( __FILE__ ) . '/extension.json' );
 
-global $wgExtensionCredits;
-$wgExtensionCredits['other'][] = array(
-    'name' => 'Enhanced Retrieval extension',
-    'version' => ER_EXTENSION_VERSION,
-    'license-name' => 'GPL-2.0+',
-    'author'=>"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA].",
-    'url' => 'https://www.semantic-mediawiki.org/wiki/Enhanced_Retrieval',
-    'description' => 'Enhanced retrieval provides faceted search for MediaWiki and SMW. It requires a SOLR server as backend.',
-);
-
 global $wgJobClasses;
 $wgJobClasses['UpdateSolrJob'] = 'DIQA\FacetedSearch\UpdateSolrJob';
 

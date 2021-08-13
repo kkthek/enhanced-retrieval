@@ -35,6 +35,7 @@ $messages = array();
 $messages['en'] = array(
 	/* general/maintenance messages */
 	'facetedsearch'           => 'FacetedSearch',
+	'facetedsearch-desc'      => 'EnhancedRetrieval provides faceted search for MediaWiki and SMW. It requires [https://www.diqa.de/de/Power-Search_for_MediaWiki DIQA powersearch] as backend.',
 	'fs_facetedsearchspecial' => 'FacetedSearch',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Faceted Search',
 
@@ -119,6 +120,7 @@ $messages['en'] = array(
 $messages['de'] = array(
 	/* general/maintenance messages */
 	'facetedsearch'           => 'Facettierte Suche',
+    'facetedsearch-desc'      => 'EnhancedRetrieval ermöglicht facettierte Suche in Mediawiki. Es benötigt die [https://www.diqa.de/de/Power-Search_for_MediaWiki DIQA-Powersuche] als Backend.',
 	'fs_facetedsearchspecial' => 'Facettierte Suche',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Facettierte Suche',
 
