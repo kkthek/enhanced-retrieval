@@ -4,10 +4,10 @@
  */
 global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 $SOLRhost = 'localhost';
-$SOLRport = 8080;
+$SOLRport = 8983;
 $SOLRuser = '';
 $SOLRpass = '';
-$SOLRcore = '';
+$SOLRcore = 'mw';
 
 /**
  * Specifies the visible namespace for groups.

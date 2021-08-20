@@ -97,22 +97,6 @@ function wfERSetupExtension() {
         ini_set( 'display_errors', 1 );
     }
 
-	if (!isset($SOLRhost)) {
-	    $SOLRhost = 'localhost';
-	}
-	if (!isset($SOLRport)) {
-	    $SOLRport = 8983;
-	}
-	if (!isset($SOLRuser)) {
-	    $SOLRuser = '';
-	}
-	if (!isset($SOLRpass)) {
-	    $SOLRpass = '';
-	}
-	if (!isset($SOLRcore)) {
-	    $SOLRcore = '';
-	}
-
 	global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
 
 	global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
