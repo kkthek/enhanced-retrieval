@@ -142,7 +142,7 @@ class UpdateSolr extends Maintenance
         $indexer = FSIndexerFactory::create();
         try {
             $messages = [];
-            $indexer->updateIndexForArticle(new WikiPage($title), null, null, $messages, true);
+            $indexer->updateIndexForArticle(new WikiPage($title), null, null, $messages, true, $this->hasOption('x'));
             if (count($messages) > 0) {
                 print implode("\t\n", $messages);
             }

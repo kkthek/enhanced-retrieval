@@ -55,8 +55,6 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
     const DELETE_DOCUMENT_BY_ID = '<delete><id>$1</id></delete>'; // $1 must be replaced by the actual ID
     const QUERY_PREFIX = 'solr/<CORE>/select/?';
 
-    const MAGIC_BOOST_VALUE = "955B76377F2547AD919E7AA156C66624";
-
     const HTTP_OK = 200;
 
     //--- Private fields ---
@@ -167,20 +165,21 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
      *         SOLR document. The value may be a single string i.e. the value of
      *         the SOLR field or an array of string if the field is multi-valued.
      * @param array $options
+     * @param bool $debugMode prints verbose output
      *
      * @return bool
      *         <true> if the update was sent successfully
      */
-    public function updateIndex(array $document, array $options) {
+    public function updateIndex(array $document, array $options, bool $debugMode = false) {
         // Create the XML for the document
         $xml = "<add>\n\t<doc>\n";
 
         // this is a dummy boost for the sole purpose of being requested even if no filter is applied.
         // it always has the value "1". it assures that boosting is actually effective.
-        global $fsgSwitchOfBoost;
-        if ( isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost == true ) {
+        global $fsgActivateBoosting;
+        if ( isset($fsgActivateBoosting) && $fsgActivateBoosting === true ) {
             $boost = $options['smwh_boost_dummy']['boost'];
-            $xml .= "\t\t<field name='smwh_boost_dummy' boost='$boost'><![CDATA[" . FSSolrIndexer::MAGIC_BOOST_VALUE . "]]></field>\n";
+            $xml .= "\t\t<field name='smwh_boost_dummy'><![CDATA[" . $boost . "]]></field>\n";
         }
 
         foreach ($document as $field => $value) {
@@ -217,6 +216,10 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
 
         // Send the XML as update command to the SOLR server
         $rc = $this->postCommand(self::COMMIT_UPDATE_CMD, $xml);
+
+        if ($debugMode) {
+            print "$xml\n";
+        }
 
         return $rc == self::HTTP_OK;
     }

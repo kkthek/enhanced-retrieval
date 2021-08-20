@@ -48,7 +48,7 @@ class ConfigLoader {
             'fsgShowSortOrder',
             'fsgShownCategoryFacets',
             'fsgShownFacets',
-            'fsgSwitchOfBoost',
+            'fsgActivateBoosting',
             'fsgTemplateBoosts',
             'fsgUseStatistics'
         ];

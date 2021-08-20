@@ -103,7 +103,6 @@ class SolrService extends \Apache_Solr_Service {
     private function extendQuery($queryString) {
         $modifiedQuery = $this->applyNamespaceConstraints($queryString);
         $modifiedQuery = $this->applyCustomConstraints($modifiedQuery);
-        $modifiedQuery = $this->putFilterParamsToMainParams($modifiedQuery);
         $modifiedQuery = str_replace(' ', '%20', $modifiedQuery);
         return $modifiedQuery;
     }
@@ -157,60 +156,5 @@ class SolrService extends \Apache_Solr_Service {
             return $_COOKIE[$var];
         }
         return '';
-    }
-
-    /**
-     * Adds filter query parameters to main query parameters.
-     * This is required for boosting.
-     *
-     * @param string $query
-     * @return string
-     */
-    private function putFilterParamsToMainParams($query) {
-        // parse query string
-        $parsedResults = [];
-        $params = explode("&", $query);
-        foreach ($params as $p) {
-            $keyValue = explode("=", $p, 2);
-            $parsedResults[$keyValue[0]][] = $keyValue[1];
-        }
-
-        // add fq-params to q-params
-        if (isset($parsedResults['fq'])) {
-            foreach ($parsedResults['fq'] as $fq) {
-                $parsedResults['q'][] = $fq;
-            }
-        }
-
-        // add boost dummy
-        global $fsgSwitchOfBoost;
-        if ( isset($fsgSwitchOfBoost) && !$fsgSwitchOfBoost === true ) {
-            $parsedResults['q'][] = 'smwh_boost_dummy%3A1';
-        }
-
-        // serialize query string
-        $url = '';
-        $first = true;
-        foreach ($parsedResults as $key => $values) {
-            if ($key == 'q') {
-                if (! $first) {
-                    $url .= '&';
-                }
-                $url .= "q=";
-                $url .= '(' . implode(' ) AND ( ', $values) . ')';
-                $first = false;
-            } else {
-                foreach ($values as $val) {
-                    if (! $first) {
-                        $url .= '&';
-                    }
-                    $val = (string) $val;
-                    $url .= "$key=$val";
-                    $first = false;
-                }
-            }
-        }
-
-        return $url;
     }
 }

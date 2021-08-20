@@ -72,7 +72,7 @@ FacetedSearch.classes.PagerWidget = AjaxSolr.PagerWidget.extend({
 		
 		// Check if the query and the facet selection are empty. If this is the
 		// case, no results and no pager are displayed.
-		var query = this.manager.store.values('q');
+		var query = this.manager.store.values('q.alt');
 		var emptyQuery = true;
 		if (query.length == 1) {
 			query = query[0];	

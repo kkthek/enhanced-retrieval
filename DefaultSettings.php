@@ -82,26 +82,11 @@ $fsgEnableIncrementalIndexer = true;
 global $fsgIndexPredefinedProperties;
 $fsgIndexPredefinedProperties = true;
 
-/**********************************************************************
- *
- * BOOSTING
- *
- * Please note: If you want to use boosting, the field type "wiki" needs to be derived from
- * com.diqapm.solr.queryparser.DataWikiField (is default, see schema.xml of SOLR). However, this is more
- * memory consuming and may lead to messages like "Your query yields too many results, please refine", especially
- * on very short (or empty) search terms.
- *
- * You have two options:
- *
- *	1. Don't use boosting and replace "com.diqapm.solr.queryparser.DataWikiField" by "solr.TextField"
- * 	2. Increase "maxBooleanClauses" in solrconfig.xml (requires more memory)
- */
-
 /**
- * Switch off boosting
+ * Activates boosting
  */
-global $fsgSwitchOfBoost;
-$fsgSwitchOfBoost=true;
+global $fsgActivateBoosting;
+$fsgActivateBoosting=false;
 
 /**
  * The default boost index for all pages which are not boosted otherwise
