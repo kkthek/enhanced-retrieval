@@ -165,50 +165,11 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
     /**
      * This is the counterpart of FS_SolrSMWDB.encodeTitle()
      * Turns a SOLR field name into a readable Wiki title.
-     * 
+     *
      * @param {String} title url-encoded and % replaced with _0x
      * @returns {String}     decoded, readable name
      */
     function decodeTitle(title) {
-        var tmp = title.replace(/\s/g, "_");
-        tmp = tmp.replace(/__/g, "_0x5f");
-
-        var encChars = new RegExp("_0x[a-fA-F0-9]{2}", "g");
-        var matches = tmp.match(encChars);
-        if (matches !== null ) {
-            for(var i = 0; i < matches.length; i++) {
-                var hex = matches[i].substr(1);
-                var dec = parseInt(hex, 16);
-                var char = String.fromCharCode(dec);
-                tmp = tmp.replace("_"+hex, char);
-            }
-        }
-        // console.log("decodeTitle:" + tmp.replace(/_/g, " "));
-        return tmp.replace(/_/g, " ");
-    };
-
-    /**
-     * this used to work but now cannot handle Umlauts encoded as two bytes??!!
-     */
-    function decodeTitle_old(title) {
-        title = title.replace(/\s/g, "_");
-        title = title.replace(/__/g, "_0x5f");
-        var encChars = new RegExp("_0x[a-f0-9]{2}", "g");
-        var matches = title.match(encChars);
-        if (matches === null) return title;
-        for(var i = 0; i < matches.length; i++) {
-            var hex = matches[i].substr(1);
-            var dec = parseInt(hex, 16);
-            var char = String.fromCharCode(dec);
-            title = title.replace("_"+hex, char);
-        }
-        return title.replace(/_/g, " ");
-    };
-
-    /**
-     * unfortunately this does not work in IE
-     */
-    function decodeTitle_new(title) {
         var tmp = replaceAll(title, " ", "_");
         tmp = replaceAll(tmp, "_0x", "\%");
         tmp = replaceAll(tmp, "__", "_");
@@ -251,18 +212,18 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             return text;
         }
 
-        var patternLength = pattern.length();
+        var patternLength = pattern.length;
         var patternLength1 = Math.max(patternLength, 1);
-        var textLength = text.length();
+        var textLength = text.length;
 
-        var newLengthHint = textLength - patternLength + replacement.length();
+        var newLengthHint = textLength - patternLength + replacement.length;
         if (newLengthHint < 0) {
             return text;
         }
         var result = '';
         var i = 0;
         do {
-            result = result + text.substring(i, j) + pattern;
+            result = result + text.substring(i, j) + replacement;
             i = j + patternLength;
         } while (j < textLength && (j = text.indexOf(pattern, j + patternLength1)) > 0);
 
