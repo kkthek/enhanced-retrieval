@@ -551,7 +551,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
         var props = doc[FS_PROPERTIES] || [];
         var cats  = doc[FS_DIRECTCATEGORIES] || [];
 
-        if (typeof cats !== 'undefined') {
+        if (typeof cats !== 'undefined' && cats.length > 0) {
             // Show CAT_MAX categories
             output +=
                 '<div class="xfsResultCategory">' +
