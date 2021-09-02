@@ -165,9 +165,12 @@ class FSSolrSMWDB extends FSSolrIndexer {
         }
 
         // extract document if a file was uploaded
+        global $fsgIndexImageURL;
         if ($pns == NS_FILE) {
             try {
-                $this->retrieveFileSystemPath($db, $pns, $pt, $doc);
+                if (isset($fsgIndexImageURL) && $fsgIndexImageURL === true) {
+                    $this->retrieveFileSystemPath($db, $pns, $pt, $doc);
+                }
                 $docData = $this->extractDocument($t);
                 $doc['smwh_full_text'] = $docData['text'];
             } catch( Exception $e ) {

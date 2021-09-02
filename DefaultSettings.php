@@ -272,3 +272,9 @@ $fsgHitsPerPage = 10;
  */
 global $fsgDefaultSortOrder;
 $fsgDefaultSortOrder = "score";
+
+/**
+ * Indexes the image URL as separate attribute
+ */
+global $fsgIndexImageURL;
+$fsgIndexImageURL = false;
