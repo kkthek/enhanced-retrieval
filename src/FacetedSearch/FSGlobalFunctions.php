@@ -60,6 +60,8 @@ class FSGlobalFunctions {
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleDelete';
             $wgHooks['ApprovedRevsRevisionApproved'][] =
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved';
+            $wgHooks['PageSaveComplete'][] =
+                'DIQA\FacetedSearch\FSIncrementalUpdater::onPageSaveComplete';
         }
 
         // Register specials pages
