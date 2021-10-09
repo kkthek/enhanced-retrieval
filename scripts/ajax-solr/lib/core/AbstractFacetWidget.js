@@ -116,9 +116,9 @@ AjaxSolr.AbstractFacetWidget = AjaxSolr.AbstractWidget.extend(
    * @returns {String} An fq parameter value.
    */
   fq: function (value, exclude) {
-    // If the field value has a space or a colon in it, wrap it in quotes,
+    // If the field value has a space or a colon or a dash in it, wrap it in quotes,
     // unless it is a range query.
-    if (value.match(/[ :]/) && !value.match(/[\[\{]\S+ TO \S+[\]\}]/)) {
+    if (value.match(/[ :-]/) && !value.match(/[\[\{]\S+ TO \S+[\]\}]/)) {
       value = '"' + value + '"';
     }
     return (exclude ? '-' : '') + this.field + ':' + value;
