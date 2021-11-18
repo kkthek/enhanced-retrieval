@@ -20,7 +20,7 @@
 	"RestRoutes": [
 		{
 			"path": "/EnhancedRetrieval/v1/proxy",
-            "method": "GET",
+			"method": "GET",
 			"class": "DIQA\\FacetedSearch\\ProxyRestEndpoint"
 		}
 	],

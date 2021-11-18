@@ -67,7 +67,7 @@ $messages['en'] = array(
 	'less' 				=> 'less',
 	'noFacetFilter'		=> '(no facets selected)',
 	'underspecifiedSearch' => 'Your current search may match too many results. Please refine it!',
-    'session_lost'      => 'Mediawiki session got lost. Please re-login.',
+	'session_lost'      => 'Mediawiki session got lost. Please re-login.',
 	'removeFilter'		=> 'Remove this facet',
 	'removeRestriction'	=> 'Remove restriction',
 	'removeAllFilters'	=> 'Remove all facets',
@@ -120,7 +120,7 @@ $messages['en'] = array(
 $messages['de'] = array(
 	/* general/maintenance messages */
 	'facetedsearch'           => 'Facettierte Suche',
-    'facetedsearch-desc'      => 'EnhancedRetrieval ermöglicht facettierte Suche in Mediawiki. Es benötigt die [https://www.diqa.de/de/Power-Search_for_MediaWiki DIQA-Powersuche] als Backend.',
+	'facetedsearch-desc'      => 'EnhancedRetrieval ermöglicht facettierte Suche in Mediawiki. Es benötigt die [https://www.diqa.de/de/Power-Search_for_MediaWiki DIQA-Powersuche] als Backend.',
 	'fs_facetedsearchspecial' => 'Facettierte Suche',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Facettierte Suche',
 
@@ -152,7 +152,7 @@ $messages['de'] = array(
 	'less' 				=> 'weniger',
 	'noFacetFilter'		=> '(Keine Facetten ausgewählt.)',
 	'underspecifiedSearch' => 'Ihre aktuelle Suche hat zu viele Treffer. Bitte verfeinern Sie sie!',
-    'session_lost'      => 'Browser-Session ist abgelaufen. Bitte loggen Sie sich neu ein.',
+	'session_lost'      => 'Browser-Session ist abgelaufen. Bitte loggen Sie sich neu ein.',
 	'removeFilter'		=> 'Diese Facette enfernen',
 	'removeRestriction'	=> 'Einschränkung entfernen',
 	'removeAllFilters'	=> 'Alle Facetten entfernen',

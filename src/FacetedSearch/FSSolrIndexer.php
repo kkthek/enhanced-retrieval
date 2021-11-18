@@ -19,7 +19,7 @@ namespace DIQA\FacetedSearch;
  *
  */
 use Exception;
-use RepoGroup;
+use MediaWiki\MediaWikiServices;
 use Title;
 
 /**
@@ -240,7 +240,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
      */
     public function extractDocument($title) {
         if ($title instanceof Title) {
-            $file = RepoGroup::singleton()->getLocalRepo()->newFile($title);
+            $file = MediaWikiServices::getInstance()->getRepoGroup()->getLocalRepo()->newFile($title);
             $filepath = $file->getLocalRefPath();
         } else {
             $filepath = $title;
@@ -499,8 +499,8 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
     }
 
     /**
-     * @param  command
-     * @return inserts the core and returns the URL for the provided command as a string
+     * @param  String $command
+     * @return String the URL for the provided command as a string, including the core
      */
     private function createCommandUrl($command){
         if($this->indexCore == '') {
