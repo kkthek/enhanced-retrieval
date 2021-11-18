@@ -3,21 +3,20 @@ namespace DIQA\FacetedSearch;
 
 use Exception;
 use JobQueueGroup;
-use ParserOptions;
-use Sanitizer;
-use SMWDataItem;
-use SMWDITime;
-use Title;
-use WikiPage;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use RepoGroup;
-use SMW\Services\ServicesFactory as ApplicationFactory;
+use ParserOptions;
+use Sanitizer;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty as SMWDIProperty;
 use SMW\DIWikiPage as SMWDIWikiPage;
 use SMW\PropertyRegistry;
+use SMW\Services\ServicesFactory as ApplicationFactory;
+use SMWDataItem;
+use SMWDITime;
+use Title;
+use WikiPage;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -94,7 +93,22 @@ class FSSolrSMWDB extends FSSolrIndexer {
         parent::__construct($host, $port, $user, $pass, $indexCore);
     }
 
-
+    /**
+     * Updates the index for the given $wikiPage.
+     * It retrieves all semantic data of the new version and adds it to the index.
+     *
+     * @param WikiPage $wikiPage
+     *         The article that changed.
+     * @param User $user
+     *         Optional user object
+     * @param string $text
+     *        Optional content of the article. If NULL, the content of $wikiPage is
+     *        retrieved in this method.
+     * @param array $messages
+     *      User readible messages (out)
+     * @param bool force
+     *      Force update from command-line
+     */
     public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $rawText = NULL,
                                           & $messages = [], $force = false, bool $debugMode = false ) {
 
@@ -136,7 +150,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 throw new Exception("unapproved " . $t->getPrefixedText());
             }
             $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW);
-
+            
             $text = $content->getParserOutput($wikiPage->getTitle(), $revision->getId(), $parserOptions)->getText();
             $text = Sanitizer::stripAllTags($text);
 
@@ -161,7 +175,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $db = wfGetDB( DB_REPLICA  );
 
         if ($this->retrieveSMWID($db, $pns, $pt, $doc)) {
-            $this->retrievePropertyValues($pns, $pt, $doc, $options);
+            $this->retrievePropertyValues($t, $doc, $options);
+            $this->indexCategories($t, $doc);
         }
 
         // extract document if a file was uploaded
@@ -172,7 +187,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
                     $this->retrieveFileSystemPath($db, $pns, $pt, $doc);
                 }
                 $docData = $this->extractDocument($t);
-                $doc['smwh_full_text'] = $docData['text'];
+                if($docData) {
+                    $doc['smwh_full_text'] = $docData['text'];
+                }
             } catch( Exception $e ) {
                 $messages[] = $e->getMessage();
                 $doc['smwh_full_text'] .= " " . $e->getMessage();
@@ -270,7 +287,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
      */
     private function getApprovedRevision(WikiPage $wikiPage) {
         // get approved rev_id
-        $db = wfGetDB( DB_MASTER );
+        $db = wfGetDB( DB_PRIMARY );
         $approved_revs_table = $db->tableName("approved_revs");
         $queryString = sprintf(
                 "SELECT rev_id" .
@@ -311,7 +328,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
             global $wgUser;
             // The article with the new name has the same page id as before
             $wp = WikiPage::newFromID( $oldid );
-
+            
             $content = $wp->getContent(RevisionRecord::RAW);
             if($content == null) {
                 $text = '';
@@ -476,7 +493,7 @@ SQL;
      */
     private function retrieveFileSystemPath($db, $namespace, $title, array &$doc) {
         $title = Title::newFromText($title, $namespace);
-        $file = RepoGroup::singleton()->getLocalRepo()->newFile($title);
+        $file = MediaWikiServices::getInstance()->getRepoGroup()->getLocalRepo()->newFile($title);
         $filepath = $file->getFullUrl();
 
         $propXSD = "smwh_diqa_import_fullpath_xsdvalue_t";
@@ -488,40 +505,27 @@ SQL;
      * Retrieves the relations of the article with the SMW ID $smwID and adds
      * them to the document description $doc.
      *
-     * @param int $smwID
-     *         The SMW ID.
+     * @param Title $title 
      * @param array $doc
      *         The document description. If the page has relations, all relations
      *         and their values are added to $doc. The key 'smwh_properties' will
      *         be an array of relation names and a key will be added for each
      *         relation with the value of the relation.
+     * @param array $options
      */
-    private function retrievePropertyValues($namespace, $title, array &$doc, array &$options) {
+    private function retrievePropertyValues($title, array &$doc, array &$options) {
         global $fsgIndexPredefinedProperties;
 
         $store = smwfGetStore();
-
-        $subject = SMWDIWikiPage::newFromTitle(Title::newFromText($title, $namespace));
-
-        $properties = $store->getProperties($subject);
-
         $attributes = array();
         $relations = array();
 
-        global $wgContLang;
+        $subject = SMWDIWikiPage::newFromTitle($title);
+        $properties = $store->getProperties($subject);
+
         foreach($properties as $property) {
-
-            // handle member categories
-            if ($property->getKey() == "_INST") {
-                $categories = $store->getPropertyValues($subject, $property);
-                $this->indexCategories($categories, $doc, $options);
-                continue;
-            }
-
-            // handle super-categories
-            if ($property->getKey() == "_SUBC") {
-                $categories = $store->getPropertyValues($subject, $property);
-                $this->indexCategories($categories, $doc, $options);
+            // skip instance-of and subclass properties
+            if ($property->getKey() == "_INST" || $property->getKey() == "_SUBC") {
                 continue;
             }
 
@@ -533,8 +537,6 @@ SQL;
                 if (isset($fsgIndexPredefinedProperties) && $fsgIndexPredefinedProperties === false) {
                     continue;
                 }
-                $prop = str_replace(' ', '_', $p->getLabel());
-
             }
 
             // check if property should be indexed
@@ -598,26 +600,32 @@ SQL;
 
         $doc['smwh_properties'] = array_filter(array_unique($relations), function($e) { return !empty($e); });
         $doc['smwh_attributes'] = array_filter(array_unique($attributes), function($e) { return !empty($e); });
-
     }
 
     /**
      * Indexes categories. Either as member categories or super-categories
      *
-     * @param array $categories
+     * @param Title $title 
      * @param array $doc
-     * @param array $options
      */
-    private function indexCategories($categories, array &$doc, array &$options) {
+    private function indexCategories(Title $title, array &$doc) {
+        $store = smwfGetStore();
+        $subject = SMWDIWikiPage::newFromTitle($title);
+ 
+        $categories = [];
+        $properties = $store->getProperties($subject);
+        foreach($properties as $property) {
+            if ($property->getKey() == "_INST" || $property->getKey() == "_SUBC") {
+                $categories = array_merge($categories, $store->getPropertyValues($subject, $property));
+            }
+        }
+
         $prop_ignoreasfacet = wfMessage('fs_prop_ignoreasfacet')->text();
         $ignoreAsFacetProp = SMWDIProperty::newFromUserLabel($prop_ignoreasfacet);
-        $store = smwfGetStore();
 
-        $doc['smwh_categories'] = [];
         $doc['smwh_directcategories'] = [];
         $allParentCategories = [];
         foreach($categories as $category) {
-
             // do not index if ignored
             $iafValues = $store->getPropertyValues(SMWDIWikiPage::newFromTitle($category->getTitle()), $ignoreAsFacetProp);
             if (count($iafValues) > 0) {
@@ -625,36 +633,50 @@ SQL;
             }
 
             // index this category
-            $categoryAsDBkey = $category->getTitle()->getDBkey();
-            $doc['smwh_categories'][] = $categoryAsDBkey;
-            $doc['smwh_directcategories'][] = $categoryAsDBkey;
-            
-
-            $this->getAllSupercategories($category->getTitle(), $allParentCategories);
-
+            $doc['smwh_directcategories'][] = $category->getTitle()->getText();
+            $allParentCategories[] = $category->getTitle();
         }
 
-        // index all parent categories
-        $allParentCategories = array_unique($allParentCategories);
-        foreach($allParentCategories as $pc) {
+        // index all categories recursively
+        $allCategories = $this->getAllSuperCategories($allParentCategories);
+        $allCategories = array_unique($allCategories);
+        foreach($allCategories as $pc) {
             $doc['smwh_categories'][] = $pc;
-            
         }
+    }
+
+    /**
+     * Returns all parent categories, recursively.
+     *
+     * @param array of Title objects $categories for starting the recursion
+     * @return array transitive superclass closure of categories
+     */
+    private function getAllSuperCategories($categories) {
+        $y = [];
+        foreach($categories as $category) {
+            $y = $this->getAllSuperCategoriesInternal($category, $y);
+        }
+        return $y;
     }
 
     /**
      * Returns all parent categories.
      *
-     * @param Title $cTitle
-     * @param array $categories Category names as text
+     * @param Title $root the current root category
+     * @param array $categories temporary list of already found cateagories, for endless-loop protection
+     * @return array transitive superclass closure of categories
      */
-    private function getAllSupercategories($cTitle, & $categories) {
-        $parentCategories = $cTitle->getParentCategories();
-        foreach($parentCategories as $parentCat => $childCat) {
-            $parentCatTitle = Title::newFromText($parentCat);
-            $categories[] = $parentCatTitle->getText();
-            $this->getAllSupercategories($parentCatTitle, $categories);
+    private function getAllSuperCategoriesInternal($root, $temp) {
+        $y = $temp;
+        $y[] = $root->getText();
+        $parentCategories = $root->getParentCategories();
+        foreach($parentCategories as $parentCategoryName => $childCat) {
+            $parentCatTitle = Title::newFromText($parentCategoryName);
+            if( ! in_array($parentCatTitle->getText(), $y) ) {
+                $y = $this->getAllSuperCategoriesInternal($parentCatTitle, $y);
+            }
         }
+        return $y;
     }
 
     /**

@@ -1,7 +1,8 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
+
 VERSION 2.3
-    - Got rid of separate proxy implementation. Instead, the proxy now is a REST endpoint of MW.
+	- Got rid of separate proxy implementation. Instead, the proxy now is a REST endpoint of MW.
 
 VERSION 2.2
 	- Support for promoting and demoting search results visually
