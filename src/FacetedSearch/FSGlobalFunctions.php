@@ -60,8 +60,6 @@ class FSGlobalFunctions {
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleDelete';
             $wgHooks['ApprovedRevsRevisionApproved'][] =
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved';
-            $wgHooks['PageSaveComplete'][] =
-                'DIQA\FacetedSearch\FSIncrementalUpdater::onPageSaveComplete';
         }
 
         // Register specials pages
@@ -210,14 +208,18 @@ class FSGlobalFunctions {
      * Called before parser is initialized
      */
     public static function initializeBeforeParserInit() {
+
+        global $wgOut;
+        global $fsgNamespacesForSearchField;
+        $wgOut->addJsConfigVars('fsgNamespacesForSearchField', $fsgNamespacesForSearchField);
+
         $currentTitle = \RequestContext::getMain()->getTitle();
         if( is_null($currentTitle) || $currentTitle->getNamespace() != NS_SPECIAL ||
                ($currentTitle->getText() != 'Suche' && $currentTitle->getText() != 'Search')) {
             return;
         }
 
-        global $wgOut,
-                $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgDateTimePropertyClusters,
+        global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgDateTimePropertyClusters,
                 $fsgShowArticleProperties, $fsgShowSolrScore,
                 $fsgShownFacets, $fsgFacetsWithOR, $fsgShownCategoryFacets,
                 $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay,

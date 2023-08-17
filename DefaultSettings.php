@@ -278,3 +278,9 @@ $fsgDefaultSortOrder = "score";
  */
 global $fsgIndexImageURL;
 $fsgIndexImageURL = false;
+
+/**
+ * Pages of these namespaces are shown in the global search field (requires a patch)
+ */
+global $fsgNamespacesForSearchField;
+$fsgNamespacesForSearchField = [ NS_MAIN ];

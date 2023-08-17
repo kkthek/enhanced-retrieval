@@ -302,6 +302,8 @@ FacetedSearch.classes.FacetedSearch = function () {
 					.replace(/([\+\-!\(\)\{\}\[\]\^"~\*\?\\:])/g, '\\$1')
 					.replace(/(&&|\|\|)/g,'\\$1')
 					.replace(/\s\s*/g, ' ');
+			var parts = escapedSearchText.split(" ");
+			escapedSearchText = parts.join(" AND ");
 			escapedSearchText = '(' + escapedSearchText + ')';
 			exactMatchQuery = ' OR ' + QUERY_FIELD + ':'+ escapedSearchText;
 			exactMatchQuery += ' OR ' + TITLE_FIELD + ':' + escapedSearchText;
@@ -359,9 +361,11 @@ FacetedSearch.classes.FacetedSearch = function () {
 			// Add a * to the last word if the query string does not end with a phrase
 			if (!endWithPhrase && i == numWords-1) {
 				w += '*';
+				queryString += "+" + w + " ";
+			} else {
+				queryString += "+" + w + " AND ";
+
 			}
-							   
-			queryString += "+" + w + " ";
 		}
 		
 		// Escape special characters in phrases
