@@ -633,7 +633,7 @@ SQL;
             }
 
             // index this category
-            $doc['smwh_directcategories'][] = $category->getTitle()->getText();
+            $doc['smwh_directcategories'][] = $category->getTitle()->getDBkey();
             $allParentCategories[] = $category->getTitle();
         }
 
@@ -668,11 +668,11 @@ SQL;
      */
     private function getAllSuperCategoriesInternal($root, $temp) {
         $y = $temp;
-        $y[] = $root->getText();
+        $y[] = $root->getDBkey();
         $parentCategories = $root->getParentCategories();
         foreach($parentCategories as $parentCategoryName => $childCat) {
             $parentCatTitle = Title::newFromText($parentCategoryName);
-            if( ! in_array($parentCatTitle->getText(), $y) ) {
+            if( ! in_array($parentCatTitle->getDBkey(), $y) ) {
                 $y = $this->getAllSuperCategoriesInternal($parentCatTitle, $y);
             }
         }
