@@ -2,6 +2,8 @@
 
 namespace DIQA\FacetedSearch;
 
+use MediaWiki\MediaWikiServices;
+
 class FacetedCategoryFilter {
 
     /**
@@ -18,7 +20,7 @@ class FacetedCategoryFilter {
             return true;
         }
 
-        global $wgContLang;
+        $wgContLang = MediaWikiServices::getInstance()->getContentLanguage();
         $categoryLabel = $wgContLang->getNsText(NS_CATEGORY);
         $html = "<span id='fs_category_filter_label'>$categoryLabel: </span><br/>";
 

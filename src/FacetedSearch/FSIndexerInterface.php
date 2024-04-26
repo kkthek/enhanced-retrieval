@@ -1,6 +1,7 @@
 <?php
 namespace DIQA\FacetedSearch;
 
+use MediaWiki\User\UserIdentity;
 use WikiPage;
 
 /*
@@ -32,7 +33,7 @@ use WikiPage;
  * 
  */
 if ( !defined( 'MEDIAWIKI' ) ) {
-	die( "This file is part of the Enhanced Retrieval Extension extension. It is not a valid entry point.\n" );
+    die( "This file is part of the Enhanced Retrieval Extension extension. It is not a valid entry point.\n" );
 }
 
 /**
@@ -44,49 +45,45 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  *
  */
 interface FSIndexerInterface {
-	
-	/**
-	 * Pings the server of the indexer and checks if it is responding.
-	 * @return bool
-	 * 	<true>, if the server is responding
-	 * 	<false> otherwise
-	 */
-	public function ping();
-	
-	/**
-	 * Creates a full index of all available semantic data.
-	 * 
-	 * @param bool $clean
-	 * 		If <true> (default), the existing index is cleaned before the new
-	 * 		index is created.
-	 */
-	public function createFullIndex($clean = true);
-	
-	/**
-	 * Deletes the complete index.
-	 */
-	public function deleteIndex();
-	
-	/**
-	 * Updates the index for the given $wikiPage.
-	 * It retrieves all semantic data of the new version and adds it to the index.
-	 *
-	 * @param WikiPage $wikiPage
-	 * 		The article that changed.
-	 * @param User $user
-	 * 		Optional user object
-	 * @param string $text
-	 *		Optional content of the article. If NULL, the content of $wikiPage is
-	 *		retrieved in this method.
-	 * @param array $messages 
-	 *      User readible messages (out)
-	 * @param bool force 
-	 *      Force update from command-line
+    
+    /**
+     * Pings the server of the indexer and checks if it is responding.
+     * @return bool
+     * 	<true>, if the server is responding
+     * 	<false> otherwise
+     */
+    public function ping();
+    
+    /**
+     * Creates a full index of all available semantic data.
+     * 
+     * @param bool $clean
+     * 		If <true> (default), the existing index is cleaned before the new
+     * 		index is created.
+     */
+    public function createFullIndex($clean = true);
+    
+    /**
+     * Deletes the complete index.
+     */
+    public function deleteIndex();
+    
+    /**
+     * Updates the index for the given $wikiPage.
+     * It retrieves all semantic data of the new version and adds it to the index.
+     *
+     * @param WikiPage $wikiPage
+     *      The article that changed.
+     * @param string $rawText
+     *      Optional content of the article. If it is null, the content of $wikiPage is
+     *      retrieved in this method.
+     * @param array $messages
+     *      User readible messages (out)
      * @param bool $debugMode
-     *      prints verbose output
-	 */
-	public function updateIndexForArticle(WikiPage $wikiPage, $user = NULL, $text = NULL,
-                                          & $messages = [], $force = false, bool $debugMode = false);
+     *      Prints verbose output
+     */
+    public function updateIndexForArticle(WikiPage $wikiPage, $rawText = null,
+                                          &$messages = [], bool $debugMode = false) : bool;
 
     /**
      * Updates the index for a moved article.

@@ -1,6 +1,16 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
 
+VERSION 3.0
+* updated extension.json for MW1.38
+* renamed global config variable
+  * from $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore
+  * to $fsgSolrHost, $fsgSolrPort, $fsgSolrUser, $fsgSolrPass, $fsgSolrCore
+* removed $fsgCustomConstraint config variable
+* removed unused config variables
+** $fsgScriptPath
+  * $fsgIP
+
 VERSION 2.3
 	- Got rid of separate proxy implementation. Instead, the proxy now is a REST endpoint of MW.
 

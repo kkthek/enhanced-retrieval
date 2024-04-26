@@ -14,11 +14,12 @@ class UpdateSolr extends Maintenance
 
     private $linkCache;
     private $writeToStartidfile;
+    private $num_files = 0;
 
     public function __construct()
     {
         parent::__construct();
-        $this->mDescription = "Updates SOLR index";
+        $this->addDescription( "Updates SOLR index" );
         $this->addOption('v', 'Verbose mode', false, false);
         $this->addOption('g', 'Get the maximum ID of pages that would be updated (all other parameters are ignored if this is present)', false, false);
         $this->addOption('d', 'Delay every 100 pages (miliseconds)', false, true);
@@ -34,7 +35,7 @@ class UpdateSolr extends Maintenance
     public function execute()
     {
         if( !defined( 'ER_EXTENSION_VERSION' ) ) {
-            echo("ERROR: The enhanced retrievel extension is not properly installed or configured.\n");
+            echo("ERROR: The enhanced retrieval extension is not properly installed or configured.\n");
             die(1);
         }
 
@@ -44,9 +45,9 @@ class UpdateSolr extends Maintenance
             return;
         }
 
-        // when indexing everything, dependent pages do not need special treatment
-        global $fsUpdateOnlyCurrentArticle;
-        $fsUpdateOnlyCurrentArticle = true;
+        // when indexing everything, we dont create any updating job for SOLR
+        global $fsCreateUpdateJob;
+        $fsCreateUpdateJob = false;
 
         $this->linkCache = MediaWikiServices::getInstance()->getLinkCache();
         $this->num_files = 0;
@@ -87,9 +88,8 @@ class UpdateSolr extends Maintenance
      */
     private function refreshPagesByIds($start, $end)
     {
-
         print "Processing all IDs from $start to " . ($end ? "$end" : 'last ID') . " ...\n";
-        new SMWDIProperty("_wpg");
+
         $id = $start;
         while (((! $end) || ($id <= $end)) && ($id > 0)) {
             $title = Title::newFromID($id);
@@ -153,7 +153,7 @@ class UpdateSolr extends Maintenance
         $indexer = FSIndexerFactory::create();
         try {
             $messages = [];
-            $indexer->updateIndexForArticle(new WikiPage($title), null, null, $messages, true, $this->hasOption('x'));
+            $indexer->updateIndexForArticle(new WikiPage($title), null, $messages, $this->hasOption('x'));
             if (count($messages) > 0) {
                 print implode("\t\n", $messages);
             }
@@ -222,20 +222,18 @@ class UpdateSolr extends Maintenance
     }
 
     private function getMaxId() {
-        $db = wfGetDB(DB_REPLICA);
+        $db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
         $page_table = $db->tableName("page");
         $query = "SELECT MAX(page_id) as maxid FROM $page_table";
         $res = $db->query($query);
-        if ($db->numRows($res) > 0) {
-            $row = $db->fetchObject($res);
+        if( $res->numRows() > 0 ) {
+            $row = $res->fetchObject();
             if( $row ) {
                 return $row->maxid;
             }
         }
         return 0;
     }
-
-
 }
 
 $maintClass = "UpdateSolr";

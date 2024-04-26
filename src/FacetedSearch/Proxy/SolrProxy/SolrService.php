@@ -1,7 +1,11 @@
 <?php
 namespace DIQA\FacetedSearch\Proxy\SolrProxy;
 
+use Apache_Solr_HttpTransportException;
+use Apache_Solr_InvalidArgumentException;
+use Apache_Solr_Response;
 use MediaWiki\MediaWikiServices;
+use RequestContext;
 
 require_once (__DIR__ . '/../SolrPhpClient/Apache/Solr/Service.php');
 
@@ -27,7 +31,7 @@ class SolrService extends \Apache_Solr_Service {
      * @param boolean $httpTransport
      * @param string $userpass of the form "user:pass"
      */
-    public function __construct($host = 'localhost', $port = 8983, $path = '/solr/', $httpTransport = false, $userpass) {
+    public function __construct($host = 'localhost', $port = 8983, $path = '/solr/', $httpTransport = false, $userpass = ':') {
         parent::__construct($host, $port, $path, $httpTransport, $userpass);
     }
 
@@ -78,15 +82,13 @@ class SolrService extends \Apache_Solr_Service {
             $num_search_hits = $num_search_hits === false ? 0 : $num_search_hits;
             $cache->set('DIQA.EnhancedRetrieval.num_search_hits', ++$num_search_hits);
         }
-
-
     }
 
     private function getUserGroups() {
-        global $wgUser;
+        $user = RequestContext::getMain()->getUser();
         $userGroups = MediaWikiServices::getInstance()
             ->getUserGroupManager()
-            ->getUserGroups( $wgUser);
+            ->getUserGroups( $user );
         // every users is treated as being a member of "user"
         if (! in_array('user', $userGroups)) {
             $userGroups[] = 'user';
@@ -102,9 +104,7 @@ class SolrService extends \Apache_Solr_Service {
      */
     private function extendQuery($queryString) {
         $modifiedQuery = $this->applyNamespaceConstraints($queryString);
-        $modifiedQuery = $this->applyCustomConstraints($modifiedQuery);
-        $modifiedQuery = str_replace(' ', '%20', $modifiedQuery);
-        return $modifiedQuery;
+        return str_replace(' ', '%20', $modifiedQuery);
     }
 
     private function applyNamespaceConstraints($query) {
@@ -129,32 +129,5 @@ class SolrService extends \Apache_Solr_Service {
         }
 
         return $query;
-    }
-
-    private function applyCustomConstraints($query) {
-        global $fsgCustomConstraint;
-        if (! isset($fsgCustomConstraint)) {
-            return $query;
-        }
-
-        $userGroups = $this->getUserGroups();
-
-        global $wgDBname;
-        $userid = self::getCookie($wgDBname . 'UserID');
-        $userName = self::getCookie($wgDBname . 'UserName');
-
-        $modifiedQuery = $query;
-        foreach ($fsgCustomConstraint as $operation) {
-            $modifiedQuery = $operation($modifiedQuery, $userGroups, $userName, $userid);
-        }
-
-        return $modifiedQuery;
-    }
-
-    private static function getCookie($var) {
-        if (isset($_COOKIE[$var])) {
-            return $_COOKIE[$var];
-        }
-        return '';
     }
 }

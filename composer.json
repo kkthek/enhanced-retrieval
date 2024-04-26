@@ -15,23 +15,20 @@
 	"authors": [
 		{
 			"name": "Kai Kühn",
-			"homepage": "http://www.diqa-pm.com",
+			"homepage": "https://diqa.de",
 			"role": "Core developer"
 		}
 	],
 	"support": {
 		"email": "kuehn@diqa-pm.com",
-		"issues": "http://bugs.diqa-pm.de"
+		"issues": "https://bugs.diqa-pm.com/"
 	},
 	"require": {
-		"php": ">=7.0.0",
+		"php": ">=7.4.0",
 		"composer/installers": "1.*,>=1.0.1",
-		"mediawiki/semantic-media-wiki": "~3.0",
+		"mediawiki/semantic-media-wiki": "~3.0|~4.0",
 		"philo/laravel-blade": "3.1.*",
 		"mediawiki/bootstrap": "~4.5"
-	},
-	"require-dev": {
-		"mediawiki/semantic-media-wiki": "~3.0"
 	},
 	"replace": {
 		"mediawiki/enhanced-retrieval": "*"

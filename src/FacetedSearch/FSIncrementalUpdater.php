@@ -1,18 +1,20 @@
 <?php
 namespace DIQA\FacetedSearch;
 
+use Exception;
 use ForeignTitle;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Storage\EditResult;
 use MediaWiki\User\UserIdentity;
-use User;
-use WikiPage;
-use Title;
-use SMWStore;
 use SMW\SemanticData;
-use JobQueueGroup;
+use SMWStore;
+use StatusValue;
+use Title;
+use WikiPage;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -71,7 +73,9 @@ class FSIncrementalUpdater  {
      */
     public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
         $wikiTitle = $semanticData->getSubject()->getTitle();
-        self::createUpdateJob($wikiTitle);
+        if (self::shouldCreateUpdateJob()) {
+            self::createUpdateJob( $wikiTitle);
+        }
         return true;
     }
 
@@ -93,11 +97,29 @@ class FSIncrementalUpdater  {
         global $smwgNamespacesWithSemanticLinks;
         if (isset($smwgNamespacesWithSemanticLinks[$wikiTitle->getNamespace()]) &&
             $smwgNamespacesWithSemanticLinks[$wikiTitle->getNamespace()] === true) {
-            return; // already updated in onUpdateDataAfter
+            return true; // already updated in onUpdateDataAfter
         }
-        self::createUpdateJob($wikiTitle);
+        if (self::shouldCreateUpdateJob()) {
+            self::createUpdateJob( $wikiTitle);
+        }
         return true;
 
+    }
+
+    private static function createUpdateJob(Title $title ) : void {
+        $params = [];
+        $params['title'] = $title;
+        $job = new UpdateSolrWithDependantJob(Title::makeTitle(NS_SPECIAL, 'Search'), $params);
+        MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup()->push( $job );
+    }
+
+    private static function shouldCreateUpdateJob() {
+        global $fsCreateUpdateJob;
+        if (isset($fsCreateUpdateJob) && $fsCreateUpdateJob === false) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -107,12 +129,11 @@ class FSIncrementalUpdater  {
      * @return bool
      */
     public static function onUploadComplete( &$image ) {
-        global $wgUser;
         try {
             $wikiPage = new WikiPage($image->getLocalFile()->getTitle());
             $indexer = FSIndexerFactory::create();
-            $indexer->updateIndexForArticle($wikiPage, $wgUser, "");
-        } catch(\Exception $e) {
+            $indexer->updateIndexForArticle( $wikiPage );
+        } catch(Exception $e) {
             wfDebugLog("EnhancedRetrieval", "Could not update article in SOLR. Reason: ".$e->getMessage());
         }
         return true;
@@ -138,9 +159,9 @@ class FSIncrementalUpdater  {
     public static function onAfterImportPage(Title $title, ForeignTitle $origTitle, $revCount, $sRevCount, $pageInfo) {
         try {
             $indexer = FSIndexerFactory::create();
-            $wikiPage = new WikiPage($title);
-            $indexer->updateIndexForArticle($wikiPage);
-        } catch(\Exception $e) {
+            $wikiPage = new WikiPage( $title );
+            $indexer->updateIndexForArticle( $wikiPage );
+        } catch(Exception $e) {
             wfDebugLog("EnhancedRetrieval", "Could not update article on import operation in SOLR. Reason: ".$e->getMessage());
         }
         return true;
@@ -150,41 +171,49 @@ class FSIncrementalUpdater  {
      * This function is called after an article was moved.
      * It starts an update of the index for the given article.
      *
-     * @param Title $title
-     * @param Title $newTitle
-     * @param User $user
-     * @param numeric $oldid
-     * @param numeric $newid
-     * @return bool
-     *
+     * @param LinkTarget $old Old title
+     * @param LinkTarget $new New title
+     * @param UserIdentity $user User who did the move
+     * @param int $pageid Database ID of the page that's been moved
+     * @param int $redirid Database ID of the created redirect
+     * @param string $reason Reason for the move
+     * @param RevisionRecord $revision RevisionRecord created by the move
+     * @return bool|void True or no return value to continue or false stop other hook handlers,
+     *     doesn't abort the move itself
      */
-    public static function onTitleMoveComplete(Title &$title, Title &$newTitle, $user, $oldid, $newid): bool
-    {
+
+    public static function onPageMoveCompleting( $old, $new, $user, $pageid, $redirid, $reason, $revision ) {
         try {
             $indexer = FSIndexerFactory::create();
-            $indexer->updateIndexForMovedArticle($oldid, $newid);
-        } catch(\Exception $e) {
+            $indexer->updateIndexForMovedArticle( $pageid, $redirid );
+        } catch(Exception $e) {
             wfDebugLog("EnhancedRetrieval", "Could not move article in SOLR. Reason: ".$e->getMessage());
         }
         return true;
     }
 
     /**
-     * This method is called, when an article is deleted. It is removed from
-     * the index.
+     * This hook is called before a page is deleted.
      *
-     * @param WikiPage $article
-     * @param User $user
-     * @param string $reason
-     * @return bool
-     *
+     * @param ProperPageIdentity $page Page being deleted.
+     * @param Authority $deleter Who is deleting the page
+     * @param string $reason Reason the page is being deleted
+     * @param StatusValue $status Add any error here
+     * @param bool $suppress Whether this is a suppression deletion or not
+     * @return bool|void True or no return value to continue; false to abort, which also requires adding
+     *                   a fatal error to $status.
      */
-    public static function onArticleDelete(WikiPage &$article, User &$user, string &$reason): bool
-    {
+    public static function onPageDelete(
+            ProperPageIdentity $page,
+            Authority $deleter,
+            string $reason,
+            StatusValue $status,
+            bool $suppress ) {
+
         try {
             $indexer = FSIndexerFactory::create();
-            $indexer->deleteDocument($article->getID());
-        } catch(\Exception $e) {
+            $indexer->deleteDocument( $page->getID() );
+        } catch(Exception $e) {
             wfDebugLog("EnhancedRetrieval", "Could not delete article in SOLR. Reason: ".$e->getMessage());
         }
         return true;
@@ -199,10 +228,9 @@ class FSIncrementalUpdater  {
      * @param int $rev_id
      * @return bool
      */
-    public static function onRevisionApproved($parser, $title, $rev_id): bool
-    {
+    public static function onRevisionApproved($parser, $title, $rev_id): bool {
         $store = MediaWikiServices::getInstance()->getRevisionStore();
-        $revision = $store->getRevisionByTitle( $title, $rev_id);
+        $revision = $store->getRevisionByTitle( $title, $rev_id );
         if (is_null($revision)) {
             return true;
         }
@@ -210,8 +238,8 @@ class FSIncrementalUpdater  {
         $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW)->serialize();
         try {
             $indexer = FSIndexerFactory::create();
-            $indexer->updateIndexForArticle(new WikiPage($title), null, $content);
-        } catch(\Exception $e) {
+            $indexer->updateIndexForArticle( new WikiPage($title), $content );
+        } catch(Exception $e) {
             wfDebugLog("EnhancedRetrieval", "Could not update article in SOLR. Reason: ".$e->getMessage());
         }
         return true;
@@ -225,8 +253,7 @@ class FSIncrementalUpdater  {
      * @param Title $wikiTitle
      * @return bool
      */
-    private static function updateArticle(Title $wikiTitle): bool
-    {
+    private static function updateArticle(Title $wikiTitle): bool {
         $store = MediaWikiServices::getInstance()->getRevisionStore();
         $revision = $store->getRevisionByTitle($wikiTitle);
         if (is_null($revision)) {
@@ -236,19 +263,11 @@ class FSIncrementalUpdater  {
         $content = $revision->getContent(SlotRecord::MAIN, RevisionRecord::RAW)->serialize();
         try {
             $indexer = FSIndexerFactory::create();
-            $indexer->updateIndexForArticle(new WikiPage($wikiTitle), null, $content);
-        } catch (\Exception $e) {
+            $indexer->updateIndexForArticle( new WikiPage($wikiTitle), $content );
+        } catch(Exception $e) {
             wfDebugLog("EnhancedRetrieval", "Could not update article in SOLR. Reason: ".$e->getMessage());
         }
         return true;
     }
 
-    private static function createUpdateJob(Title $wikiTitle): void
-    {
-        $params = [];
-        $params['title'] = $wikiTitle->getPrefixedText();
-        $title = Title::makeTitle(NS_SPECIAL, 'Search');
-        $job = new UpdateSolrJob($title, $params);
-        JobQueueGroup::singleton()->push($job);
-    }
 }

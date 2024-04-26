@@ -21,7 +21,7 @@ console.log("ER: Loading scripts/FacetedSearch/Enhancements/fs_propertySelector.
 					var propertiesToShow = mw.config.get('ext.er.SHOWNFACETS')[selectedCategory];
 					for (var i = 0; i < propertiesToShow.length; i++) {
 						var property = propertiesToShow[i];
-						property.replace(/\s/g, '_');
+						property = property.replace(/\s/g, '__');
 						if (facetItem.facet.indexOf('smwh_'+property+'_') === 0) {
 							return true;
 						}

@@ -2,7 +2,6 @@
 namespace DIQA\FacetedSearch\Specials;
 
 use Exception;
-use Hooks;
 use MediaWiki\MediaWikiServices;
 use SMW\SpecialPage;
 use Title;
@@ -135,37 +134,34 @@ class FSFacetedSearchSpecial extends SpecialPage {
      * Overloaded function that is responsible for the creation of the Special Page
      */
     public function execute($par) {
-
-        global $wgOut, $wgRequest;
+        $output = $this->getOutput();
+        $request = $this->getRequest();
 
         try {
-            $wgOut->setPageTitle(wfMessage('fs_title')->text());
-            $wgOut->addModules('ext.facetedSearch.special');
-            $wgOut->addModules('ext.facetedSearch.enhancements');
+            $output->setPageTitle(wfMessage('fs_title')->text());
+            $output->addModules('ext.facetedSearch.special');
+            $output->addModules('ext.facetedSearch.enhancements');
 
-            $search = str_replace( "\n", " ", $wgRequest->getText( 'search', '' ) );
+            $search = str_replace( "\n", " ", $request->getText( 'search', '' ) );
             if ($search === wfMessage('smw_search_this_wiki')->text()) {
-                // If the help text of the search field is passed, assume an empty
-                // search string
+                // If the help text of the search field is passed, assume an empty search string
                 $search = '';
             }
 
             $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
-            $hookContainer->run( 'fs_searchRedirect', [ &$wgOut, &$search ] );
+            $hookContainer->run( 'fs_searchRedirect', [ &$output, &$search ] );
 
-            $restrict = $wgRequest->getText( 'restrict', '' );
-            $specialPageTitle = $wgRequest->getText( 'title', '' );
             $t = Title::newFromText( $search );
 
-            $fulltext = $wgRequest->getVal( 'fulltext', '' );
-            $fulltext_x = $wgRequest->getVal( 'fulltext_x', '' );
+            $fulltext = $request->getVal( 'fulltext', '' );
+            $fulltext_x = $request->getVal( 'fulltext_x', '' );
             if ($fulltext == NULL && $fulltext_x == NULL) {
                 # If the string can be used to create a title
                 if( !is_null( $t ) ) {
                     # If there's an exact or very near match, jump right there.
                     $t = static::defaultNearMatcher()->getNearMatch( $search );
                     if( !is_null( $t ) ) {
-                        $wgOut->redirect( $t->getFullURL() );
+                        $output->redirect( $t->getFullURL() );
                         return;
                     }
                 }
@@ -175,7 +171,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
             $html = self::SPECIAL_PAGE_HTML;
             $html = str_replace('{{searchTerm}}', htmlspecialchars($search), $html);
 
-            $prefixParam = $wgRequest->getVal( 'prefix', '' );
+            $prefixParam = $request->getVal( 'prefix', '' );
             $html = str_replace('{{fs_ext_prefix_param}}', str_replace("\"", "&quot;", $prefixParam), $html);
 
             global $fsgShowSortOrder, $fsgShowCategories, $fsgShowNamespaces, $fsgPlaceholderText, $fsgDefaultSortOrder;
@@ -200,10 +196,10 @@ class FSFacetedSearchSpecial extends SpecialPage {
 
             $html = $this->addExtensions($html);
 
-            $wgOut->addHTML($this->replaceLanguageStrings($html));
+            $output->addHTML($this->replaceLanguageStrings($html));
 
         } catch(Exception $e) {
-            $wgOut->addHTML(sprintf('<div class="fs_error_hint">%s</div>', $e->getMessage()));
+            $output->addHTML(sprintf('<div class="fs_error_hint">%s</div>', $e->getMessage()));
         }
     }
 

@@ -3,7 +3,7 @@
 === Requirements ===
 * PHP 7.x
 * Composer
-* MediaWiki 1.35.x
+* MediaWiki 1.37.x
 * SMW 3.x
 * Apache SOLR server v8.30+
 
@@ -25,16 +25,16 @@
 
 	-----------------------------------------------------------------------------------
 
-		global $SOLRhost, $SOLRport, $SOLRuser, $SOLRpass, $SOLRcore;
-		$SOLRhost = 'localhost';
-		$SOLRport = 8983;
-		$SOLRuser = '';
-		$SOLRpass = '';
-		$SOLRcore = 'mw';
+		global $fsgSolrHost, $fsgSolrPort, $fsgSolrUser, $fsgSolrPass, $fsgSolrCore;
+		$fsgSolrHost = 'localhost';
+		$fsgSolrPort = 8983;
+		$fsgSolrUser = '';
+		$fsgSolrPass = '';
+		$fsgSolrCore = 'mw';
 
 	-----------------------------------------------------------------------------------
 
-	Note: SOLRuser / SOLRpass / SOLRcore are optional, default is empty. 
+	Note: fsgSolrUser / fsgSolrPass / fsgSolrCore are optional, default is empty.
 		Default SOLR port is 8983. Default host is "localhost"
 
 * Create the initial index:

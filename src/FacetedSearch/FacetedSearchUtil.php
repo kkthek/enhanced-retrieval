@@ -1,7 +1,8 @@
 <?php
 namespace DIQA\FacetedSearch;
 
-use PageProps;
+use MediaWiki\MediaWikiServices;
+use SMW\SQLStore\SQLStore;
 use Title;
 use WikiPage;
 
@@ -14,10 +15,13 @@ class FacetedSearchUtil {
      * @return array of string
      */
     public static function getDistinctPropertyValues($property) {
-        $db = wfGetDB ( DB_REPLICA  );
+        $db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
-        $p_id = smwfGetStore ()->smwIds->getSMWPageID ( $property, SMW_NS_PROPERTY, "", "" );
-
+        /**
+         * @var SQLStore
+         */
+        $store = smwfGetStore();
+        $p_id = $store->getObjectIds()->getSMWPageID ( $property, SMW_NS_PROPERTY, '', '' );
 
         $smw_ids = $db->tableName ( 'smw_object_ids' );
         $smw_atts2 = $db->tableName ( 'smw_di_blob' );
@@ -40,8 +44,8 @@ class FacetedSearchUtil {
         // rewrite result as array
         $results = array ();
 
-        if ($db->numRows ( $res ) > 0) {
-            while ( $row = $db->fetchObject ( $res ) ) {
+        if( $res->numRows() > 0 ) {
+            while ( $row = $res->fetchObject() ) {
                 if ($row->ns_value == -1) {
                     $results [] = [ 'id' => $row->p_value, 'label' => is_null($row->blob_value) ? $row->p_value : $row->blob_value ];
                 } else {
@@ -54,13 +58,13 @@ class FacetedSearchUtil {
                 }
             }
         }
-        $db->freeResult ( $res );
+        $res->free();
 
         return $results;
     }
 
     /**
-     * Retrieves the display title from the properties tabel for the given page.
+     * Retrieves the display title from the properties table for the given page.
      * It will probably only properly work if the DisplayTitles extension is installed and used.
      * The default value is the pagename.
      * 
@@ -76,15 +80,16 @@ class FacetedSearchUtil {
         
         $redirect = false;
         if($wikipage) {
-            $redirectTarget = $wikipage->getRedirectTarget();
+            $redirectTarget = MediaWikiServices::getInstance()->getRedirectLookup()->getRedirectTarget( $wikipage );
             if ( !is_null( $redirectTarget ) ) {
                 $redirect = true;
-                $title = $redirectTarget;
+                $title = Title::makeTitle( $redirectTarget->getNamespace(), $redirectTarget->getDBkey() );
             }
         }
         
         $id = $title->getArticleID();
-        $values = PageProps::getInstance()->getProperties( $title, 'displaytitle' );
+        $values = MediaWikiServices::getInstance()->getPageProps()->getProperties( $title, 'displaytitle' );
+
         if ( array_key_exists( $id, $values ) ) {
             $value = $values[$id];
             if ( trim( str_replace( '&#160;', '', strip_tags( $value ) ) ) !== '' ) {

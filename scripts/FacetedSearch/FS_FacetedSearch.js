@@ -680,6 +680,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			'hl.simple.pre': '<b>',
 			'hl.simple.post': '</b>',
 			'hl.fragsize': '250',
+			'hl.method': 'fastVector',
 			'sort': getSortOrderModifier(mw.config.get('ext.er.DEFAULT_SORT_ORDER')),
 			'q.alt': '*:*'
 		};

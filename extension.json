@@ -1,22 +1,21 @@
 {
 	"name": "EnhancedRetrieval",
 	"author": [
-		"Vulcan Inc. Maintained by [http://www.diqa-pm.com DIQA]"
+		"Vulcan Inc. Maintained by [https://diqa.de DIQA]"
 	],
 	"url": "https://github.com/kkthek/enhanced-retrieval",
 	"descriptionmsg": "facetedsearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"version": "2.3",
+	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.35",
+		"MediaWiki": ">= 1.38",
 		"platform": {
-			"php": ">= 7.3"
+			"php": ">= 7.4"
 		}
 	},
-	"AutoloadNamespaces": {
-		"DIQA\\FacetedSearch\\": "src/FacetedSearch/"
-	},
+	"@load_composer_autoloader": true,
 	"RestRoutes": [
 		{
 			"path": "/EnhancedRetrieval/v1/proxy",
@@ -24,5 +23,324 @@
 			"class": "DIQA\\FacetedSearch\\ProxyRestEndpoint"
 		}
 	],
-	"manifest_version": 2
+	"AutoloadNamespaces": {
+		"DIQA\\FacetedSearch\\": "src/FacetedSearch/"
+	},
+	"AutoloadClasses": {
+		"EnhancedRetrieval": "EnhancedRetrieval.php"
+	},
+	"callback": "EnhancedRetrieval::initExtension",
+	"ExtensionFunctions": [
+		"EnhancedRetrieval::onExtensionFunction",
+		"DIQA\\FacetedSearch\\FSGlobalFunctions::setupFacetedSearch"
+	],
+
+	"MessagesDirs": {
+		"EnhancedRetrieval": [
+			"i18n"
+		]
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "DIQA\\FacetedSearch\\FSGlobalFunctions::initializeBeforeParserInit",
+		"BeforePageDisplay": "DIQA\\FacetedSearch\\FSGlobalFunctions::onBeforePageDisplay",
+		"fs_extendedFilters": "DIQA\\FacetedSearch\\FacetedCategoryFilter::addFilter",
+		"GetPreferences": "DIQA\\FacetedSearch\\UserPreference::setupPreferences"
+	},
+	"SpecialPages": {
+		"Search": "DIQA\\FacetedSearch\\Specials\\FSFacetedSearchSpecial",
+		"FacetedSearch": "DIQA\\FacetedSearch\\Specials\\FSFacetedSearchSpecial"
+	},
+	"JobClasses": {
+		"UpdateSolrJob": "DIQA\\FacetedSearch\\UpdateSolrJob",
+		"UpdateSolrWithDependantJob": "DIQA\\FacetedSearch\\UpdateSolrWithDependantJob"
+	},
+	"DefaultUserOptions": {
+		"er-sort-order-preferences": "sort-by-count"
+	},
+	"config_prefix": "fsg",
+	"config": {
+		"SolrCore": {
+			"value": "mw"
+		},
+		"SolrHost": {
+			"value": "localhost"
+		},
+		"SolrPort": {
+			"value": 8983
+		},
+		"SolrUser": {
+			"value": ""
+		},
+		"SolrPass": {
+			"value": ""
+		},
+		"SolrProxyDebug": {
+			"value": false
+		},
+		"AnnotationsInSnippet": {
+			"value": [],
+			"description": "Annotations can be shown in the snippet. This config maps category names to lists of property names. Articles from these categories show the values of the given properties in the snippets (if values exist). E.g. $fsgAnnotationsInSnippet[ 'Dokument'=>['Abteilung','Dokumentart' ] ]"
+		},
+		"BlacklistPages": {
+			"value": [],
+			"description": "All pages listed here are ignored by EnhancedRetrieval. Specify prefixed page titles, e.g. Property:Name or Category:People"
+		},
+		"CategoriesToShowInTitle": {
+			"value": [],
+			"description": "List of categories which should be shown in the title of search hit"
+		},
+		"CategoryFilter": {
+			"value": [],
+			"description": "Configurationf for the category drop-down list of the form ['category'=>'label'] The first entry determines the default. The entry with an empty key '' represents 'no selected category filter'"
+		},
+		"CreateNewPageLink": {
+			"value": "/{article}?action=edit",
+			"description": "This is the pattern for the link that leads to the creation of new pages. EnhancedRetrieval checks if the entered search term is the name of an existing article. If this is not the case it offers a link for creating this article. The variable {article} will be replaced by the actual article name. The link will be appended to the base URL like \"http://localhost/mediawiki/index.php\""
+		},
+		"DateTimePropertyClusters": {
+			"value": [],
+			"description": "Configures grouping of dateTime facets. Example: $fsgDateTimePropertyClusters['smwh_Freigegeben__am_xsdvalue_dt']=['min'=>'1990-01-01-00:00:00','max'=>'2030-12-31-23:59:59']"
+		},
+		"DefaultSortOrder": {
+			"value": "score",
+			"description": "Default sort order. Possible values: score, newest, oldest, ascending, descending"
+		},
+		"EnableIncrementalIndexer": {
+			"value": true,
+			"description": "If TRUE, changed pages will be indexed incrementally i.e. when they are saved, moved or deleted. Setting it to FALSE can make sense for example during the installation when SOLR is not yet running."
+		},
+		"ExtraPropertiesToRequest": {
+			"value": [],
+			"description": "Set of properties that are requested for each search. Change this only if you want to extend the search."
+		},
+		"FacetedSearchForMW": {
+			"value": true,
+			"description": "If TRUE, a search in the MediaWiki search field is redirected to the faceted search special page."
+		},
+		"FacetsDialogWithCustomContent": {
+			"value": [],
+			"description": "List of properties that have custom content in the facet (OR) dialog."
+		},
+		"FacetsWithOR": {
+			"value": [],
+			"description": "List of properties for which EnhancedRetrieval will offer a selection dialog for 'OR'."
+		},
+		"HitsPerPage": {
+			"value": 10,
+			"description": "Maximum number of search hits to show at once on the search page."
+		},
+		"IndexImageURL": {
+			"value": false,
+			"description": "Indexes the image URL as separate attribute"
+		},
+		"IndexPredefinedProperties": {
+			"value": true,
+			"description": "If TRUE, SMW's pre-defined properties will be indexed too. Single properties can be excluded from the facets via [[Ignore as facet::true]]"
+		},
+		"IndexSubobjects": {
+			"value": true,
+			"description": "Also index SMW subobjects (not only full wiki articles)."
+		},
+		"NamespaceConstraint": {
+			"value": [],
+			"description": "Specifies the visible namespace for groups. group => array of namespaces-IDs, e.g. $fsgNamespaceConstraint = ['sysop' => [ 0, 10, 14 ] ]; sysop users may only see Main, Template and Category pages. 'user' is default group if a user is in no other group."
+		},
+		"NumericPropertyClusters": {
+			"value": [],
+			"description": "Configures grouping of numeric facets. Example: $fsgNumericPropertyClusters['smwh_BaujahrMin_xsdvalue_d'] = ['min'=>-9999, 'max'=>9999, 'lowerBound'=>1700, 'upperBound'=>2030, 'interval'=>10]; means that the given property gets a minimum cluster value of -9999, a maximum of 9999 and 33*10 year-clusters from 1700 to 2030. min and max is optional."
+		},
+		"ShowArticleProperties": {
+			"value": true,
+			"description": "Show the article properties button under each search hit."
+		},
+		"ShowCategories": {
+			"value": true,
+			"description": "Show/hide categories in the facettes section"
+		},
+		"ShowFileInOverlay": {
+			"value": [
+				"pdf"
+			],
+			"description": "Show some files in an overlay"
+		},
+		"ShowNamespaces": {
+			"value": true,
+			"description": "Show/hide UI element for selecting namespace filters"
+		},
+		"ShowSolrScore": {
+			"value": false,
+			"description": "Show the SOLR search score as a tooltip for the SHOW DETAILS link of each search hit."
+		},
+		"ShowSortOrder": {
+			"value": true,
+			"description": "Show/hide UI element for selecting the sort order of search hits"
+		},
+		"ShownCategoryFacets": {
+			"value": [],
+			"description": "List of categories to show in the category facet (if empty, all categories are shown)"
+		},
+		"ShownFacets": {
+			"value": [],
+			"description": "This config maps category names to lists of property names. If the catagory is selected in the category drop-down, (only) the configured facets are shown in the facet list (even if other values exist), e.g. $fsgShownFacets[ 'Person'=>['Name','Country','Age'], 'Company'=>['CEO','City','BusinessArea'] ]"
+		},
+		"UseStatistics": {
+			"value": false,
+			"description": "use statistics logging"
+		},
+		"ActivateBoosting": {
+			"value": false,
+			"description": "Activates boosting, yes or no"
+		},
+		"DefaultBoost": {
+			"value": 1.0,
+			"description": "The default boost factor for all pages that are not boosted otherwise"
+		},
+		"CategoryBoosts": {
+			"value": [],
+			"description": "All pages belonging to the categories are boosted by the given value, e.g. $fsgCategoryBoosts=['People'=>2.0]. Do not add category prefix before the page title."
+		},
+		"NamespaceBoosts": {
+			"value": [],
+			"description": "All pages in the namespaces are boosted by the given value, e.g. $fsgNamespaceBoosts=[0=>2.0]. Use the namespace numbers here, not their names."
+		},
+		"TemplateBoosts": {
+			"value": [],
+			"description": "All pages using one of the templates are boosted by the given value, e.g. $fsgTemplateBoosts=['MyTemplate'=>2.0]"
+		},
+		"PromotionProperty": {
+			"value": false,
+			"description": "Boolean property indicating that a search hit should be highlighted (promoted). Use the SOLR field names here, e.g. 'smwh_HatInventarbeschrieb_xsdvalue_b' or false to turn it off."
+		},
+		"DemotionProperty": {
+			"value": false,
+			"description": "Boolean property indicating that a search hit should be greyed out (demoted). Use the SOLR field names here, e.g. 'smwh_HatInventarbeschrieb_xsdvalue_b' or false to turn it off."
+		}
+	},
+	"APIModules": {
+		"fs_dialogapi": "DIQA\\FacetedSearch\\Util\\DialogAjaxAPI"
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "EnhancedRetrieval"
+	},
+	"ResourceModules": {
+		"ext.facetedSearch.ajaxSolr": {
+			"group": "ext.facetedSearch",
+			"scripts": [
+				"scripts/ajax-solr/lib/core/Core.js",
+				"scripts/ajax-solr/lib/core/AbstractManager.js",
+				"scripts/ajax-solr/lib/core/Parameter.js",
+				"scripts/ajax-solr/lib/core/ParameterStore.js",
+				"scripts/ajax-solr/lib/core/AbstractWidget.js",
+				"scripts/ajax-solr/lib/core/AbstractFacetWidget.js",
+				"scripts/ajax-solr/lib/core/ParameterStore.js",
+				"scripts/ajax-solr/lib/helpers/jquery/ajaxsolr.theme.js",
+				"scripts/ajax-solr/lib/widgets/jquery/PagerWidget.js",
+				"scripts/FacetedSearch/jquery.jsonp-2.1.4.js",
+				"scripts/FacetedSearch/FS_Manager.jquery.js"
+			]
+		},
+		"ext.facetedSearch.special": {
+			"group": "ext.facetedSearch",
+			"scripts": [
+				"scripts/FacetedSearch/FS_Theme.js",
+				"scripts/FacetedSearch/FS_Utils.js",
+				"scripts/FacetedSearch/FS_ResultWidget.js",
+				"scripts/FacetedSearch/FS_PagerWidget.js",
+				"scripts/FacetedSearch/FS_FacetWidget.js",
+				"scripts/FacetedSearch/FS_ArticlePropertiesWidget.js",
+				"scripts/FacetedSearch/FS_CreateArticleWidget.js",
+				"scripts/FacetedSearch/FS_LinkCurrentSearchWidget.js",
+				"scripts/FacetedSearch/FS_NamespaceFacetWidget.js",
+				"scripts/FacetedSearch/FS_FacetPropertyValueWidget.js",
+				"scripts/FacetedSearch/FS_CurrentSearchWidget.js",
+				"scripts/FacetedSearch/FS_FacetedSearch.js",
+				"scripts/FacetedSearch/FS_FacetClusterer.js",
+				"scripts/FacetedSearch/FS_NumericFacetClusterer.js",
+				"scripts/FacetedSearch/FS_StringFacetClusterer.js",
+				"scripts/FacetedSearch/FS_BooleanFacetClusterer.js",
+				"scripts/FacetedSearch/FS_DateFacetClusterer.js",
+				"scripts/FacetedSearch/FS_ClusterWidget.js",
+				"scripts/FacetedSearch/FS_FacetClustererFactory.js"
+			],
+			"styles": [
+				"skin/faceted_search.css"
+			],
+			"dependencies": [
+				"ext.facetedSearch.ajaxSolr"
+			],
+			"messages": [
+				"solrNotFound",
+				"solrConnectionError",
+				"tryConnectSOLR",
+				"more",
+				"less",
+				"noFacetFilter",
+				"noFacetsFound",
+				"underspecifiedSearch",
+				"session_lost",
+				"removeFilter",
+				"removeRestriction",
+				"removeAllFilters",
+				"pagerPrevious",
+				"pagerNext",
+				"results",
+				"to",
+				"of",
+				"ofapprox",
+				"inCategory",
+				"show",
+				"hide",
+				"showDetails",
+				"hideDetails",
+				"lastChange",
+				"addFacetOrQuery",
+				"mainNamespace",
+				"namespaceTooltip",
+				"allNamespaces",
+				"nonexArticle",
+				"searchLink",
+				"searchLinkTT",
+				"_TYPE",
+				"_URI",
+				"_SUBP",
+				"_SUBC",
+				"_UNIT",
+				"_IMPO",
+				"_CONV",
+				"_SERV",
+				"_PVAL",
+				"_MDAT",
+				"_CDAT",
+				"_NEWP",
+				"_LEDT",
+				"_ERRP",
+				"_LIST",
+				"_SOBJ",
+				"_ASK",
+				"_ASKST",
+				"_ASKFO",
+				"_ASKSI",
+				"_ASKDE"
+			]
+		},
+		"ext.facetedSearch.enhancements": {
+			"group": "ext.facetedSearch",
+			"scripts": [
+				"scripts/FacetedSearch/Enhancements/fs_categoryFilter.js",
+				"scripts/FacetedSearch/Enhancements/fs_propertySelector.js",
+				"scripts/FacetedSearch/Enhancements/fs_categorySelector.js",
+				"scripts/FacetedSearch/Enhancements/fs_facetValueDialog.js",
+				"scripts/FacetedSearch/Enhancements/fs_enhancements.js"
+			],
+			"styles": [
+				"skin/dialogs.css"
+			],
+			"dependencies": [
+				"ext.facetedSearch.special",
+				"ext.bootstrap.styles",
+				"ext.bootstrap.scripts"
+			]
+		}
+	}
 }

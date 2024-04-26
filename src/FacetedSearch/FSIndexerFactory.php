@@ -44,30 +44,30 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  */
 class FSIndexerFactory {
 
-	/**
-	 * Creates an indexer object which is described by the given configuration.
-	 *
-	 * @param array $indexerConfig
-	 * 	This array has the following key value pairs:
-	 *    'indexer' => 'SOLR'
-     *    'source'  => 'SMWDB'
-	 *    'proxyHost' => hostname of the proxy
-     *    'proxyServlet' => the part of the URL after the port
-     *    'indexerHost'  => hostname of the indexer as seen from the wiki server
-     *    'indexerPort'  => port number of the indexer as seen from the wiki server
-     *  If <null> (default), the global configuration which is stored in the
-     *  variable $fsgFacetedSearchConfig is used.
+    /**
+     * Creates an indexer object which is described by the given configuration.
+     *
+     * @param array|null $indexerConfig
+     *      This array has the following key value pairs:
+     *      'indexer' => 'SOLR'
+     *      'source'  => 'SMWDB'
+     *      'proxyHost' => hostname of the proxy
+     *      'proxyServlet' => the part of the URL after the port
+     *      'indexerHost'  => hostname of the indexer as seen from the wiki server
+     *      'indexerPort'  => port number of the indexer as seen from the wiki server
+     *      If <null> (default), the global configuration which is stored in the
+     *      variable $fsgFacetedSearchConfig is used.
      *
      * @return FSIndexerInterface
-     * 	An instance of the interface IFSIndexer
+     *      An instance of the interface IFSIndexer
      * @throws FSException
-     * 	INCOMPLETE_CONFIG: If the configuration is incomplete
-     *  UNSUPPORTED_VALUE: If a value for a field in the configuration is not supported
-	 */
+     *      INCOMPLETE_CONFIG: If the configuration is incomplete
+     *      UNSUPPORTED_VALUE: If a value for a field in the configuration is not supported
+     */
 	public static function create(array $indexerConfig = null) {
 		if (is_null($indexerConfig)) {
 			global $fsgFacetedSearchConfig;
-			$indexerConfig = $fsgFacetedSearchConfig;
+			$indexerConfig = $fsgFacetedSearchConfig ?? [];
 		}
 		// Check if the configuration is complete
 		$expKeys = array('indexer' => 0, 'source' => 0, 'proxyHost' => 0,
@@ -75,35 +75,28 @@ class FSIndexerFactory {
 		                 'indexerPort' => 0);
 		$missingKeys = array_diff_key($expKeys, $indexerConfig);
 		if (count($missingKeys) > 0) {
-			$missingKeys = "The following keys are missing: ".implode(', ', array_keys($missingKeys));
+			$missingKeys = "The following keys are missing: " . json_encode(array_keys($missingKeys));
 			throw new FSException(FSException::INCOMPLETE_CONFIG, $missingKeys);
 		}
 
 		// Check if the configuration is supported
-		$unsupported = array();
-		if (!in_array($indexerConfig['indexer'], array('SOLR'))) {
-			$unsupported[] = "indexer => {$indexerConfig['indexer']}";
+		$unsupported = [];
+		if ($indexerConfig['indexer'] != 'SOLR') {
+			$unsupported["indexer"] = $indexerConfig['indexer'];
 		}
-		if (!in_array($indexerConfig['source'], array('SMWDB'))) {
-			$unsupported[] = "source => {$indexerConfig['source']}";
+		if ($indexerConfig['source'] != 'SMWDB') {
+			$unsupported["source"] = $indexerConfig['source'];
 		}
 		if (count($unsupported) > 0) {
-			$unsupported = "The following values are not supported:\n".implode("\n", $unsupported);
+			$unsupported = "The following values are not supported: " . json_encode($unsupported);
 			throw new FSException(FSException::UNSUPPORTED_VALUE, $unsupported);
 		}
 
 		// Create the indexer object
-		if ($indexerConfig['indexer'] == 'SOLR') {
-			// Indexer is Apache SOLR
-			if ($indexerConfig['source'] == 'SMWDB') {
-				// The SMW database is indexed
-				return new FSSolrSMWDB($indexerConfig['indexerHost'],
-									   $indexerConfig['indexerPort'],
-									   $indexerConfig['indexerUser'],
-									   $indexerConfig['indexerPass'],
-									   $indexerConfig['indexerCore']);
-			}
-		}
-		return null;
+        return new FSSolrSMWDB($indexerConfig['indexerHost'],
+                               $indexerConfig['indexerPort'],
+                               $indexerConfig['indexerUser'],
+                               $indexerConfig['indexerPass'],
+                               $indexerConfig['indexerCore']);
 	}
 }

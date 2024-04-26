@@ -271,7 +271,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
         // send document to Tika and extract text
         if ($filepath == '') {
             if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
-                throw new Exception(sprintf("\n - WARNING: Empty file path for '%s'. Can not index document properly.\n", $title->getPrefixedText()));
+                throw new Exception(sprintf("\nWARN  Empty file path for '%s'. Can not index document properly.\n", $title->getPrefixedText()));
             }
             return;
         }
@@ -279,7 +279,8 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
         $result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);
 
         if ($rc != 200) {
-            throw new Exception(sprintf('Keine Extraktion möglich: %s HTTP code: [%s] ', $title->getPrefixedText(), $rc));
+            throw new Exception(sprintf("\nERROR Keine Extraktion möglich: %s (HTTP code: %s) %s\n", 
+                    $title->getPrefixedText(), $rc, $result));
         }
 
         // SOLR-4 uses XML as default
@@ -301,7 +302,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
         $text = preg_replace('/\s\s*/', ' ', $text );
 
         if ($text == '') {
-            throw new Exception(sprintf('Keine Extraktion möglich: %s', $title->getPrefixedText()));
+            throw new Exception(sprintf("\nWARN Kein extrahierter Text gefunden: %s\n", $title->getPrefixedText()));
         }
 
         return [ 'xml' => $xml, 'text' => $text ];
@@ -377,7 +378,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
      *
      */
     public function deleteDocument($id) {
-        $cmd = str_replace('$1', $id, self::DELETE_DOCUMENT_BY_ID);
+        $cmd = str_replace('$1', "$id", self::DELETE_DOCUMENT_BY_ID);
         $rc = $this->postCommand(self::COMMIT_UPDATE_CMD, $cmd);
         return $rc == self::HTTP_OK;
     }
@@ -446,14 +447,14 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
 
         $result = curl_exec($curl);
         if ($result === false) {
-            throw new Exception(curl_error($curl), 500);
+            throw new Exception("\nERROR CURL error " . curl_error($curl) . "\n", 500);
         }
         $info = curl_getinfo($curl);
         curl_close($curl);
 
         $HTTPCode = $info['http_code'];
         if ($HTTPCode != 200) {
-            throw new Exception("\n[Payload]:\n$data\n[HTTP response]:\n$result", $HTTPCode);
+            throw new Exception("\nERROR HTTP error $HTTPCode for command $command.\nERROR Payload:\n$data\nERROR HTTP response:\n$result", $HTTPCode);
         }
         return $HTTPCode;
     }
