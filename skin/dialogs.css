@@ -18,3 +18,20 @@
 	float: left;
 	width: 30%;
 }
+
+ul.fs-custom-root-node {
+	overflow: auto;
+	height: 400px;
+}
+
+#fs-facet-value-dialog ul {
+	list-style: none; /* Remove bullets */
+}
+
+#fs-facet-value-dialog input {
+	margin-right: 5px;
+}
+
+ ul.fs-custom-root-node > li {
+	margin-top: 15px;
+}

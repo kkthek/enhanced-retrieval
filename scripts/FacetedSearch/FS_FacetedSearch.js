@@ -208,7 +208,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		initNamespaces();
 		
 		// Show all results at start up
-		updateSearchResults();
+		updateSearchResults(true);
 	}
 	that.createUserInterface = createUserInterface;
 	
@@ -220,8 +220,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		that.timerstamp = timestamp;
 		window.setTimeout(function () {
 			if (that.timerstamp == timestamp) {
-				
-				updateSearchResults();
+				updateSearchResults(false);
 				
 				if (!solrPresent) {
 					checkSolrPresent();
@@ -250,7 +249,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * triggered.
 	 */
 	that.onSearchButtonClicked = function () {
-		updateSearchResults();
+		updateSearchResults(false);
 
 		if (!solrPresent) {
 			checkSolrPresent();
@@ -270,7 +269,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	 * Gets the search term from the input field and triggers a new SOLR request.
 	 * All widgets will be updated.
 	 */
-	function updateSearchResults() {
+	function updateSearchResults(init) {
 		var searchText = getSearch(); 
 		
 		// If the query is enclosed in parentheses it is treated as an expert query.
@@ -288,10 +287,31 @@ FacetedSearch.classes.FacetedSearch = function () {
 		
 		mAjaxSolrManager.store.addByValue('q.alt', QUERY_FIELD + ':' + qs);
 		mAjaxSolrManager.store.addByValue('searchText', searchText);
-		readPrefixParameter();
+		var params = init ? readPrefixParameter() : {};
+
+		if (init && !params.category) {
+			var category = $('select#fs_category_filter option:selected').val();
+			if (category && category !== '') {
+				mAjaxSolrManager.store.addByValue('fq', 'smwh_categories:' + category);
+			}
+		}
+
+		if (init && !params.sort) {
+			var selected = $("#fs_sort_order_drop_down option:selected");
+			var order = selected.length > 0 ? selected[0].value : '';
+			var sort = getSortOrderModifier(order);
+			mAjaxSolrManager.store.addByValue('sort', sort);
+		}
+
+		if (init && !params.namespace) {
+			var namespace = $('.xfsSelectedNamespace').attr('namespace');
+			if (namespace && namespace !== '') {
+				mAjaxSolrManager.store.addByValue('fq', 'smwh_namespace_id:' + namespace);
+			}
+		}
 		mAjaxSolrManager.doRequest(0);
 	}
-	
+
 	/**
 	 * Prepare query for exact title matches
 	 */
@@ -366,6 +386,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 				queryString += "+" + w + " AND ";
 
 			}
+
 		}
 		
 		// Escape special characters in phrases
@@ -475,6 +496,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		
 		// clear init parameters
 		$('input#fs-prefix-param').val('');
+		return params;
 	}
 	
 	/**
@@ -552,7 +574,6 @@ FacetedSearch.classes.FacetedSearch = function () {
 					field : NAMESPACE_FIELD,
 					mNamespaces: ns
 				}));
-				
 			}
 		});
 		sm.init();
@@ -632,7 +653,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 			sort = DISPLAY_TITLE_FIELD + ' desc, score desc';
 			break;
 		default:
-			sort = 'score desc';
+			sort = 'score desc, ' + DISPLAY_TITLE_FIELD + ' asc';
 		}
 		return sort;
 	}
@@ -752,6 +773,29 @@ FacetedSearch.classes.FacetedSearch = function () {
 		mAjaxSolrManager.init();
 		initParameterStore();
 		checkSolrPresent();	
+	}
+
+	that.extractDisplayName = function(facetValue) {
+		return facetValue.indexOf('|') > -1 ? facetValue.substr(facetValue.indexOf('|')+1) : facetValue;
+	}
+
+	that.extractPropertyName = function(property) {
+		// Try attribute
+		var plainName = property.match(ATTRIBUTE_REGEX);
+		if (plainName) {
+			return noUnderscore(plainName[1]);
+		}
+		// Try relation
+		plainName = property.match(RELATION_REGEX);
+		if (plainName) {
+			return noUnderscore(plainName[1]);
+		}
+		// Neither attribute nor relation => return the given name
+		return noUnderscore(property);
+	}
+
+	function noUnderscore(string) {
+		return string.replace(/_/g, ' ');
 	}
 	
 	construct();

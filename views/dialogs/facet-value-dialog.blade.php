@@ -13,15 +13,24 @@
       </div>
 
       <div class="modal-body">
+        <div class="fsgFacetDialogMetadata" toremove="{{$toRemove}}" style="display: none;"></div>
         <p>Wählen Sie die Werte aus, die berücksichtigt werden sollen.</p>
-        <table style="width: 80%">
+        <span>Filter</span><input type="text" id="search-field" style="width: 100%; margin-top:3px" />
+        <div style="height: 400px; margin-top: 10px;">
+        <table style="width: 80%; overflow: auto">
         @foreach($values as $val)
           <div class="facet">
-            <input type="checkbox" value="{{$val['id'] == $val['label'] ? $val['id'] : $val['id'].'|'.$val['label']}}" />
+            <input type="checkbox" i
+                   isLeaf="true"
+                   filtervalue="{{mb_strtolower($val['label'])}}"
+                   value="{{$val['facetValue']}}"
+                   propertyfacet="{{$val['propertyFacet']}}"
+                   property="{{$val['property']}}"/>
             {!!$val['label']!!}
           </div>
         @endforeach
         </table>
+        </div>
       </div>
 
       <div class="modal-footer">

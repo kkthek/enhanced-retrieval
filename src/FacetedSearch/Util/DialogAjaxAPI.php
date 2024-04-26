@@ -2,7 +2,7 @@
 namespace DIQA\FacetedSearch\Util;
 
 use ApiBase;
-use DIQA\FacetedSearch\FacetedSearchUtil;
+use MediaWiki\MediaWikiServices;
 use Philo\Blade\Blade;
 use Title;
 
@@ -21,26 +21,28 @@ class DialogAjaxAPI extends ApiBase {
 	public function execute() {
 		$params = $this->extractRequestParams ();
 
+        global $fsgFacetsDialogWithCustomContent;
+        $customContent = in_array($params['property'], $fsgFacetsDialogWithCustomContent) ?? false;
+
 		switch ($params ['method']) {
 			case 'getSelectFacetValueDialog' :
-				$this->getSelectFacetValueDialog ( $params );
+			    if ($customContent !== false) {
+			        $this->getSelectFacetValueFromCustomContent($params);
+                } else {
+                    $this->getSelectFacetValueDialog($params);
+                }
 				break;
 		}
 	}
 
 	private function getSelectFacetValueDialog($params) {
-		global $wgServer, $wgScriptPath;
 
-		$distinctPropertyValues = FacetedSearchUtil::getDistinctPropertyValues($params ['property']);
-		usort($distinctPropertyValues, function($e1, $e2) {
-			return strcmp(strtolower($e1['label']), strtolower($e2['label']));
-		});
-
-		$propertyTitle = Title::newFromText($params ['property'], SMW_NS_PROPERTY);
+		$facetValues = new FacetValueGenerator($params ['property']);
 
 		$html = $this->blade->view ()->make ( "dialogs.facet-value-dialog",
-				array ('values' => $distinctPropertyValues,
-					   'facetName' => $propertyTitle->getText())
+				array ('values' => $facetValues->getFacetData(),
+					   'toRemove' => json_encode($facetValues->getFacetsToRemove()),
+					   'facetName' => $params ['property'])
 		 )->render ();
 
 		$htmlResult = ['html'=>$html];
@@ -48,6 +50,25 @@ class DialogAjaxAPI extends ApiBase {
 		$result->setIndexedTagName ( $htmlResult, 'p' );
 		$result->addValue ( null, $this->getModuleName (), $htmlResult );
 	}
+
+    private function getSelectFacetValueFromCustomContent($params) {
+
+        $content = [];
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run('fsgCustomFacetDialogContent', [ $params ['property'], & $content ]);
+
+        $html = $this->blade->view ()->make ( "dialogs.facet-custom-dialog",
+            [
+                'content' => $content[$params ['property']] ?? '',
+                'facetName' => $params ['property']
+            ]
+        )->render ();
+
+        $htmlResult = ['html'=>$html];
+        $result = $this->getResult ();
+        $result->setIndexedTagName ( $htmlResult, 'p' );
+        $result->addValue ( null, $this->getModuleName (), $htmlResult );
+    }
 
 	protected function getAllowedParams() {
 		return array (

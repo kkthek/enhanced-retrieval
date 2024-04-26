@@ -338,7 +338,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             // if no property given, just extract the nicename
             $.each(plainNames, function() {
                 var nicename = window.XFS.translateName ? window.XFS.translateName(this) : this;
-                nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
+                nicename = nicename.split('|').length > 1 ? nicename.split('|')[1] : nicename;
                 vals.push(noUnderscore(nicename));
             });
 
@@ -346,7 +346,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             // Relation values are rendered as link
             $.each(plainNames, function() {
                 var nicename = window.XFS.translateName ? window.XFS.translateName(this) : this;
-                nicename = this.split('|').length > 1 ? this.split('|')[1] : this;
+                nicename = nicename.split('|').length > 1 ? nicename.split('|')[1] : nicename;
                 var link = this.split('|').length > 1 ? this.split('|')[0] : this;
 
                 if (returnLinks) {
@@ -739,23 +739,16 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
         var nicename = retrieveDisplayName(plainName, handlerData ? handlerData.field : null, false);
 
         if (isRemove) {
-            html =
-                '<span' + tooltip + ' class="'+cssClass+'">' +
-                nicename +
-                    '<img class="xfsRemoveFacet" src="' + REMOVE_ICON +'" ' +
-                        'title="'+ mw.msg('removeFilter') +'"/>' +
-            (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '') +
-                '</span>';
+            html = '<span' + tooltip + ' class="'+cssClass+'">' + nicename + '</span>' +
+                   '<img class="xfsRemoveFacet ' + cssClass + '" src="' + REMOVE_ICON +'" title="' + mw.msg('removeFilter') + '"/>' +
+                   (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '');
+
         } else {
-
-            html =
-                '<span class="addFacet fs_propertyFacet">' +
-                    '<a href="#"' + tooltip + '>' + nicename + '</a> ' +
-                    '<span class="xfsMinor">(' + count + ')</span>' +
-                    (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '') +
-
-                '</span>';
+            html = '<a href="#"' + tooltip + ' class="addFacet">' + nicename + '</a> ' +
+                   '<span class="xfsMinor">(' + count + ')</span>' +
+                   (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '');
         }
+
         var path = mw.config.get('wgScriptPath') + IMAGE_PATH;
         if (isProperty(facet)) {
             var facetsExpanded = FacetedSearch.singleton.FacetedSearchInstance.isExpandedFacet(facet);
@@ -794,7 +787,9 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             var img = '<img src="' + path + 'item.png" class="fs_categoryFacet">';
             html = img + html;
         }
-        html = $('<div>' + html + '</div>');
+
+        html = $('<div class="' + cssClass + '">' + html + '</div>' + '<div style="clear: both;"></div>');
+
         // Attach the event handlers
         html.find('.addFacet').bind('click', handlerData, handler);
         html.find('.xfsRemoveFacet').bind('click', handlerData, handler);
@@ -843,11 +838,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
     };
 
     AjaxSolr.theme.prototype.no_items_found_with_facetvalue = function(facet) {
-        var parts = facet.split(':');
-        var value = parts.length > 1 ? parts[1].split('|') : parts;
-        var label = (value.length > 1 ? value[1] : value[0]);
-        label = label.replace(/"/g, '');
-        return $('<div>').addClass('xfsClusterEntry').html(label);
+        return $('<div>').addClass('xfsClusterEntry').html(mw.msg('noFacetsFound'));
     };
 
     AjaxSolr.theme.prototype.no_facet_filter_set = function() {

@@ -178,7 +178,9 @@ global $fsgDateTimePropertyClusters;
 $fsgDateTimePropertyClusters = [];
 
 /**
- * User configurable category drop-down
+ * User configurable category drop-down of the form ["label" => "Category"].
+ * The first entry determines the default.
+ * The entry with an empty key '' represents "no selected category filter".
  */
 global $fsgCategoryFilter;
 $fsgCategoryFilter = [];
@@ -280,7 +282,7 @@ global $fsgIndexImageURL;
 $fsgIndexImageURL = false;
 
 /**
- * Pages of these namespaces are shown in the global search field (requires a patch)
+ * Properties which have custom content in the facet dialog
  */
-global $fsgNamespacesForSearchField;
-$fsgNamespacesForSearchField = [ NS_MAIN ];
+global $fsgFacetsDialogWithCustomContent;
+$fsgFacetsDialogWithCustomContent = [];

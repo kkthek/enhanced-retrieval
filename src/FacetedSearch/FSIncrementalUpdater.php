@@ -12,7 +12,7 @@ use WikiPage;
 use Title;
 use SMWStore;
 use SMW\SemanticData;
-
+use JobQueueGroup;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -71,7 +71,8 @@ class FSIncrementalUpdater  {
      */
     public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
         $wikiTitle = $semanticData->getSubject()->getTitle();
-        return self::updateArticle($wikiTitle);
+        self::createUpdateJob($wikiTitle);
+        return true;
     }
 
     /**
@@ -94,7 +95,8 @@ class FSIncrementalUpdater  {
             $smwgNamespacesWithSemanticLinks[$wikiTitle->getNamespace()] === true) {
             return; // already updated in onUpdateDataAfter
         }
-        return self::updateArticle($wikiTitle);
+        self::createUpdateJob($wikiTitle);
+        return true;
 
     }
 
@@ -239,5 +241,14 @@ class FSIncrementalUpdater  {
             wfDebugLog("EnhancedRetrieval", "Could not update article in SOLR. Reason: ".$e->getMessage());
         }
         return true;
+    }
+
+    private static function createUpdateJob(Title $wikiTitle): void
+    {
+        $params = [];
+        $params['title'] = $wikiTitle->getPrefixedText();
+        $title = Title::makeTitle(NS_SPECIAL, 'Search');
+        $job = new UpdateSolrJob($title, $params);
+        JobQueueGroup::singleton()->push($job);
     }
 }

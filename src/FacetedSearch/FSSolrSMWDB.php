@@ -397,7 +397,7 @@ SQL;
      * @param string  $propertyName
      * @return string
      */
-    private static function encodeTitle($propertyName) {
+    public static function encodeTitle($propertyName) {
         // turns non-acii and some special characters into percent encoding, e.g. %3A
         $tmp = rawurlencode($propertyName);
 
@@ -439,6 +439,39 @@ SQL;
         // all others are regarded as string/text
         return "smwh_{$prop}_xsdvalue_t";
     }
+
+    /**
+     * Returns the SOLR field name for a property value constraint
+     * @param SMWDIProperty $property
+     *
+     * @return string
+     */
+    public static function encodeSOLRFieldNameForValue($property) {
+        $prop = str_replace(' ', '_', $property->getLabel());
+
+        $prop = self::encodeTitle($prop);
+
+        $typeId = $property->findPropertyValueType();
+        $type = DataTypeRegistry::getInstance()->getDataItemByType($typeId);
+
+        // The property names of all attributes are built based on their type.
+        switch($type) {
+            case SMWDataItem::TYPE_BOOLEAN:
+                return "smwh_{$prop}_xsdvalue_b";
+            case SMWDataItem::TYPE_NUMBER:
+                return "smwh_{$prop}_numvalue_d";
+            case SMWDataItem::TYPE_BLOB:
+                return "smwh_{$prop}_xsdvalue_s";
+            case SMWDataItem::TYPE_WIKIPAGE:
+                return "smwh_{$prop}_s";
+            case SMWDataItem::TYPE_TIME:
+                return "smwh_{$prop}_xsdvalue_dt";
+        }
+
+        // all others are regarded as wikipage
+        return "smwh_{$prop}_s";
+    }
+
 
     /**
      * Retrieves the SMW-ID of the article with the $namespaceID and the $title

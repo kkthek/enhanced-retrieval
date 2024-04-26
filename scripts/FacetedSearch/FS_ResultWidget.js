@@ -240,8 +240,10 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		fields = fields.concat(["score"]);
 		
 		asm.store.addByValue('fl', fields);
-		var query = fs.DOCUMENT_ID + ':' + docData.id;
-		asm.store.addByValue('q.alt', query);
+
+		// query for documentID and use q here, since no wild cards are involved
+		var documentID = fs.DOCUMENT_ID + ':' + docData.id;
+		asm.store.addByValue('q', documentID);
 		
 		this.mArticlePropertiesWidget.setTarget(domElement);
 		asm.doRequest(0);

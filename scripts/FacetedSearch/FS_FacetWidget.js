@@ -134,11 +134,33 @@ FacetedSearch.classes.FacetWidget = AjaxSolr.AbstractFacetWidget.extend({
 				});
 			}
 		}
-				
+
+		if (mw.user.options.values['er-sort-order-preferences'] === 'sort-alphabetically') {
+			this.sortAlphabetically();
+		} else {
+			this.sortByCount();
+		}
+
+			
+	},
+
+	sortAlphabetically: function() {
+		var fsi = FacetedSearch.singleton.FacetedSearchInstance;
+		this.mFacetItems.sort(function(a, b) {
+			var aDisplay  = fsi.extractDisplayName(a.facet);
+			var bDisplay  = fsi.extractDisplayName(b.facet);
+			aDisplay = fsi.extractPropertyName(aDisplay);
+			bDisplay = fsi.extractPropertyName(bDisplay);
+			aDisplay = window.XFS.translateName(aDisplay);
+			bDisplay = window.XFS.translateName(bDisplay);
+			return aDisplay.toLowerCase().localeCompare(bDisplay.toLowerCase());
+		});
+	},
+
+	sortByCount: function() {
 		this.mFacetItems.sort(function(a, b) {
 			return a.count > b.count ? -1 : 1;
 		});
-			
 	},
 	
 	/**

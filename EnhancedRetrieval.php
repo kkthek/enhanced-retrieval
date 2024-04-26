@@ -2,6 +2,7 @@
 use DIQA\FacetedSearch\FSGlobalFunctions;
 use DIQA\FacetedSearch\Proxy\SolrProxy\ConfigLoader;
 use DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial;
+use DIQA\FacetedSearch\UserPreference;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA-Projektmanagement GmbH
@@ -47,7 +48,12 @@ $wgExtensionMessagesFiles['FacetedSearch'] = $dir . '/src/FacetedSearch/Language
 
 global $wgHooks;
 $wgHooks['ParserFirstCallInit'][] = 'DIQA\FacetedSearch\FSGlobalFunctions::initializeBeforeParserInit';
+$wgHooks['BeforePageDisplay'][] = 'DIQA\FacetedSearch\FSGlobalFunctions::onBeforePageDisplay';
 $wgHooks['fs_extendedFilters'][] = 'DIQA\FacetedSearch\FacetedCategoryFilter::addFilter';
+$wgHooks['GetPreferences'][] = 'DIQA\FacetedSearch\UserPreference::setupPreferences';
+
+global $wgDefaultUserOptions;
+$wgDefaultUserOptions['er-sort-order-preferences'] = UserPreference::$defaultSortOrder;
 
 global $wgAPIModules;
 $wgAPIModules['fs_dialogapi'] = 'DIQA\FacetedSearch\Util\DialogAjaxAPI';

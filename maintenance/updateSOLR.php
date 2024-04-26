@@ -20,6 +20,7 @@ class UpdateSolr extends Maintenance
         parent::__construct();
         $this->mDescription = "Updates SOLR index";
         $this->addOption('v', 'Verbose mode', false, false);
+        $this->addOption('g', 'Get the maximum ID of pages that would be updated (all other parameters are ignored if this is present)', false, false);
         $this->addOption('d', 'Delay every 100 pages (miliseconds)', false, true);
         $this->addOption('x', 'Debug mode', false, false);
         $this->addOption('p', 'Page title(s), separated by ","', false, true);
@@ -32,6 +33,16 @@ class UpdateSolr extends Maintenance
 
     public function execute()
     {
+        if( !defined( 'ER_EXTENSION_VERSION' ) ) {
+            echo("ERROR: The enhanced retrievel extension is not properly installed or configured.\n");
+            die(1);
+        }
+
+        if( $this->hasOption('g') ) {
+            $max = $this->getMaxId();
+            print "$max\n";
+            return;
+        }
 
         // when indexing everything, dependent pages do not need special treatment
         global $fsUpdateOnlyCurrentArticle;
@@ -192,31 +203,39 @@ class UpdateSolr extends Maintenance
      */
     private function getEndId($start)
     {
-        if ($this->hasOption('e')) { // Note: this might reasonably be larger than the page count
+        if ($this->hasOption('e')) { 
+            // Note: this might reasonably be larger than the page count
             $end = intval($this->getOption('e'));
+
         } elseif ($this->hasOption('n')) {
             $end = $start + intval($this->getOption('n'));
+
         } elseif ($this->hasOption('f')) {
             $title = Title::newFromText($this->getOption('f'));
             $start = $title->getArticleID();
             $end = $title->getArticleID();
+
         } else {
-            $db = wfGetDB(DB_REPLICA);
-            $page_table = $db->tableName("page");
-            $query = "SELECT MAX(page_id) as maxid FROM $page_table";
-            $res = $db->query($query);
-            if ($db->numRows($res) > 0) {
-                while ($row = $db->fetchObject($res)) {
-                    $end = $row->maxid;
-                }
-                if ($end == '') {
-                    echo "\nThere are no pages. Nothing to do.\n";
-                    die();
-                }
-            }
+            $end = $this->getMaxId();
         }
         return $end;
     }
+
+    private function getMaxId() {
+        $db = wfGetDB(DB_REPLICA);
+        $page_table = $db->tableName("page");
+        $query = "SELECT MAX(page_id) as maxid FROM $page_table";
+        $res = $db->query($query);
+        if ($db->numRows($res) > 0) {
+            $row = $db->fetchObject($res);
+            if( $row ) {
+                return $row->maxid;
+            }
+        }
+        return 0;
+    }
+
+
 }
 
 $maintClass = "UpdateSolr";

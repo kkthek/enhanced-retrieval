@@ -39,7 +39,13 @@ $messages['en'] = array(
 	'fs_facetedsearchspecial' => 'FacetedSearch',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Faceted Search',
 
-	//--- Messages for the special page ---
+    // Messages for the user preferences dialog
+	'prefs-enhanced-retrieval' => 'FacetedSearch',
+    'prefs-Standard-Sortierung-Facetten' => 'Sort Order of Facettes',
+    'sort-alphabetically' => 'Sort facettes alphabetically',
+    'sort-by-count' => 'Sort facettes by number of matches',
+
+    // Messages for the special page
 	'fs_title'            => 'Faceted Search',
 	'fs_search'           => 'Find',
 	'fs_categories'       => 'Categories',
@@ -54,6 +60,7 @@ $messages['en'] = array(
 	'fs_title_ascending'  => 'Title ascending',
 	'fs_title_descending' => 'Title descending',
 	'fs_sort_by'          => 'Sort by',
+	'fs_all_pages'        => 'All Wiki pages',
 
 	'fs_prop_ignoreasfacet' => 'Ignore as facet',
 
@@ -66,6 +73,7 @@ $messages['en'] = array(
 	'more' 				=> 'more',
 	'less' 				=> 'less',
 	'noFacetFilter'		=> '(no facets selected)',
+	'noFacetsFound'		=> '(no facets found)',
 	'underspecifiedSearch' => 'Your current search may match too many results. Please refine it!',
 	'session_lost'      => 'Mediawiki session got lost. Please re-login.',
 	'removeFilter'		=> 'Remove this facet',
@@ -124,7 +132,13 @@ $messages['de'] = array(
 	'fs_facetedsearchspecial' => 'Facettierte Suche',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Facettierte Suche',
 
-	//--- Messages for the special page ---
+    // Messages for the user preferences dialog
+    'prefs-enhanced-retrieval' => 'Facettierte Suche',
+    'prefs-Standard-Sortierung-Facetten' => 'Sortierung der Facetten',
+    'sort-alphabetically' => 'Alphabetisch sortieren',
+    'sort-by-count' => 'Nach Häufigkeit sortieren',
+
+	// Messages for the special page
 	'fs_title'            => 'Facettensuche',
 	'fs_search'           => 'Finde',
 	'fs_categories'       => 'Kategorien',
@@ -139,6 +153,7 @@ $messages['de'] = array(
 	'fs_title_ascending'  => 'Artikelname aufsteigend',
 	'fs_title_descending' => 'Artikelname absteigend',
 	'fs_sort_by'          => 'Sortierung:',
+	'fs_all_pages'        => 'Alle Wikiseiten',
 
 	'fs_prop_ignoreasfacet' => 'Ignoriere als Facette',
 
@@ -151,6 +166,7 @@ $messages['de'] = array(
 	'more' 				=> 'mehr',
 	'less' 				=> 'weniger',
 	'noFacetFilter'		=> '(Keine Facetten ausgewählt.)',
+    'noFacetsFound'		=> '(Keine Facetten gefunden)',
 	'underspecifiedSearch' => 'Ihre aktuelle Suche hat zu viele Treffer. Bitte verfeinern Sie sie!',
 	'session_lost'      => 'Browser-Session ist abgelaufen. Bitte loggen Sie sich neu ein.',
 	'removeFilter'		=> 'Diese Facette enfernen',

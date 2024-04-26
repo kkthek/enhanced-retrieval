@@ -3,6 +3,9 @@ namespace DIQA\FacetedSearch;
 
 use Bootstrap\BootstrapManager;
 use SMW\StoreFactory;
+use OutputPage;
+use Skin;
+
 /*
  * Copyright (C) Vulcan Inc., DIQA Projektmanagement GmbH
  *
@@ -60,6 +63,8 @@ class FSGlobalFunctions {
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onArticleDelete';
             $wgHooks['ApprovedRevsRevisionApproved'][] =
                     'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved';
+            $wgHooks['PageSaveComplete'][] =
+                'DIQA\FacetedSearch\FSIncrementalUpdater::onPageSaveComplete';
         }
 
         // Register specials pages
@@ -136,6 +141,7 @@ class FSGlobalFunctions {
                         'more'                 ,
                         'less'                 ,
                         'noFacetFilter'        ,
+                        'noFacetsFound'        ,
                         'underspecifiedSearch' ,
                         'session_lost' ,
                         'removeFilter'        ,
@@ -204,22 +210,23 @@ class FSGlobalFunctions {
         );
     }
 
+    public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+        global $fsgFacetsDialogWithCustomContent;
+        $out->addJsConfigVars('fsgFacetsDialogWithCustomContent', $fsgFacetsDialogWithCustomContent );
+    }
+
     /**
      * Called before parser is initialized
      */
     public static function initializeBeforeParserInit() {
-
-        global $wgOut;
-        global $fsgNamespacesForSearchField;
-        $wgOut->addJsConfigVars('fsgNamespacesForSearchField', $fsgNamespacesForSearchField);
-
         $currentTitle = \RequestContext::getMain()->getTitle();
         if( is_null($currentTitle) || $currentTitle->getNamespace() != NS_SPECIAL ||
                ($currentTitle->getText() != 'Suche' && $currentTitle->getText() != 'Search')) {
             return;
         }
 
-        global $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgDateTimePropertyClusters,
+        global $wgOut,
+                $fsgExtraPropertiesToRequest, $fsgNumericPropertyClusters, $fsgDateTimePropertyClusters,
                 $fsgShowArticleProperties, $fsgShowSolrScore,
                 $fsgShownFacets, $fsgFacetsWithOR, $fsgShownCategoryFacets,
                 $fsgCategoriesToShowInTitle, $fsgShowFileInOverlay,
