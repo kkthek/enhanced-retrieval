@@ -35,7 +35,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 	die(1);
 }
 
-define('ER_EXTENSION_VERSION', '2.3');
+define('ER_EXTENSION_VERSION', '2.4');
 wfLoadExtension( 'EnhancedRetrieval', dirname( __FILE__ ) . '/extension.json' );
 
 global $wgJobClasses;
