@@ -1,9 +1,9 @@
-== Enhanced Retrieval Extension 2.3 ==
+== Enhanced Retrieval Extension 2.5 ==
 
 === Requirements ===
 * PHP 7.x
 * Composer
-* MediaWiki 1.37.x
+* MediaWiki 1.38+
 * SMW 3.x
 * Apache SOLR server v8.30+
 
