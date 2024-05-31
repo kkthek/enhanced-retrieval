@@ -22,7 +22,7 @@
 #fs_query_button, .fs_category_filter, .fs_sort_order {
 	margin-top: 5px;
 	margin-bottom: 5px;
-	padding: 0px;
+	padding: 0;
 }
 
 #search_button {
@@ -217,8 +217,7 @@ a.xfsAddFacetOperation {
 }
 
 div.xfs_additional_property_table {
-	border: 1px solid;
-	border-color: lightgray;
+	border: 1px solid lightgray;
 	display: block;
 	width: 100%;
 }

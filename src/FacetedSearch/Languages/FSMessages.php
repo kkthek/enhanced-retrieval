@@ -38,9 +38,14 @@ $messages['en'] = array(
 	'facetedsearch-desc'      => 'EnhancedRetrieval provides faceted search for MediaWiki and SMW. It requires [https://www.diqa.de/de/Power-Search_for_MediaWiki DIQA powersearch] as backend.',
 	'fs_facetedsearchspecial' => 'FacetedSearch',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Faceted Search',
-	'prefs-enhanced-retrieval' => 'FacetedSearch',
 
-	//--- Messages for the special page ---
+	// Messages for the user preferences dialog
+	'prefs-enhanced-retrieval' => 'FacetedSearch',
+	'prefs-Standard-Sortierung-Facetten' => 'Sort Order of Facettes',
+	'sort-alphabetically' => 'Sort facettes alphabetically',
+	'sort-by-count' => 'Sort facettes by number of matches',
+
+	// Messages for the special page
 	'fs_title'            => 'Faceted Search',
 	'fs_search'           => 'Find',
 	'fs_categories'       => 'Categories',
@@ -126,9 +131,14 @@ $messages['de'] = array(
 	'facetedsearch-desc'      => 'EnhancedRetrieval ermöglicht facettierte Suche in Mediawiki. Es benötigt die [https://www.diqa.de/de/Power-Search_for_MediaWiki DIQA-Powersuche] als Backend.',
 	'fs_facetedsearchspecial' => 'Facettierte Suche',  // Name of the special page for Faceted Search
 	'fs_specialpage_group'    => 'Facettierte Suche',
-    'prefs-enhanced-retrieval' => 'Facettierte Suche',
 
-	//--- Messages for the special page ---
+	// Messages for the user preferences dialog
+	'prefs-enhanced-retrieval' => 'Facettierte Suche',
+	'prefs-Standard-Sortierung-Facetten' => 'Sortierung der Facetten',
+	'sort-alphabetically' => 'Alphabetisch sortieren',
+	'sort-by-count' => 'Nach Häufigkeit sortieren',
+
+	// Messages for the special page
 	'fs_title'            => 'Facettensuche',
 	'fs_search'           => 'Finde',
 	'fs_categories'       => 'Kategorien',
@@ -156,7 +166,7 @@ $messages['de'] = array(
 	'more' 				=> 'mehr',
 	'less' 				=> 'weniger',
 	'noFacetFilter'		=> '(Keine Facetten ausgewählt.)',
-    'noFacetsFound'		=> '(Keine Facetten gefunden)',
+	'noFacetsFound'		=> '(Keine Facetten gefunden)',
 	'underspecifiedSearch' => 'Ihre aktuelle Suche hat zu viele Treffer. Bitte verfeinern Sie sie!',
 	'session_lost'      => 'Browser-Session ist abgelaufen. Bitte loggen Sie sich neu ein.',
 	'removeFilter'		=> 'Diese Facette enfernen',

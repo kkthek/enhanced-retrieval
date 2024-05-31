@@ -3,6 +3,7 @@ namespace DIQA\FacetedSearch;
 
 use Exception;
 use ForeignTitle;
+use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
@@ -10,6 +11,7 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Storage\EditResult;
 use MediaWiki\User\UserIdentity;
+use Parser;
 use SMW\SemanticData;
 use SMWStore;
 use StatusValue;

@@ -117,7 +117,7 @@ FacetedSearch.classes.DateFacetClusterer = function (facetName, plainName) {
 			if (dateTimePropertyClusters['max']) {
 				var clusterMax = dateTimePropertyClusters['max'];
 				clusterMax = parseInt(clusterMax.replace(/-|:/g,''));
-				if (max > clusterMax) {
+				if (Number(max) > clusterMax) {
 					max = clusterMax;
 				}
 			}
@@ -125,14 +125,14 @@ FacetedSearch.classes.DateFacetClusterer = function (facetName, plainName) {
 			if (dateTimePropertyClusters['min']) {
 				var clusterMin = dateTimePropertyClusters['min'];
 				clusterMin = parseInt(clusterMin.replace(/-|:/g,''));
-				if (min < clusterMin) {
+				if (Number(min) < clusterMin) {
 					min = clusterMin;
 				}
 			}
 			
 		}
 		
-		var incr = findIncrement(min, max);
+		var incr = findIncrement(Number(min), Number(max));
 		
 		mIncrementField = incr.getIncrementField();
 		
@@ -153,9 +153,9 @@ FacetedSearch.classes.DateFacetClusterer = function (facetName, plainName) {
 	/**
 	 * Calculates a the best suited increment for ranges between the data/time
 	 * values min and max that are given as strings that represent long values.
-	 * @param {long} min
+	 * @param {Number} min
 	 * 		Lower bound of date/time
-	 * @param {long} max
+	 * @param {Number} max
 	 * 		Upper bound of date/time
 	 * 
 	 * @return {Object} 
