@@ -1,7 +1,6 @@
 <?php
 namespace DIQA\FacetedSearch;
 
-use MediaWiki\User\UserIdentity;
 use WikiPage;
 
 /*

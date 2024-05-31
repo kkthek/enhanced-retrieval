@@ -194,13 +194,13 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
             // assemble xml attributes for field
             $optionAtts = '';
             if (isset($options[$field])) {
-                foreach($options[$field] as $name => $value) {
-                    $optionAtts .= "$name='$value' ";
+                foreach($options[$field] as $name => $option) {
+                    $optionAtts .= "$name='$option' ";
                 }
             }
             if (isset($options['*']) && !array_key_exists($field, $options)) {
-                foreach($options['*'] as $name => $value) {
-                    $optionAtts .= "$name='$value' ";
+                foreach($options['*'] as $name => $option) {
+                    $optionAtts .= "$name='$option' ";
                 }
             }
 
@@ -236,7 +236,8 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
      * @param mixed $title Title or filepath
      *         Title object of document (must be of type NS_FILE)
      *         or a filepath in the filesystem
-     * @return [ text => extracted text of document, xml => full XML-response of Tika ]
+     * @return array e.g. [ text => extracted text of document, xml => full XML-response of Tika ]
+     * @throws Exception
      */
     public function extractDocument($title) {
         if ($title instanceof Title) {
@@ -265,7 +266,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
 
         // do not index unknown formats
         if ($contentType == 'application/octet-stream') {
-            return;
+            return [];
         }
 
         // send document to Tika and extract text
@@ -273,7 +274,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
             if ( PHP_SAPI === 'cli' && !defined('UNITTEST_MODE')) {
                 throw new Exception(sprintf("\nWARN  Empty file path for '%s'. Can not index document properly.\n", $title->getPrefixedText()));
             }
-            return;
+            return [];
         }
 
         $result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);

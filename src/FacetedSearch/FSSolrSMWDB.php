@@ -11,7 +11,6 @@ use SMW\DataTypeRegistry;
 use SMW\DIProperty as SMWDIProperty;
 use SMW\DIWikiPage as SMWDIWikiPage;
 use SMW\PropertyRegistry;
-use SMW\Services\ServicesFactory as ApplicationFactory;
 use SMWDataItem;
 use SMWDITime;
 use Title;
@@ -197,7 +196,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 $this->retrieveFileSystemPath($db, $pageNamespace, $pageDbKey, $doc);
             }
             $docData = $this->extractDocument( $pageTitle );
-            if( $docData ) {
+            if( array_key_exists('text', $docData) ) {
                 $text = $docData['text'] ?? '';
             }
         } catch( Exception $e ) {
@@ -214,7 +213,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
      */
     private function calculateBoosting(WikiPage $wikiPage, array &$options, array $doc) {
         global $fsgActivateBoosting;
-        if (! isset($fsgActivateBoosting) || $fsgActivateBoosting === false) {
+        if (! isset($fsgActivateBoosting) || !$fsgActivateBoosting ) {
             return;
         }
 
