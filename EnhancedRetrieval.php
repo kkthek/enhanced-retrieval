@@ -56,9 +56,10 @@ class EnhancedRetrieval {
             ini_set( 'display_errors', 1 );
         }
 
-        global $fsgSolrHost, $fsgSolrPort, $fsgSolrUser, $fsgSolrPass, $fsgSolrCore;
-        global $fsgFacetedSearchConfig, $wgServer, $wgScriptPath;
+        global $fsgFacetedSearchConfig;
         if (!isset($fsgFacetedSearchConfig)) {
+            global $fsgSolrHost, $fsgSolrPort, $fsgSolrUser, $fsgSolrPass, $fsgSolrCore;
+            global $wgServer, $wgScriptPath;
             $fsgFacetedSearchConfig = array(
                 'indexer' => 'SOLR',
                 'source'  => 'SMWDB',

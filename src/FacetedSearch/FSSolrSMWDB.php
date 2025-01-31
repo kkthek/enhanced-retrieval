@@ -6,6 +6,7 @@ use IDatabase;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use RequestContext;
 use Sanitizer;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty as SMWDIProperty;
@@ -143,6 +144,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $pageTitle = $wikiPage->getTitle();
         $pageNamespace = $pageTitle->getNamespace();
 
+        # DisplayTitle seems to fetch info from the request's page title ;( so we set it here ):
+        RequestContext::getMain()->setTitle( $pageTitle );
+
         if ($pageNamespace == NS_FILE) {
             $text = $this->getTextFromFile( $wikiPage, $doc, $messages );
             if( $text ) {
@@ -152,7 +156,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
         global $egApprovedRevsBlankIfUnapproved, $egApprovedRevsNamespaces;
         if (defined('APPROVED_REVS_VERSION')
-                && $egApprovedRevsBlankIfUnapproved 
+                && $egApprovedRevsBlankIfUnapproved
                 && in_array( $pageNamespace, $egApprovedRevsNamespaces )) {
 
             // index the approved revision
@@ -196,7 +200,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 $this->retrieveFileSystemPath($db, $pageNamespace, $pageDbKey, $doc);
             }
             $docData = $this->extractDocument( $pageTitle );
-            if( array_key_exists('text', $docData) ) {
+            if( $docData ) {
                 $text = $docData['text'] ?? '';
             }
         } catch( Exception $e ) {
@@ -213,7 +217,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
      */
     private function calculateBoosting(WikiPage $wikiPage, array &$options, array $doc) {
         global $fsgActivateBoosting;
-        if (! isset($fsgActivateBoosting) || !$fsgActivateBoosting ) {
+        if (! isset($fsgActivateBoosting) || $fsgActivateBoosting === false) {
             return;
         }
 
@@ -264,13 +268,13 @@ class FSSolrSMWDB extends FSSolrIndexer {
     private function getApprovedRevision(WikiPage $wikiPage) {
         // get approved rev_id
         $db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
-    
+
         $res = $db->newSelectQueryBuilder()
                 ->select( 'rev_id' )
                 ->from( 'approved_revs' )
                 ->where( 'page_id = ' . $wikiPage->getTitle()->getArticleID() )
                 ->fetchResultSet();
-    
+
         $rev_id = null;
         if ( $res->numRows() > 0 ) {
             if( $row = $res->fetchRow() ) {
@@ -302,7 +306,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
         if( $this->deleteDocument($oldid) ) {
             // The article with the new name has the same page id as before
             $wp = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromID( $oldid );
-            
+
             $content = $wp->getContent(RevisionRecord::RAW);
             if($content == null) {
                 $text = '';
@@ -355,7 +359,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 ->where( "tl_from = $pid" )
                 ->caller( __METHOD__ )
                 ->fetchResultSet();
-    
+
         // // MW < 1.38
         // $templateLinksTable = $db->tableName('templatelinks');
         // $sql = <<<SQL
@@ -483,7 +487,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 ->where( ["smw_namespace = $namespaceID", "smw_title=$title"] )
                 ->caller( __METHOD__ )
                 ->fetchResultSet();
-    
+
         $found = false;
         if ( $res->numRows() > 0 ) {
             $row = $res->fetchObject();
@@ -518,7 +522,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
      * Retrieves the relations of the article with the SMW ID $smwID and adds
      * them to the document description $doc.
      *
-     * @param Title $title 
+     * @param Title $title
      * @param array $doc
      *         The document description. If the page has relations, all relations
      *         and their values are added to $doc. The key 'smwh_properties' will
@@ -617,13 +621,13 @@ class FSSolrSMWDB extends FSSolrIndexer {
     /**
      * Indexes categories. Either as member categories or super-categories
      *
-     * @param Title $title 
+     * @param Title $title
      * @param array $doc
      */
     private function indexCategories(Title $title, array &$doc) {
         $store = smwfGetStore();
         $subject = SMWDIWikiPage::newFromTitle($title);
- 
+
         $categories = [];
         $properties = $store->getProperties($subject);
         foreach($properties as $property) {

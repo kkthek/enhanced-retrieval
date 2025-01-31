@@ -69,6 +69,10 @@ class FSGlobalFunctions {
      * Called before parser is initialized
      */
     public static function initializeBeforeParserInit() {
+        if( !RequestContext::getMain()->hasTitle() ) {
+            return true;
+        }
+
         $currentTitle = RequestContext::getMain()->getTitle();
         if( is_null($currentTitle) || 
                 $currentTitle->getNamespace() != NS_SPECIAL ||

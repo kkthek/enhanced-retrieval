@@ -7,7 +7,7 @@
 	"descriptionmsg": "facetedsearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
-	"version": "3.0.1",
+	"version": "3.0.2",
 	"manifest_version": 2,
 	"requires": {
 		"MediaWiki": ">= 1.39",
@@ -60,22 +60,28 @@
 	"config_prefix": "fsg",
 	"config": {
 		"SolrCore": {
-			"value": "mw"
+			"value": "mw",
+			"description": "The name of the SOLR core which stores the index data of the wiki. (1 per each wiki)"
 		},
 		"SolrHost": {
-			"value": "localhost"
+			"value": "localhost",
+			"description": "The hostname of the SOLR server. Default is localhost. It is recommended that SOLR listens only on localhost."
 		},
 		"SolrPort": {
-			"value": 8983
+			"value": 8983,
+			"description": "The port of the SOLR server. Default is 8983"
 		},
 		"SolrUser": {
-			"value": ""
+			"value": "",
+			"description": "The user of the SOLR server (usually required in multi-tenant environments or if the SOLR server is accessible via internet"
 		},
 		"SolrPass": {
-			"value": ""
+			"value": "",
+			"description": "The password of the SOLR user (see SolrUser setting)"
 		},
 		"SolrProxyDebug": {
-			"value": false
+			"value": false,
+			"description": "Activates maximum PHP error reporting. DO NOT use this for production but only for debugging purposes."
 		},
 		"AnnotationsInSnippet": {
 			"value": [],
@@ -91,7 +97,7 @@
 		},
 		"CategoryFilter": {
 			"value": [],
-			"description": "Configurationf for the category drop-down list of the form ['category'=>'label'] The first entry determines the default. The entry with an empty key '' represents 'no selected category filter'"
+			"description": "Configuration for the category drop-down list of the form ['category'=>'label'] The first entry determines the default. The entry with an empty key '' represents 'no selected category filter'"
 		},
 		"CreateNewPageLink": {
 			"value": "/{article}?action=edit",
@@ -149,13 +155,17 @@
 			"value": [],
 			"description": "Configures grouping of numeric facets. Example: $fsgNumericPropertyClusters['smwh_BaujahrMin_xsdvalue_d'] = ['min'=>-9999, 'max'=>9999, 'lowerBound'=>1700, 'upperBound'=>2030, 'interval'=>10]; means that the given property gets a minimum cluster value of -9999, a maximum of 9999 and 33*10 year-clusters from 1700 to 2030. min and max is optional."
 		},
+		"PlaceholderText": {
+			"value": "",
+			"description": "Place holder used in the search box of Special:Search."
+		},
 		"ShowArticleProperties": {
 			"value": true,
 			"description": "Show the article properties button under each search hit."
 		},
 		"ShowCategories": {
 			"value": true,
-			"description": "Show/hide categories in the facettes section"
+			"description": "Show/hide categories in the facets section"
 		},
 		"ShowFileInOverlay": {
 			"value": [
@@ -181,11 +191,11 @@
 		},
 		"ShownFacets": {
 			"value": [],
-			"description": "This config maps category names to lists of property names. If the catagory is selected in the category drop-down, (only) the configured facets are shown in the facet list (even if other values exist), e.g. $fsgShownFacets[ 'Person'=>['Name','Country','Age'], 'Company'=>['CEO','City','BusinessArea'] ]"
+			"description": "This config maps category names to lists of property names. If the category is selected in the category drop-down, (only) the configured facets are shown in the facet list (even if other values exist), e.g. $fsgShownFacets[ 'Person'=>['Name','Country','Age'], 'Company'=>['CEO','City','BusinessArea'] ]"
 		},
 		"UseStatistics": {
 			"value": false,
-			"description": "use statistics logging"
+			"description": "use statistics logging. Cache-key 'DIQA.EnhancedRetrieval.num_searches' stores number of searches and 'DIQA.EnhancedRetrieval.num_search_hits' stores number of searches with at least 1 result."
 		},
 		"ActivateBoosting": {
 			"value": false,

@@ -111,7 +111,7 @@ class FSIncrementalUpdater  {
     private static function createUpdateJob(Title $title ) : void {
         $params = [];
         $params['title'] = $title;
-        $job = new UpdateSolrWithDependantJob(Title::makeTitle(NS_SPECIAL, 'Search'), $params);
+        $job = new UpdateSolrWithDependantJob($title, $params);
         MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup()->push( $job );
     }
 

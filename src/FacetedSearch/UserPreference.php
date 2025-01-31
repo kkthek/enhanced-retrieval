@@ -18,7 +18,7 @@ class UserPreference
         $preferences ['er-sort-order-preferences'] = array(
             'type' => 'radio',
             'label' => '&#160;',
-            'label-message' => 'prefs-Standard-Sortierung-Facetten', // a system message
+            'label-message' => 'prefs-facet-sort-order', // a system message
             'section' => 'enhanced-retrieval',
             'options' => $options,
             'help-message' => 'Suchoptionen'  // a system message (optional)

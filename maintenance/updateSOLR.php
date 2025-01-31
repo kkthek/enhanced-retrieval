@@ -120,7 +120,7 @@ class UpdateSolr extends Maintenance
     /**
      * Refresh given pages.
      *
-     * @param array of string $pages Page titles
+     * @param array $pages of string Page titles
      */
     private function refreshPages($pages)
     {
@@ -178,6 +178,9 @@ class UpdateSolr extends Maintenance
         $this->writeToStartidfile = false;
         if ($this->hasOption('s')) {
             $start = max(1, intval($this->getOption('s')));
+        } elseif ($this->hasOption('f')) {
+            $title = Title::newFromText($this->getOption('f'));
+            $start = $title->getArticleID();
         } elseif ($this->hasOption('startidfile')) {
             if (! is_writable(file_exists($this->getOption('startidfile')) ? $this->getOption('startidfile') : dirname($this->getOption('startidfile')))) {
                 die("Cannot use a startidfile that we can't write to.\n");
@@ -212,7 +215,6 @@ class UpdateSolr extends Maintenance
 
         } elseif ($this->hasOption('f')) {
             $title = Title::newFromText($this->getOption('f'));
-            $start = $title->getArticleID();
             $end = $title->getArticleID();
 
         } else {
