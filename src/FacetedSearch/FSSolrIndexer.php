@@ -455,7 +455,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
 
         $HTTPCode = $info['http_code'];
         if ($HTTPCode != 200) {
-            throw new Exception("\nERROR HTTP error $HTTPCode for command $command.\nERROR Payload:\n$data\nERROR HTTP response:\n$result", $HTTPCode);
+            throw new Exception("\nERROR HTTP error $HTTPCode for command $command.\nURL=$url\nERROR Payload:\n$data\nERROR HTTP response:\n$result", $HTTPCode);
         }
         return $HTTPCode;
     }
