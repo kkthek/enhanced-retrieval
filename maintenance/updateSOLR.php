@@ -157,7 +157,7 @@ class UpdateSolr extends Maintenance
             if (count($messages) > 0) {
                 print implode("\t\n", $messages);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             print sprintf("\t[NOT INDEXED] [HTTP code %s]\n", $e->getCode());
             if ($this->hasOption('x')) {
                 print sprintf("\t[NOT INDEXED] %s\n", $e->getMessage());
