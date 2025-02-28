@@ -48,7 +48,7 @@
 	},
 	"SpecialPages": {
 		"Search": "DIQA\\FacetedSearch\\Specials\\FSFacetedSearchSpecial",
-		"FacetedSearch": "DIQA\\FacetedSearch\\Specials\\FSFacetedSearchSpecial"
+		"Faceted_Search": "DIQA\\FacetedSearch\\Specials\\FSFacetedSearchSpecial"
 	},
 	"JobClasses": {
 		"UpdateSolrJob": "DIQA\\FacetedSearch\\UpdateSolrJob",

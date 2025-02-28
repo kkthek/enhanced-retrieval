@@ -124,7 +124,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
 ';
 
     public function __construct() {
-        // parent::__construct('FacetedSearch');
+        // parent::__construct('Faceted_Search');
         parent::__construct('Search');
         global $wgHooks;
         $wgHooks['MakeGlobalVariablesScript'][] = "DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial::addJavaScriptVariables";
