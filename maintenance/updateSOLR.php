@@ -22,13 +22,13 @@ class UpdateSolr extends Maintenance
         $this->addDescription( "Updates SOLR index" );
         $this->addOption('v', 'Verbose mode', false, false);
         $this->addOption('g', 'Get the maximum ID of pages that would be updated (all other parameters are ignored if this is present)', false, false);
-        $this->addOption('d', 'Delay every 100 pages (miliseconds)', false, true);
+        $this->addOption('d', 'Delay every 100 pages (milliseconds)', false, true);
         $this->addOption('x', 'Debug mode', false, false);
         $this->addOption('p', 'Page title(s), separated by ","', false, true);
         $this->addOption('s', 'Start-ID', false, true);
         $this->addOption('e', 'End-ID', false, true);
         $this->addOption('n', 'Number of IDs from Start-ID', false, true);
-        $this->addOption('f', 'End-ID by Pagename', false, true);
+        $this->addOption('f', 'End-ID by page name', false, true);
         $this->addOption('startidfile', 'File containing ID to start processing and saves last processed ID to this file', false, true);
     }
 
@@ -45,7 +45,7 @@ class UpdateSolr extends Maintenance
             return;
         }
 
-        // when indexing everything, we dont create any updating job for SOLR
+        // when indexing everything, we don't create any updating job for SOLR
         global $fsCreateUpdateJob;
         $fsCreateUpdateJob = false;
 
@@ -66,7 +66,7 @@ class UpdateSolr extends Maintenance
     }
 
     /**
-     * Print Documatation header
+     * Print Documentation header
      */
     private function printDocHeader() {
         print "Refreshing all semantic data in the SOLR server!\n---\n" .

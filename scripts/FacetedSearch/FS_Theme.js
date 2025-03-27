@@ -389,7 +389,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
         }
 
         return false;
-    };
+    }
 
     /**
      * Returns CSS class for files that have an extension defined
@@ -405,7 +405,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             return ' imageOverlay';
         }
         return '';
-    };
+    }
 
     /**
      * Returns CSS class result pages that should be promoted or demoted in the search UI
@@ -422,7 +422,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             css = css + ' xfsDemotedResult';
         }
         return css;
-    };
+    }
 
     /**
      * Adds annotations directly displayed in the snippets without
@@ -502,10 +502,9 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
 
         // Add the modification date
         if (doc[MOD_ATT]) {
-            var lang = FacetedSearch.singleton.Language;
             output +=
                 '<div class="xfsResultModified">' +
-                    '<p>'+ mw.msg('lastChange') +': ' +
+                    '<p>'+ mw.msg('fs_lastChange') +': ' +
                         String(doc[MOD_ATT])
                             .replace('T', ' ')
                             .substring(0, 16) +
@@ -544,8 +543,6 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
      *         The article given as SOLR document
      */
     AjaxSolr.theme.prototype.data = function (doc) {
-        var lang = FacetedSearch.singleton.Language;
-
         var output = '';
         var attr  = doc[FS_ATTRIBUTES] || [];
         var props = doc[FS_PROPERTIES] || [];
@@ -555,7 +552,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             // Show CAT_MAX categories
             output +=
                 '<div class="xfsResultCategory">' +
-                '<p>'+ mw.msg('inCategory') +': ';
+                '<p>'+ mw.msg('fs_inCategory') +': ';
             var count = Math.min(cats.length, CAT_MAX);
             var vals = [];
             for ( var i = 0; i < count; i++) {
@@ -573,7 +570,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
                 }
                 output += CAT_SEP;
                 output += '<span class="xfsToggle" style="display: none">' + vals.join(CAT_SEP) + '</span>';
-                output += ' (<a class="xfsMore">'+mw.msg('more')+'</a>)';
+                output += ' (<a class="xfsMore">'+mw.msg('fs_more')+'</a>)';
             }
             output += '</p></div>';
         }
@@ -601,7 +598,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             output +=
                     '<div>' +
                         '(<a class="xfsShow"' + scoreAttribute + '>' +
-                            mw.msg('show') +
+                            mw.msg('fs_show') +
                         '</a>)' +
                         '<div class="xfsResultTable"></div>' +
                     '</div>';
@@ -623,8 +620,6 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
      *         The article given as SOLR document
      */
     AjaxSolr.theme.prototype.articleProperties = function(doc) {
-        var lang = FacetedSearch.singleton.Language;
-
         var output = '<table>';
         var row = 0;
 
@@ -670,13 +665,12 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
      *
      */
     AjaxSolr.theme.prototype.namespaceFacet = function(facet, count, handler, showPropertyDetailsHandler, isRemove){
-        var lang = FacetedSearch.singleton.Language;
-        var name = facet === 'all'
-                    ? mw.msg('allNamespaces')
-                    : mw.config.get('wgFormattedNamespaces')[facet];
+        var name = facet === 'all' ?
+                    mw.msg('fs_allNamespaces') :
+                    mw.config.get('wgFormattedNamespaces')[facet];
         if (name === '') {
             // Main namespace
-            name = mw.msg('mainNamespace');
+            name = mw.msg('fs_mainNamespace');
         }
 
         if (typeof name === 'undefined') {
@@ -684,7 +678,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
             // was disabled after the creation of the index.
             return '';
         }
-        var tooltip = 'title="' + mw.msg('namespaceTooltip', count) + '" ';
+        var tooltip = 'title="' + mw.msg('fs_namespaceTooltip', count) + '" ';
         name = name.replace(/ /g, '&nbsp;');
         var emptyNamespace = count === 0 ? " xfsEmptyNamespace" : '';
         html = $('<span namespace="' + facet + '" class="xfsNamespace' + emptyNamespace + '"/>')
@@ -719,7 +713,6 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
     AjaxSolr.theme.prototype.facet = function(facet, count, handler, handlerData,
                                                 showPropertyDetailsHandler, isRemove) {
         var html;
-        var lang = FacetedSearch.singleton.Language;
         var plainName = extractPlainName(facet);
 
         // check if it is a pre-defined property
@@ -740,7 +733,7 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
 
         if (isRemove) {
             html = '<span' + tooltip + ' class="'+cssClass+'">' + nicename + '</span>' +
-                   '<img class="xfsRemoveFacet ' + cssClass + '" src="' + REMOVE_ICON +'" title="' + mw.msg('removeFilter') + '"/>' +
+                   '<img class="xfsRemoveFacet ' + cssClass + '" src="' + REMOVE_ICON +'" title="' + mw.msg('fs_removeFilter') + '"/>' +
                    (isProperty(facet) && window.XFS.addAdditionalFacets ? window.XFS.addAdditionalFacets(facet) : '');
 
         } else {
@@ -775,11 +768,11 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
 
             var img1 =
                 '<img src="'+ path + 'right.png" ' +
-                    'title="'+ mw.msg('showDetails') +
+                    'title="'+ mw.msg('fs_showDetails') +
                     '" id="'+img1ID+'"'+img1Visible+' class="detailsImage fs_propertyFacet"/>';
             var img2 =
                 '<img src="'+ path + 'down.png" ' +
-                    'title="'+ mw.msg('hideDetails') +
+                    'title="'+ mw.msg('fs_hideDetails') +
                     '" id="'+img2ID+'"'+img2Visible+'" class="detailsImage fs_propertyFacet"/>';
             html = img1 + img2 + html;
             html += '<div id="' + divID +'"'+ img2Visible + '></div>';
@@ -812,19 +805,18 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
     };
 
     AjaxSolr.theme.prototype.moreLessLink = function(moreHandler, lessHandler) {
-        var lang = FacetedSearch.singleton.Language;
         var $ = jQuery;
 
         var html =
             '<div>' +
                 '<a class="xfsFMore">' +
-                    mw.msg('more') +
+                    mw.msg('fs_more') +
                 '</a>' +
                 '<span style="display: none">' +
                 ' &#124; ' +
                 '</span>' +
                 '<a class="xfsFLess" style="display: none">' +
-                    mw.msg('less') +
+                    mw.msg('fs_less') +
                 '</a>' +
             '</div>';
         html = $(html);
@@ -838,43 +830,37 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
     };
 
     AjaxSolr.theme.prototype.no_items_found_with_facetvalue = function(facet) {
-        return $('<div>').addClass('xfsClusterEntry').html(mw.msg('noFacetsFound'));
+        return $('<div>').addClass('xfsClusterEntry').html(mw.msg('fs_noFacetsFound'));
     };
 
     AjaxSolr.theme.prototype.no_facet_filter_set = function() {
-        var lang = FacetedSearch.singleton.Language;
-        return $('<div class="xfsMinor">').text(mw.msg('noFacetFilter'));
+        return $('<div class="xfsMinor">').text(mw.msg('fs_noFacetFilter'));
     };
 
     AjaxSolr.theme.prototype.underspecified_search = function() {
-        var lang = FacetedSearch.singleton.Language;
         return $('<div class="xfsErrorMessage">')
-                .text(mw.msg('underspecifiedSearch'));
+                .text(mw.msg('fs_underspecifiedSearch'));
     };
 
     AjaxSolr.theme.prototype.session_lost = function() {
-        var lang = FacetedSearch.singleton.Language;
         return $('<div class="xfsErrorMessage">')
-            .text(mw.msg('session_lost'));
+            .text(mw.msg('fs_sessionLost'));
     };
 
     AjaxSolr.theme.prototype.remove_all_filters = function(handler) {
-        var lang = FacetedSearch.singleton.Language;
         return $('<a href="#"/>')
-                .text(mw.msg('removeAllFilters'))
+                .text(mw.msg('fs_removeAllFilters'))
                 .click(handler);
     };
 
     AjaxSolr.theme.prototype.emptyQuery = function(handler) {
-        var lang = FacetedSearch.singleton.Language;
-        return mw.msg('addFacetOrQuery');
+        return mw.msg('fs_addFacetOrQuery');
     };
 
     AjaxSolr.theme.prototype.createArticle = function(articleName, link) {
-        var lang = FacetedSearch.singleton.Language;
         link = escapeHTML(link);
         articleName = escapeHTML(articleName);
-        var html = mw.msg('nonexArticle', '<em>'+articleName+'</em>') +
+        var html = mw.msg('fs_nonexArticle', '<em>'+articleName+'</em>') +
                     ' <a href="' + link + '" class="xfsRedLink">' +
                         articleName +
                     '</a>';
@@ -890,11 +876,10 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
     };
 
     AjaxSolr.theme.prototype.currentSearch = function(link) {
-        var lang = FacetedSearch.singleton.Language;
         link = escapeHTML(link);
         var html = ' <a href="' + link + '" title="' +
-                        mw.msg('searchLinkTT') + '">' +
-                        mw.msg('searchLink') +
+                        mw.msg('fs_searchLinkTT') + '">' +
+                        mw.msg('fs_searchLink') +
                     '</a>';
         return html;
     };
@@ -932,10 +917,9 @@ console.log("ER: Loading scripts/FacetedSearch/FS_Theme.js");
                         : from + ' - ' + to;
 
         if (isClusterTitle) {
-            var lang = FacetedSearch.singleton.Language;
             var removeIcon = isRangeRestricted
                 ? '<img class="xfsRemoveRange" src="' + REMOVE_ICON +'" ' +
-                        'title="'+ mw.msg('removeRestriction') +'"/>'
+                        'title="'+ mw.msg('fs_removeRestriction') +'"/>'
                 : '';
             html =
                 $('<div>' +

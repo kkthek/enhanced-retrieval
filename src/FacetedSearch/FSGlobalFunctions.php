@@ -87,13 +87,11 @@ class FSGlobalFunctions {
                 $fsgPromotionProperty, $fsgDemotionProperty,
                 $fsgHitsPerPage, $fsgDefaultSortOrder;
 
-        if (isset($fsgExtraPropertiesToRequest)) {
-            $extraPropertiesToRequest = [];
+        $extraPropertiesToRequest = [];
+        if(isset($fsgExtraPropertiesToRequest)) {
             foreach ($fsgExtraPropertiesToRequest as $prop) {
                 $extraPropertiesToRequest[] = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($prop));
             }
-        } else {
-            $extraPropertiesToRequest = [];
         }
 
         if ($fsgPromotionProperty) {

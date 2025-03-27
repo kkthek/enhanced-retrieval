@@ -138,7 +138,6 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 	 * Creates a new AjaxSolrManager.
 	 */
 	init: function () {
-		var fsi = FacetedSearch.singleton.FacetedSearchInstance;
 		// Initialize the AjaxSolrManager for getting properties of the articles
 		this.mASMforProperties = new AjaxSolr.FSManager({
 			solrUrl : mw.config.get('wgFSSolrURL'),
@@ -163,15 +162,13 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		});
 		this.mASMforTitleCheck.addWidget(this.mCreateArticleWidget);
 		
-		
-		var lang = FacetedSearch.singleton.Language;
 		$( document ).on('click', 'a.xfsMore', function() {
 			if ($(this).prev('span.xfsToggle').is(':visible')) {
 				$(this).prev('span.xfsToggle').hide();
-				$(this).text(mw.msg('more'));
+				$(this).text(mw.msg('fs_more'));
 			} else {
 				$(this).prev('span.xfsToggle').show();
-				$(this).text(mw.msg('less'));
+				$(this).text(mw.msg('fs_less'));
 			}
 			return false;
 		});
@@ -184,12 +181,11 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 	showPropertiesHandler: function () {
 		// "this" is now the clicked element and not the result widget
 		var $this= $(this);
-		var lang = FacetedSearch.singleton.Language;
-		
+
 		// Check if the table with property values is already present
 		var table = $this.parent().find('table');
 		if (table.length === 0) {
-			$this.text(mw.msg('hide'));
+			$this.text(mw.msg('fs_hide'));
 			
 			var docData = $this.data('documentData');
 			var resultWidget = docData.resultWidget;
@@ -200,10 +196,10 @@ FacetedSearch.classes.ResultWidget = AjaxSolr.AbstractWidget.extend({
 		
 		if (table.is(':visible')) {
 			table.hide();
-			$this.text(mw.msg('show'));
+			$this.text(mw.msg('fs_show'));
 		} else {
 			table.show();
-			$this.text(mw.msg('hide'));
+			$this.text(mw.msg('fs_hide'));
 		}
 		
 		return false;
