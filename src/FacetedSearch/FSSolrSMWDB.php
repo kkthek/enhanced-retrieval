@@ -140,6 +140,9 @@ class FSSolrSMWDB extends FSSolrIndexer {
         return true;
     }
 
+    /**
+     * @throws Exception
+     */
     private function getText(WikiPage $wikiPage, array &$doc, array &$messages ) : string {
         $pageTitle = $wikiPage->getTitle();
         $pageNamespace = $pageTitle->getNamespace();
@@ -165,18 +168,23 @@ class FSSolrSMWDB extends FSSolrIndexer {
                 throw new Exception( "unapproved $pageTitle" );
             }
             $content = $revision->getContent( SlotRecord::MAIN, RevisionRecord::RAW );
-            $parserOut = MediaWikiServices::getInstance()->getContentRenderer()->getParserOutput( $content, $wikiPage, $revision->getId() );
+            if ( !$content ) {
+                throw new Exception("Cannot find content for latest revision of $pageTitle");
+            }
+            $parserOut = MediaWikiServices::getInstance()->getContentRenderer()->getParserOutput($content, $wikiPage, $revision->getId());
         } else {
             // index latest revision
             $content = $wikiPage->getContent();
-            $parserOut = MediaWikiServices::getInstance()->getContentRenderer()->getParserOutput( $content, $wikiPage );
+            if ( !$content ) {
+                throw new Exception("Cannot find content for $pageTitle");
+            }
+            $parserOut = MediaWikiServices::getInstance()->getContentRenderer()->getParserOutput($content, $wikiPage);
         }
 
-        if ( !$parserOut ) {
-            return '';
-        } else {
-            return Sanitizer::stripAllTags($parserOut->getText());
+        if ( $parserOut == null ) {
+            throw new Exception("Cannot find parser output for $pageTitle");
         }
+        return Sanitizer::stripAllTags($parserOut->getText());
     }
 
     /**
