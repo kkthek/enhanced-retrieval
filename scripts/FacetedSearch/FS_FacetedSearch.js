@@ -514,7 +514,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 					
 					$("#waiting_for_solr div").remove();
 					var errorHint = $('<div>')
-						.text(mw.msg('solrConnectionError'));
+						.text(mw.msg('fs_solrConnectionError'));
 					errorHint.css({'color' : 'red', 'font-weight' : 'bold'});
 					$("#waiting_for_solr").append(errorHint);
 					
@@ -528,15 +528,15 @@ FacetedSearch.classes.FacetedSearch = function () {
 		sm.doRequest(0);
 		
 		var lang = FacetedSearch.singleton.Language;
-		$("#waiting_for_solr").text(mw.msg('tryConnectSOLR'));
+		$("#waiting_for_solr").text(mw.msg('fs_tryConnectSOLR'));
 		$("#results").hide();
 		$("#waiting_for_solr").show();
 		
 		var interval = setInterval(function () {
 			if (!solrPresent) {
-				var msg = (numTries < 3)
-					? mw.msg('tryConnectSOLR')
-					: mw.msg('solrNotFound', mw.config.get('wgFSSolrURL') + mw.config.get('wgFSSolrServlet')) + dots
+				var msg = (numTries < 3) ?
+					mw.msg('fs_tryConnectSOLR') :
+					mw.msg('fs_solrNotFound', mw.config.get('wgFSSolrURL') + mw.config.get('wgFSSolrServlet')) + dots;
 				$("#waiting_for_solr").text(msg);
 				dots += '.';
 				++numTries;
@@ -551,7 +551,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 				$("#waiting_for_solr").hide();
 				$("#results").show();
 			}
-		}, 3000);
+		}, 10000);
 	}
 	
 	/**
@@ -746,17 +746,17 @@ FacetedSearch.classes.FacetedSearch = function () {
 		mAjaxSolrManager.addWidget(new FacetedSearch.classes.PagerWidget({
 			id : 'pager',
 			target : '#pager',
-			prevLabel : mw.msg('pagerPrevious'),
-			nextLabel : mw.msg('pagerNext'),
+			prevLabel : mw.msg('fs_pagerPrevious'),
+			nextLabel : mw.msg('fs_pagerNext'),
 			renderHeader : function(perPage, offset, total, approx) {
 				$('#pager-header').html(
 						$('<span/>').text(
-								mw.msg('results') + ' ' 
+								mw.msg('fs_results') + ' '
 								+ Math.min(total, offset + 1)
-								+ ' ' + mw.msg('to') + ' '
+								+ ' ' + mw.msg('fs_to') + ' '
 								+ Math.min(total, offset + perPage)
 								+ ' ' 
-								+ mw.msg(approx ? 'ofapprox' : 'of') 
+								+ mw.msg(approx ? 'fs_ofapprox' : 'fs_of')
 								+ ' ' + total));
 			}
 		}));
@@ -778,7 +778,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 
 	that.extractDisplayName = function(facetValue) {
 		return facetValue.indexOf('|') > -1 ? facetValue.substr(facetValue.indexOf('|')+1) : facetValue;
-	}
+	};
 
 	that.extractPropertyName = function(property) {
 		// Try attribute
@@ -793,7 +793,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 		}
 		// Neither attribute nor relation => return the given name
 		return noUnderscore(property);
-	}
+	};
 
 	function noUnderscore(string) {
 		return string.replace(/_/g, ' ');
@@ -811,7 +811,7 @@ FacetedSearch.classes.FacetedSearch = function () {
 	that.TITLE_FIELD		 = TITLE_FIELD;
 	that.DISPLAY_TITLE_FIELD = DISPLAY_TITLE_FIELD;
 	return that;
-}
+};
 
 // Create the singleton instance of Faceted Search
 if (!FacetedSearch.singleton) {

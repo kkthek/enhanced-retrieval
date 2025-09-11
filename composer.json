@@ -44,13 +44,15 @@
 			"EnhancedRetrieval.php"
 		],
 		"psr-4": {
-			"DIQA\\FacetedSearch\\": "src/FacetedSearch/"
-		}
+          "DIQA\\FacetedSearch\\": "src/FacetedSearch/",
+          "DIQA\\FacetedSearch\\Maintenance\\": "maintenance/",
+          "Apache\\Solr\\": "src/SolrPhpClient/Apache/Solr/"
+        }
 	},
 	"config": {
 		"process-timeout": 0
 	},
 	"scripts": {
-		"update": "php maintenance/updateSOLR.php -v"
+		"update": "php maintenance/UpdateSolr.php -v"
 	}
 }

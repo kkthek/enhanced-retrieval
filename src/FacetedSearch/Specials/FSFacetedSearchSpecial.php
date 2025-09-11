@@ -3,8 +3,9 @@ namespace DIQA\FacetedSearch\Specials;
 
 use Exception;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Search\TitleMatcher;
 use SMW\SpecialPage;
-use Title;
+use MediaWiki\Title\Title;
 
 /*
  * Copyright (C) Vulcan Inc.
@@ -126,8 +127,8 @@ class FSFacetedSearchSpecial extends SpecialPage {
     public function __construct() {
         // parent::__construct('Faceted_Search');
         parent::__construct('Search');
-        global $wgHooks;
-        $wgHooks['MakeGlobalVariablesScript'][] = "DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial::addJavaScriptVariables";
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->register('MakeGlobalVariablesScript', "DIQA\FacetedSearch\Specials\FSFacetedSearchSpecial::addJavaScriptVariables");
     }
 
     /**
@@ -159,7 +160,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
                 # If the string can be used to create a title
                 if( !is_null( $t ) ) {
                     # If there's an exact or very near match, jump right there.
-                    $t = static::defaultNearMatcher()->getNearMatch( $search );
+                    $t = static::getTitleMatcher()->getNearMatch( $search );
                     if( !is_null( $t ) ) {
                         $output->redirect( $t->getFullURL() );
                         return;
@@ -203,9 +204,8 @@ class FSFacetedSearchSpecial extends SpecialPage {
         }
     }
 
-    protected static function defaultNearMatcher() {
-        $config = MediaWikiServices::getInstance()->getMainConfig();
-        return MediaWikiServices::getInstance()->newSearchEngine()->getNearMatcher( $config );
+    protected static function getTitleMatcher(): TitleMatcher {
+        return MediaWikiServices::getInstance()->getTitleMatcher();
     }
 
     /**

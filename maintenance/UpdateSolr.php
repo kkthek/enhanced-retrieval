@@ -1,6 +1,12 @@
 <?php
+namespace DIQA\FacetedSearch\Maintenance;
+
 use DIQA\FacetedSearch\FSIndexerFactory;
+use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use Throwable;
+use WikiPage;
 
 /**
  * Updates the solr index.
@@ -22,13 +28,13 @@ class UpdateSolr extends Maintenance
         $this->addDescription( "Updates SOLR index" );
         $this->addOption('v', 'Verbose mode', false, false);
         $this->addOption('g', 'Get the maximum ID of pages that would be updated (all other parameters are ignored if this is present)', false, false);
-        $this->addOption('d', 'Delay every 100 pages (miliseconds)', false, true);
+        $this->addOption('d', 'Delay every 100 pages (milliseconds)', false, true);
         $this->addOption('x', 'Debug mode', false, false);
         $this->addOption('p', 'Page title(s), separated by ","', false, true);
         $this->addOption('s', 'Start-ID', false, true);
         $this->addOption('e', 'End-ID', false, true);
         $this->addOption('n', 'Number of IDs from Start-ID', false, true);
-        $this->addOption('f', 'End-ID by Pagename', false, true);
+        $this->addOption('f', 'End-ID by page name', false, true);
         $this->addOption('startidfile', 'File containing ID to start processing and saves last processed ID to this file', false, true);
     }
 
@@ -45,7 +51,7 @@ class UpdateSolr extends Maintenance
             return;
         }
 
-        // when indexing everything, we dont create any updating job for SOLR
+        // when indexing everything, we don't create any updating job for SOLR
         global $fsCreateUpdateJob;
         $fsCreateUpdateJob = false;
 
@@ -66,7 +72,7 @@ class UpdateSolr extends Maintenance
     }
 
     /**
-     * Print Documatation header
+     * Print Documentation header
      */
     private function printDocHeader() {
         print "Refreshing all semantic data in the SOLR server!\n---\n" .
@@ -225,18 +231,17 @@ class UpdateSolr extends Maintenance
 
     private function getMaxId() {
         $db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-        $page_table = $db->tableName("page");
-        $query = "SELECT MAX(page_id) as maxid FROM $page_table";
-        $res = $db->query($query);
-        if( $res->numRows() > 0 ) {
-            $row = $res->fetchObject();
-            if( $row ) {
-                return $row->maxid;
-            }
+        $row = $db->newSelectQueryBuilder()
+                ->fields( ['maxId' => 'MAX(page_id)'] )
+                ->table( 'page' )
+                ->caller( __METHOD__ )
+                ->fetchRow();
+        if( $row ) {
+            return $row->maxId;
         }
         return 0;
     }
 }
 
-$maintClass = "UpdateSolr";
+$maintClass = UpdateSolr::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

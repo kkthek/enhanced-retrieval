@@ -20,7 +20,7 @@ namespace DIQA\FacetedSearch;
  */
 use Exception;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * @file

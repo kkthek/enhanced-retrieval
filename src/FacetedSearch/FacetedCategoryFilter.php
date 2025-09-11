@@ -1,5 +1,4 @@
 <?php
-
 namespace DIQA\FacetedSearch;
 
 use MediaWiki\MediaWikiServices;

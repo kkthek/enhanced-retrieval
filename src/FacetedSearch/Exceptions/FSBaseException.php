@@ -19,6 +19,8 @@ namespace DIQA\FacetedSearch\Exceptions;
  *
  */
 
+use Exception;
+
 /**
  * @file
  *
@@ -36,7 +38,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  * Base class for all exceptions of Enhanced Retrieval.
  *
  */
-class FSBaseException extends \Exception {
+class FSBaseException extends Exception {
 
 	// An internal error occurred
 	// Parameters:

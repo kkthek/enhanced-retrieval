@@ -1,14 +1,13 @@
 <?php
 namespace DIQA\FacetedSearch\Util;
 
-use ApiBase;
 use eftec\bladeone\BladeOne;
+use MediaWiki\Api\ApiBase;
 use MediaWiki\MediaWikiServices;
-use Title;
 
 class DialogAjaxAPI extends ApiBase {
 
-	private $blade;
+	private BladeOne $blade;
 
 	public function __construct($query, $moduleName) {
 		parent::__construct ( $query, $moduleName );

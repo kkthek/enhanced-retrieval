@@ -2,8 +2,8 @@
 namespace DIQA\FacetedSearch;
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use SMW\SQLStore\SQLStore;
-use Title;
 use WikiPage;
 
 class FacetedSearchUtil {
@@ -25,7 +25,6 @@ class FacetedSearchUtil {
 
         $smw_ids = $db->tableName ( 'smw_object_ids' );
         $smw_atts2 = $db->tableName ( 'smw_di_blob' );
-        $smw_inst2 = $db->tableName ( 'smw_fpt_inst' );
         $smw_rels2 = $db->tableName ( 'smw_di_wikipage' );
 
         // get attribute and relations values
@@ -67,14 +66,14 @@ class FacetedSearchUtil {
      * Retrieves the display title from the properties table for the given page.
      * It will probably only properly work if the DisplayTitles extension is installed and used.
      * The default value is the pagename.
-     * 
+     *
      * This code is inspired by getDisplayTitle() from DisplayTitle\includes\DisplayTitleHooks.php
-     * 
+     *
      * @param Title $title
-     * @param WikiPage $wikipage (optional) if present redirects will be followed
+     * @param WikiPage|null $wikipage (optional) if present redirects will be followed
      * @return string smwh_displaytitle
      */
-    public static function findDisplayTitle(Title $title, WikiPage $wikipage = null) {
+    public static function findDisplayTitle(Title $title, ?WikiPage $wikipage = null): string {
         $title = $title->createFragmentTarget( '' );
         $originalPageName = $title->getPrefixedText();
         

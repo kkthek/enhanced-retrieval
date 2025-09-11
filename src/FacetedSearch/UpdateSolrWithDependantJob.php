@@ -4,11 +4,11 @@ namespace DIQA\FacetedSearch;
 
 use Exception;
 use Job;
-use SMW\DIProperty as SMWDIProperty;
-use SMW\Services\ServicesFactory as ApplicationFactory;
+use SMW\DIProperty;
+use SMW\DIWikiPage;
+use SMW\Services\ServicesFactory;
+use MediaWiki\Title\Title;
 use WikiPage;
-use Title;
-use SMW\DIWikiPage as SMWDIWikiPage;
 
 /**
  * Asynchronous updates for SOLR
@@ -16,6 +16,9 @@ use SMW\DIWikiPage as SMWDIWikiPage;
  * (= pages with an incoming relation)
  *
  * @author Kai
+ * @deprecated
+ *      * do not remove it yet, to allow potentially queued jobs to succeed
+ *      * replaced by UpdateSolrIndexJob
  *
  */
 class UpdateSolrWithDependantJob extends Job
@@ -42,7 +45,7 @@ class UpdateSolrWithDependantJob extends Job
         $consoleMode = PHP_SAPI === 'cli' && !defined('UNITTEST_MODE');
         $title = $this->params['title'];
 
-        // when indexing with jobs, we must assure not to create new updating jobs
+        // when indexing with jobs, we must ensure not to create new updating jobs
         global $fsCreateUpdateJob;
         $fsCreateUpdateJob = false;
 
@@ -66,12 +69,12 @@ class UpdateSolrWithDependantJob extends Job
     {
 
         $dependant = [];
-        $subject = SMWDIWikiPage::newFromTitle($title);
-        $store = ApplicationFactory::getInstance()->getStore();
+        $subject = DIWikiPage::newFromTitle($title);
+        $store = ServicesFactory::getInstance()->getStore();
         $inProperties = $store->getInProperties($subject);
 
         foreach ($inProperties as $inProperty) {
-            /** @var SMWDIProperty $inProperty */
+            /** @var DIProperty $inProperty */
             $subjects = $store->getPropertySubjects($inProperty, $subject);
             foreach ($subjects as $subj) {
                 $dependant[] = $subj->getTitle();

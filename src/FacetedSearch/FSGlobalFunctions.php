@@ -1,9 +1,11 @@
 <?php
 namespace DIQA\FacetedSearch;
 
-use OutputPage;
-use RequestContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
 use Skin;
+use SMW\DIProperty;
 
 /*
  * Copyright (C) Vulcan Inc., DIQA Projektmanagement GmbH
@@ -41,8 +43,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 
 class FSGlobalFunctions {
     public static function setupFacetedSearch() {
-        global $wgHooks, $wgExtensionMessagesFiles,
-        $wgExtensionAliasesFiles, $fsgEnableIncrementalIndexer;
+        global $wgExtensionAliasesFiles, $fsgEnableIncrementalIndexer;
         $dir = dirname(__FILE__);
 
         // Register special pages aliases file
@@ -50,13 +51,14 @@ class FSGlobalFunctions {
 
         // Register hooks
         if ($fsgEnableIncrementalIndexer) {
-            $wgHooks['SMW::SQLStore::AfterDataUpdateComplete'][] = 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter';
-            $wgHooks['UploadComplete'][] =                         'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete';
-            $wgHooks['AfterImportPage'][] =                        'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage';
-            $wgHooks['PageMoveCompleting'][] =                     'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete';
-            $wgHooks['PageDelete'][] =                             'DIQA\FacetedSearch\FSIncrementalUpdater::onPageDelete';
-            $wgHooks['ApprovedRevsRevisionApproved'][] =           'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved';
-            $wgHooks['PageSaveComplete'][] =                       'DIQA\FacetedSearch\FSIncrementalUpdater::onPageSaveComplete';
+            $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+            $hookContainer->register('SMW::SQLStore::AfterDataUpdateComplete', 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter');
+            $hookContainer->register('UploadComplete',                         'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete');
+            $hookContainer->register('AfterImportPage',                        'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage');
+            $hookContainer->register('PageMoveCompleting',                     'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete');
+            $hookContainer->register('PageDelete',                             'DIQA\FacetedSearch\FSIncrementalUpdater::onPageDelete');
+            $hookContainer->register('ApprovedRevsRevisionApproved',           'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved');
+            $hookContainer->register('PageSaveComplete',                       'DIQA\FacetedSearch\FSIncrementalUpdater::onPageSaveComplete');
         }
     }
 
@@ -87,23 +89,21 @@ class FSGlobalFunctions {
                 $fsgPromotionProperty, $fsgDemotionProperty,
                 $fsgHitsPerPage, $fsgDefaultSortOrder;
 
-        if (isset($fsgExtraPropertiesToRequest)) {
-            $extraPropertiesToRequest = [];
+        $extraPropertiesToRequest = [];
+        if(isset($fsgExtraPropertiesToRequest)) {
             foreach ($fsgExtraPropertiesToRequest as $prop) {
-                $extraPropertiesToRequest[] = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($prop));
+                $extraPropertiesToRequest[] = FSSolrSMWDB::encodeSOLRFieldName(DIProperty::newFromUserLabel($prop));
             }
-        } else {
-            $extraPropertiesToRequest = [];
         }
 
         if ($fsgPromotionProperty) {
-            $promotionProperty = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgPromotionProperty));
+            $promotionProperty = FSSolrSMWDB::encodeSOLRFieldName(DIProperty::newFromUserLabel($fsgPromotionProperty));
         } else {
             $promotionProperty = '';
         }
 
         if ($fsgDemotionProperty) {
-            $demotionProperty = FSSolrSMWDB::encodeSOLRFieldName(\SMWDIProperty::newFromUserLabel($fsgDemotionProperty));
+            $demotionProperty = FSSolrSMWDB::encodeSOLRFieldName(DIProperty::newFromUserLabel($fsgDemotionProperty));
         } else {
             $demotionProperty = '';
         }
@@ -145,7 +145,7 @@ class FSGlobalFunctions {
         foreach($fsgAnnotationsInSnippet ?? [] as $category => $properties) {
 
             foreach($properties as $property) {
-                $smwProperty = \SMWDIProperty::newFromUserLabel($property);
+                $smwProperty = DIProperty::newFromUserLabel($property);
                 $solrFieldName = FSSolrSMWDB::encodeSOLRFieldName($smwProperty);
 
                 if (!in_array($solrFieldName, $fsgExtraPropertiesToRequest)) {

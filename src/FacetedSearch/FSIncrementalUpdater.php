@@ -2,20 +2,20 @@
 namespace DIQA\FacetedSearch;
 
 use Exception;
-use ForeignTitle;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Parser\Parser;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Storage\EditResult;
+use MediaWiki\Title\ForeignTitle;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
-use Parser;
 use SMW\SemanticData;
-use SMWStore;
+use SMW\Store;
 use StatusValue;
-use Title;
 use WikiPage;
 
 /*
@@ -69,11 +69,11 @@ class FSIncrementalUpdater  {
     /**
      * Called when semantic data is refreshed.
      *
-     * @param SMWStore $store
+     * @param Store $store
      * @param SemanticData $semanticData
      * @return bool
      */
-    public static function onUpdateDataAfter(SMWStore $store, SemanticData $semanticData) {
+    public static function onUpdateDataAfter(Store $store, SemanticData $semanticData) {
         $wikiTitle = $semanticData->getSubject()->getTitle();
         if (self::shouldCreateUpdateJob()) {
             self::createUpdateJob( $wikiTitle);
@@ -108,11 +108,9 @@ class FSIncrementalUpdater  {
 
     }
 
-    private static function createUpdateJob(Title $title ) : void {
-        $params = [];
-        $params['title'] = $title;
-        $job = new UpdateSolrWithDependantJob($title, $params);
-        MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup()->push( $job );
+    private static function createUpdateJob( Title $title ) : void {
+        $job = new UpdateSolrIndexJob( $title );
+        MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup()->lazyPush( $job );
     }
 
     private static function shouldCreateUpdateJob() {
@@ -180,10 +178,8 @@ class FSIncrementalUpdater  {
      * @param int $redirid Database ID of the created redirect
      * @param string $reason Reason for the move
      * @param RevisionRecord $revision RevisionRecord created by the move
-     * @return bool|void True or no return value to continue or false stop other hook handlers,
-     *     doesn't abort the move itself
+     * @return bool always returns true
      */
-
     public static function onPageMoveCompleting( $old, $new, $user, $pageid, $redirid, $reason, $revision ) {
         try {
             $indexer = FSIndexerFactory::create();
@@ -202,8 +198,7 @@ class FSIncrementalUpdater  {
      * @param string $reason Reason the page is being deleted
      * @param StatusValue $status Add any error here
      * @param bool $suppress Whether this is a suppression deletion or not
-     * @return bool|void True or no return value to continue; false to abort, which also requires adding
-     *                   a fatal error to $status.
+     * @return bool always returns true
      */
     public static function onPageDelete(
             ProperPageIdentity $page,

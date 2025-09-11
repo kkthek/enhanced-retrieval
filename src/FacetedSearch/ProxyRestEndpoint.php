@@ -1,14 +1,14 @@
 <?php
-
 namespace DIQA\FacetedSearch;
 
-use DIQA\FacetedSearch\Proxy\SolrProxy\SolrService;
+use Apache\Solr\HttpTransportException;
+use Apache\Solr\Service;
+use DIQA\FacetedSearch\SolrProxy\SolrService;
 use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\Response;
 
-
 /**
- * solr proxy REST endpoint. This is where SOLR requests are processed
+ * SOLR proxy REST endpoint. This is where SOLR requests are processed
  */
 class ProxyRestEndpoint extends Handler
 {
@@ -29,13 +29,13 @@ class ProxyRestEndpoint extends Handler
         try {
             $solr = new SolrService($fsgSolrHost, $fsgSolrPort, $core, false, "$fsgSolrUser:$fsgSolrPass");
 
-            $results = $solr->rawsearch($query, SolrService::METHOD_POST);
+            $results = $solr->rawsearch($query, Service::METHOD_POST);
             $response = $results->getRawResponse();
 
             if (isset($fsgUseStatistics) && $fsgUseStatistics === true) {
                 $solr->updateSearchStats($response);
             }
-        } catch (\Apache_Solr_HttpTransportException $e) {
+        } catch (HttpTransportException $e) {
             $httpStatus = $e->getResponse()->getHttpStatus() == 0 ? 500 : $e->getResponse()->getHttpStatus();
             return $this->getResponseFactory()->createHttpError($httpStatus,
                 ["<h1 style='color:red;'>ERROR</h1>\n",

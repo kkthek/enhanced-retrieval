@@ -38,7 +38,7 @@
 		Default SOLR port is 8983. Default host is "localhost"
 
 * Create the initial index:
-	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/updateSOLR.php -v
+	php {wiki-path}/extensions/EnhancedRetrieval/maintenance/UpdateSolr.php -v
 	
 	OR via composer:
 	
