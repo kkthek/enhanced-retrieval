@@ -545,13 +545,15 @@ FacetedSearch.classes.FacetedSearch = function () {
 					clearInterval(interval);
 					return;
 				}
-				sm.doRequest(0);
+                if (numTries % 3 === 0) {
+                    sm.doRequest(0);
+                }
 			} else {
 				clearInterval(interval);
 				$("#waiting_for_solr").hide();
 				$("#results").show();
 			}
-		}, 10000);
+		}, 1000);
 	}
 	
 	/**
