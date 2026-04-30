@@ -7,10 +7,10 @@
 	"descriptionmsg": "facetedsearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
-	"version": "3.0.2",
+	"version": "3.1",
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.39",
+		"MediaWiki": ">= 1.43",
 		"platform": {
 			"php": ">= 7.4"
 		}
