@@ -157,8 +157,10 @@ class HttpTransportResponse
 	 * @var string
 	 */
 	private $_responseBody;
-	
-	/**
+
+    private $_error_msg;
+
+    /**
 	 * Construct a HTTP transport response
 	 * 
 	 * @param integer $statusCode The HTTP status code

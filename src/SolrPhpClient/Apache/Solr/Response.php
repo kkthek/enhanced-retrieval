@@ -212,7 +212,7 @@ class Response
 		//and we have response documents, then try to collapse the values and / or convert them now
 		if (($this->_createDocuments || $this->_collapseSingleValueArrays) && isset($data->response) && is_array($data->response->docs))
 		{
-			$documents = array();
+			$documents = [];
 
 			foreach ($data->response->docs as $originalDocument)
 			{

@@ -259,7 +259,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
         // add boost according to categories
         global $fsgCategoryBoosts;
         $categoriesIterator = $wikiPage->getCategories();
-        $categories = array();
+        $categories = [];
         foreach ($categoriesIterator as $categoryTitle) {
             $categories[] = $categoryTitle;
         }
@@ -532,8 +532,8 @@ class FSSolrSMWDB extends FSSolrIndexer {
         global $fsgIndexPredefinedProperties;
 
         $store = smwfGetStore();
-        $attributes = array();
-        $relations = array();
+        $attributes = [];
+        $relations = [];
 
         $subject = DIWikiPage::newFromTitle($title);
         $properties = $store->getProperties($subject);
@@ -712,7 +712,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
         $prop = self::encodeTitle($prop);
         $prop = "smwh_{$prop}_t";
         if (!array_key_exists($prop, $doc)) {
-            $doc[$prop] = array();
+            $doc[$prop] = [];
         }
         $doc[$prop][] = $obj;
         return $prop;
@@ -775,7 +775,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
             $propDate = 'smwh_' . $prop . '_datevalue_l';
             if (!array_key_exists($propDate, $doc)) {
-                $doc[$propDate] = array();
+                $doc[$propDate] = [];
             }
             $doc[$propDate][] = $dateTime;
 
@@ -784,7 +784,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
             $propNum = "smwh_{$prop}_numvalue_d";
             if (!array_key_exists($propNum, $doc)) {
-                $doc[$propNum] = array();
+                $doc[$propNum] = [];
             }
             $doc[$propNum][] = $valueXSD;
 
@@ -800,7 +800,7 @@ class FSSolrSMWDB extends FSSolrIndexer {
 
         $propXSD = "smwh_{$prop}_xsdvalue_$typeSuffix";
         if (!array_key_exists($propXSD, $doc)) {
-            $doc[$propXSD] = array();
+            $doc[$propXSD] = [];
         }
         $doc[$propXSD][] = $valueXSD;
 

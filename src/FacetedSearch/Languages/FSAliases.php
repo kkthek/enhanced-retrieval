@@ -27,7 +27,7 @@ namespace DIQA\FacetedSearch\Languages;
  *
  */
 
-$aliases = array();
+$aliases = [];
 
 /** English */
 $aliases['en'] = array(

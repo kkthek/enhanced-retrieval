@@ -84,14 +84,14 @@ class Document implements IteratorAggregate
 	 *
 	 * @var array
 	 */
-	protected $_fields = array();
+	protected $_fields = [];
 
 	/**
 	 * Document field boost values, indexed by name
 	 *
 	 * @var array array of floats
 	 */
-	protected $_fieldBoosts = array();
+	protected $_fieldBoosts = [];
 
 	/**
 	 * Clear all boosts and fields from this document
@@ -100,8 +100,8 @@ class Document implements IteratorAggregate
 	{
 		$this->_documentBoost = false;
 
-		$this->_fields = array();
-		$this->_fieldBoosts = array();
+		$this->_fields = [];
+		$this->_fieldBoosts = [];
 	}
 
 	/**
@@ -161,7 +161,7 @@ class Document implements IteratorAggregate
 		if (!isset($this->_fields[$key]))
 		{
 			// create holding array if this is the first value
-			$this->_fields[$key] = array();
+			$this->_fields[$key] = [];
 		}
 		else if (!is_array($this->_fields[$key]))
 		{

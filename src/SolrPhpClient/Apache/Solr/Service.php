@@ -159,7 +159,7 @@ class Service
 	 *
 	 * @var string
 	 */
-	protected $_pingUrl, $_updateUrl, $_searchUrl, $_threadsUrl;
+	protected $_pingUrl, $_updateUrl, $_searchUrl, $_threadsUrl, $_extractUrl;
 
 	/**
 	 * Keep track of whether our URLs have been constructed
@@ -264,7 +264,7 @@ class Service
 		if (count($params))
 		{
 			//escape all parameters appropriately for inclusion in the query string
-			$escapedParams = array();
+			$escapedParams = [];
 
 			foreach ($params as $key => $value)
 			{
@@ -954,7 +954,7 @@ class Service
 	 *
 	 * @throws InvalidArgumentException if $file, $params, or $document are invalid.
 	 */
-	public function extract($file, $params = array(), $document = null, $mimetype = 'application/octet-stream')
+	public function extract($file, $params = [], $document = null, $mimetype = 'application/octet-stream')
 	{
 		// check if $params is an array (allow null for default empty array)
 		if (!is_null($params))
@@ -966,7 +966,7 @@ class Service
 		}
 		else
 		{
-			$params = array();
+			$params = [];
 		}
 		
 		// if $file is an http request, defer to extractFromUrl instead
@@ -1015,7 +1015,7 @@ class Service
 	 *
 	 * @todo Should be using multipart/form-data to post parameter values, but I could not get my implementation to work. Needs revisisted.
 	 */
-	public function extractFromString($data, $params = array(), $document = null, $mimetype = 'application/octet-stream')
+	public function extractFromString($data, $params = [], $document = null, $mimetype = 'application/octet-stream')
 	{
 		// check if $params is an array (allow null for default empty array)
 		if (!is_null($params))
@@ -1027,7 +1027,7 @@ class Service
 		}
 		else
 		{
-			$params = array();
+			$params = [];
 		}
 
 		// make sure we receive our response in JSON and have proper name list treatment
@@ -1078,7 +1078,7 @@ class Service
 	 *
 	 * @throws InvalidArgumentException if $url, $params, or $document are invalid.
 	 */
-	public function extractFromUrl($url, $params = array(), $document = null, $mimetype = 'application/octet-stream')
+	public function extractFromUrl($url, $params = [], $document = null, $mimetype = 'application/octet-stream')
 	{
 		// check if $params is an array (allow null for default empty array)
 		if (!is_null($params))
@@ -1090,7 +1090,7 @@ class Service
 		}
 		else
 		{
-			$params = array();
+			$params = [];
 		}
 
 		$httpTransport = $this->getHttpTransport();
@@ -1150,7 +1150,7 @@ class Service
 	 * @throws HttpTransportException If an error occurs during the service call
 	 * @throws InvalidArgumentException If an invalid HTTP method is used
 	 */
-	public function search($query, $offset = 0, $limit = 10, $params = array(), $method = self::METHOD_GET)
+	public function search($query, $offset = 0, $limit = 10, $params = [], $method = self::METHOD_GET)
 	{
 		// ensure params is an array
 		if (!is_null($params))
@@ -1163,7 +1163,7 @@ class Service
 		}
 		else
 		{
-			$params = array();
+			$params = [];
 		}
 		
 		// construct our full parameters

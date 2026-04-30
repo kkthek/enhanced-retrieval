@@ -58,8 +58,8 @@ class Balancer
 
 	protected $_createDocuments = true;
 
-	protected $_readableServices = array();
-	protected $_writeableServices = array();
+	protected $_readableServices = [];
+	protected $_writeableServices = [];
 
 	protected $_currentReadService = null;
 	protected $_currentWriteService = null;
@@ -114,7 +114,7 @@ class Balancer
 	 * @param array $readableServices
 	 * @param array $writeableServices
 	 */
-	public function __construct($readableServices = array(), $writeableServices = array())
+	public function __construct($readableServices = [], $writeableServices = array())
 	{
 		//setup readable services
 		foreach ($readableServices as $service)
@@ -770,7 +770,7 @@ class Balancer
 	 *
 	 * @throws InvalidArgumentException if $file, $params, or $document are invalid.
 	 */
-	public function extract($file, $params = array(), $document = null, $mimetype = 'application/octet-stream')
+	public function extract($file, $params = [], $document = null, $mimetype = 'application/octet-stream')
 	{
 		$service = $this->_selectWriteService();
 
@@ -814,7 +814,7 @@ class Balancer
 	 *
 	 * @todo Should be using multipart/form-data to post parameter values, but I could not get my implementation to work. Needs revisisted.
 	 */
-	public function extractFromString($data, $params = array(), $document = null, $mimetype = 'application/octet-stream')
+	public function extractFromString($data, $params = [], $document = null, $mimetype = 'application/octet-stream')
 	{
 		$service = $this->_selectWriteService();
 
@@ -885,7 +885,7 @@ class Balancer
 	 *
 	 * @throws HttpTransportException If an error occurs during the service call
 	 */
-	public function search($query, $offset = 0, $limit = 10, $params = array(), $method = Service::METHOD_GET)
+	public function search($query, $offset = 0, $limit = 10, $params = [], $method = Service::METHOD_GET)
 	{
 		$service = $this->_selectReadService();
 

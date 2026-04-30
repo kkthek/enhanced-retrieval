@@ -55,7 +55,7 @@ class FSGlobalFunctions {
             $hookContainer->register('SMW::SQLStore::AfterDataUpdateComplete', 'DIQA\FacetedSearch\FSIncrementalUpdater::onUpdateDataAfter');
             $hookContainer->register('UploadComplete',                         'DIQA\FacetedSearch\FSIncrementalUpdater::onUploadComplete');
             $hookContainer->register('AfterImportPage',                        'DIQA\FacetedSearch\FSIncrementalUpdater::onAfterImportPage');
-            $hookContainer->register('PageMoveCompleting',                     'DIQA\FacetedSearch\FSIncrementalUpdater::onTitleMoveComplete');
+            $hookContainer->register('PageMoveCompleting',                     'DIQA\FacetedSearch\FSIncrementalUpdater::onPageMoveCompleting');
             $hookContainer->register('PageDelete',                             'DIQA\FacetedSearch\FSIncrementalUpdater::onPageDelete');
             $hookContainer->register('ApprovedRevsRevisionApproved',           'DIQA\FacetedSearch\FSIncrementalUpdater::onRevisionApproved');
             $hookContainer->register('PageSaveComplete',                       'DIQA\FacetedSearch\FSIncrementalUpdater::onPageSaveComplete');

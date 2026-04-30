@@ -41,7 +41,7 @@ class FacetedSearchUtil {
 
         $res = $db->query ( "($att_query) UNION ($rel_query) LIMIT 500" );
         // rewrite result as array
-        $results = array ();
+        $results = [];
 
         if( $res->numRows() > 0 ) {
             while ( $row = $res->fetchObject() ) {

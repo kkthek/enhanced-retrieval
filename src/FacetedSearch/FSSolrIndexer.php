@@ -18,6 +18,7 @@ namespace DIQA\FacetedSearch;
  * with this program.If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 use Exception;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
@@ -277,6 +278,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
             return [];
         }
 
+        // TODO for large files this can easily lead to an OOM error. Let's try to stream large files instead of loading it into memory.
         $result = $this->postCommandReturn(self::EXTRACT_CMD, file_get_contents($filepath), $contentType, $rc);
 
         if ($rc != 200) {
@@ -331,7 +333,7 @@ abstract class FSSolrIndexer implements FSIndexerInterface {
      * @deprecated
      */
     public function copyDocument($sourceID, $targetID, $ignoreCopyFields = null) {
-        $doc = array();
+        $doc = [];
 
         // Get the document with the old id
         $r = $this->sendRawQuery("q=id:$sourceID&wt=json");

@@ -4,8 +4,8 @@ namespace DIQA\FacetedSearch\Specials;
 use Exception;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Search\TitleMatcher;
-use SMW\SpecialPage;
 use MediaWiki\Title\Title;
+use SMW\SpecialPage;
 
 /*
  * Copyright (C) Vulcan Inc.
@@ -298,7 +298,7 @@ class FSFacetedSearchSpecial extends SpecialPage {
         }
 
         // Get all language strings
-        $langStrings = array();
+        $langStrings = [];
         foreach ($identifiers[2] as $id) {
             $langStrings[] = wfMessage($id)->text();
         }

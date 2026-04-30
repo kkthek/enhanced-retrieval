@@ -17,8 +17,6 @@ use MediaWiki\MediaWikiServices;
  */
 class SolrService extends Service {
 
-    private $groups;
-
     /**
      * Constructor.
      * All parameters are optional and will take on default values

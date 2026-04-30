@@ -73,7 +73,7 @@ class UpdateSolrIndexJob extends Job {
         $children = $this->getParams()['children'];
         if( $children  ) {
             $num = count($children);
-            $this->logMessage( "Indexing $num pages referring to '$title'." );;
+            $this->logMessage( "Indexing $num pages referring to '$title'." );
 
             $referringPages = [];
 

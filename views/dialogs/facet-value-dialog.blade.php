@@ -20,9 +20,9 @@
         <table style="width: 80%; overflow: auto">
         @foreach($values as $val)
           <div class="facet">
-            <input type="checkbox" i
+            <input type="checkbox"
                    isLeaf="true"
-                   filtervalue="{{mb_strtolower($val['label'])}}"
+                   filtervalue="{{mb_strtolower($val['label'] ?? '')}}"
                    value="{{$val['facetValue']}}"
                    propertyfacet="{{$val['propertyFacet']}}"
                    property="{{$val['property']}}"/>
