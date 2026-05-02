@@ -1,6 +1,13 @@
 Enhanced Retrieval extension ChangeLog
 ======================================
 
+VERSION 3.2
+* Bugfixes related to MW 1.43
+* Bugfix: Search was initially delayed by 10 seconds
+
+VERSION 3.1
+* added support for MW 1.43
+
 VERSION 3.0
 * updated extension.json for MW1.39
 * renamed global config variable
